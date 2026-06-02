@@ -66,6 +66,8 @@ export async function startWorkout(formData: FormData) {
         weight: pe.weight,
         one_rep_max: pe.one_rep_max,
         rir,
+        set_type: "normal",
+        completed: false,
       });
     }
   }
@@ -84,6 +86,8 @@ interface SetInput {
   reps: number | null;
   weight: number | null;
   one_rep_max: number | null;
+  set_type?: string;
+  completed?: boolean;
 }
 
 /**
@@ -94,6 +98,7 @@ export async function saveWorkout(
   sessionId: string,
   sets: SetInput[],
   notes: string,
+  durationSeconds?: number,
 ) {
   const { supabase, user } = await requireUser();
 
@@ -127,6 +132,8 @@ export async function saveWorkout(
       weight: s.weight,
       one_rep_max: s.one_rep_max,
       rir,
+      set_type: s.set_type ?? "normal",
+      completed: s.completed ?? true,
     };
   });
 
@@ -136,7 +143,10 @@ export async function saveWorkout(
 
   await supabase
     .from("workout_sessions")
-    .update({ notes: notes.trim() || null })
+    .update({
+      notes: notes.trim() || null,
+      duration_seconds: durationSeconds ?? null,
+    })
     .eq("id", sessionId);
 
   revalidatePath("/history");

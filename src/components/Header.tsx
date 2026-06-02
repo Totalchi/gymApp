@@ -30,6 +30,18 @@ export function Header({ email }: { email?: string | null }) {
           >
             Voortgang
           </Link>
+          <Link
+            href="/body"
+            className="hidden text-sm text-slate-300 hover:text-white sm:inline"
+          >
+            Lichaam
+          </Link>
+          <Link
+            href="/settings"
+            className="hidden text-sm text-slate-300 hover:text-white sm:inline"
+          >
+            Instellingen
+          </Link>
           <form action={signout}>
             <button
               type="submit"

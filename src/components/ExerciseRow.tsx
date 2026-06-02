@@ -7,9 +7,11 @@ import { CSS } from "@dnd-kit/utilities";
 import {
   updateRoutineExercise,
   deleteRoutineExercise,
+  toggleSuperset,
 } from "@/app/routines/actions";
 import { DragHandle } from "@/components/DragHandle";
 import { ExerciseDetailModal } from "@/components/ExerciseDetailModal";
+import { useUnit } from "@/components/UnitProvider";
 import { computeRir, estimateOneRepMax } from "@/lib/rir";
 import type { RoutineExerciseWithExercise } from "@/lib/types";
 
@@ -37,6 +39,7 @@ export function ExerciseRow({
   const [notes, setNotes] = useState(item.notes ?? "");
   const [dirty, setDirty] = useState(false);
   const [showDetail, setShowDetail] = useState(false);
+  const unit = useUnit();
 
   const img = item.exercise.image_urls?.[0];
 
@@ -69,10 +72,13 @@ export function ExerciseRow({
       }}
       action={updateRoutineExercise}
       onSubmit={() => setDirty(false)}
-      className="bg-slate-900/50 px-4 py-4 sm:px-5"
+      className={`bg-slate-900/50 px-4 py-4 sm:px-5 ${
+        item.superset_group != null ? "border-l-2 border-l-sky-500" : ""
+      }`}
     >
       <input type="hidden" name="id" value={item.id} />
       <input type="hidden" name="routine_id" value={routineId} />
+      <input type="hidden" name="day_id" value={item.day_id} />
       <input type="hidden" name="notes" value={notes} />
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
@@ -123,7 +129,7 @@ export function ExerciseRow({
       <div className="grid grid-cols-4 gap-2 sm:flex sm:items-end sm:gap-3">
         <NumField label="Sets" name="sets" value={sets} onChange={(v) => { setSets(v); setDirty(true); }} />
         <NumField label="Reps" name="reps" value={reps} onChange={(v) => { setReps(v); setDirty(true); }} />
-        <NumField label="kg" name="weight" value={weight} onChange={(v) => { setWeight(v); setDirty(true); }} step="0.5" />
+        <NumField label={unit} name="weight" value={weight} onChange={(v) => { setWeight(v); setDirty(true); }} step="0.5" />
         <NumField label="1RM" name="one_rep_max" value={oneRm} onChange={(v) => { setOneRm(v); setDirty(true); }} step="0.5" onDouble={suggestOneRm} />
 
         {/* RIR badge */}
@@ -180,6 +186,17 @@ export function ExerciseRow({
         placeholder="📝 Notitie (bijv. tempo, vorm, blessure)…"
         className="mt-3 w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm placeholder:text-slate-600 focus:border-rose-500 focus:outline-none"
       />
+
+      <button
+        type="submit"
+        formAction={toggleSuperset}
+        className={`mt-2 text-xs transition hover:text-sky-300 ${
+          item.superset_group != null ? "text-sky-400" : "text-slate-500"
+        }`}
+        title="Koppel deze oefening als superset met de oefening erboven"
+      >
+        🔗 {item.superset_group != null ? "Superset (klik om los te koppelen)" : "Superset met vorige"}
+      </button>
 
       {showDetail && (
         <ExerciseDetailModal
