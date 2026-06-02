@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import Image from "next/image";
 import { saveWorkout } from "@/app/workout/actions";
 import { useUnit } from "@/components/UnitProvider";
+import { PlateCalculator } from "@/components/PlateCalculator";
 import { computeRir } from "@/lib/rir";
 import { SET_TYPES, SET_TYPE_COLORS, type SetType } from "@/lib/types";
 
@@ -78,6 +79,7 @@ export function WorkoutLogger({
   );
   const [notes, setNotes] = useState(initialNotes);
   const [pending, startTransition] = useTransition();
+  const [showPlates, setShowPlates] = useState(false);
   const unit = useUnit();
 
   // Workout-duur (loopt vanaf de starttijd van de sessie).
@@ -348,6 +350,14 @@ export function WorkoutLogger({
             </p>
           </div>
           <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setShowPlates(true)}
+              title="Plate calculator"
+              className="rounded-lg border border-slate-700 bg-slate-900 px-2.5 py-2 text-sm"
+            >
+              🏋️
+            </button>
             <select
               value={restDuration}
               onChange={(e) => setRestDuration(Number(e.target.value))}
@@ -370,6 +380,8 @@ export function WorkoutLogger({
           </div>
         </div>
       </div>
+
+      {showPlates && <PlateCalculator onClose={() => setShowPlates(false)} />}
     </div>
   );
 }

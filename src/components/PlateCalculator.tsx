@@ -1,0 +1,105 @@
+"use client";
+
+import { useState } from "react";
+import { calcPlates } from "@/lib/plates";
+import { useUnit } from "@/components/UnitProvider";
+
+const PLATE_COLORS: Record<number, string> = {
+  25: "bg-rose-600",
+  20: "bg-sky-600",
+  15: "bg-amber-500",
+  10: "bg-emerald-600",
+  5: "bg-slate-300 text-slate-900",
+  2.5: "bg-orange-400 text-slate-900",
+  1.25: "bg-slate-500",
+};
+
+export function PlateCalculator({ onClose }: { onClose: () => void }) {
+  const unit = useUnit();
+  const [weight, setWeight] = useState("60");
+  const [bar, setBar] = useState(20);
+
+  const total = parseFloat(weight.replace(",", ".")) || 0;
+  const result = calcPlates(total, bar);
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4"
+      onClick={onClose}
+    >
+      <div
+        className="w-full max-w-sm rounded-2xl border border-slate-700 bg-slate-900 p-5"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="mb-4 flex items-center justify-between">
+          <h3 className="text-lg font-semibold">Plate calculator</h3>
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-lg px-3 py-1 text-sm text-slate-400 hover:bg-slate-800"
+          >
+            Sluiten
+          </button>
+        </div>
+
+        <div className="mb-4 flex gap-2">
+          <label className="flex-1">
+            <span className="mb-1 block text-xs text-slate-400">
+              Doelgewicht ({unit})
+            </span>
+            <input
+              type="number"
+              inputMode="decimal"
+              step="0.5"
+              value={weight}
+              onChange={(e) => setWeight(e.target.value)}
+              className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-center tabular-nums focus:border-rose-500 focus:outline-none"
+            />
+          </label>
+          <label className="w-24">
+            <span className="mb-1 block text-xs text-slate-400">Stang</span>
+            <select
+              value={bar}
+              onChange={(e) => setBar(Number(e.target.value))}
+              className="w-full rounded-lg border border-slate-700 bg-slate-950 px-2 py-2 text-center focus:outline-none"
+            >
+              {[20, 15, 10, 7, 0].map((b) => (
+                <option key={b} value={b}>
+                  {b} {unit}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
+
+        <p className="mb-2 text-sm text-slate-400">Per kant:</p>
+        {result.perSide.length === 0 ? (
+          <p className="rounded-lg bg-slate-800 px-3 py-4 text-center text-sm text-slate-500">
+            Alleen de stang ({bar} {unit}).
+          </p>
+        ) : (
+          <div className="flex flex-wrap items-center gap-2">
+            {result.perSide.map(({ plate, count }) =>
+              Array.from({ length: count }).map((_, i) => (
+                <span
+                  key={`${plate}-${i}`}
+                  className={`flex h-10 min-w-10 items-center justify-center rounded-md px-2 text-sm font-bold text-white ${
+                    PLATE_COLORS[plate] ?? "bg-slate-600"
+                  }`}
+                >
+                  {plate}
+                </span>
+              )),
+            )}
+          </div>
+        )}
+
+        {result.leftover > 0.01 && (
+          <p className="mt-3 text-xs text-amber-400">
+            Niet exact te maken — dichtstbij: {result.achievable} {unit}.
+          </p>
+        )}
+      </div>
+    </div>
+  );
+}

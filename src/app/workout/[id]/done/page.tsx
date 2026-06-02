@@ -1,0 +1,151 @@
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import { createClient } from "@/lib/supabase/server";
+import { Header } from "@/components/Header";
+import { estimateOneRepMax } from "@/lib/rir";
+
+interface SetRow {
+  exercise_id: string;
+  exercise_name: string | null;
+  weight: number | null;
+  reps: number | null;
+  rir: number | null;
+  set_type: string;
+  session: { performed_at: string } | null;
+}
+
+export default async function WorkoutDonePage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  const { data: session } = await supabase
+    .from("workout_sessions")
+    .select("id, day_name, performed_at, duration_seconds")
+    .eq("id", id)
+    .single();
+  if (!session) notFound();
+
+  const { data: thisSets } = await supabase
+    .from("workout_sets")
+    .select("exercise_id, exercise_name, weight, reps, rir, set_type")
+    .eq("session_id", id);
+  const sets = (thisSets ?? []).filter(
+    (s) => s.weight && s.reps && s.set_type !== "warmup",
+  );
+
+  // Totalen.
+  let volume = 0;
+  for (const s of sets) volume += (s.weight ?? 0) * (s.reps ?? 0);
+  const setCount = sets.length;
+  const minutes = session.duration_seconds
+    ? Math.round(session.duration_seconds / 60)
+    : null;
+
+  // Beste prestatie deze sessie per oefening.
+  const bestThis: Record<string, { name: string; e1rm: number; weight: number }> = {};
+  for (const s of sets) {
+    const e1 = estimateOneRepMax(s.weight!, s.reps!, s.rir ?? 0);
+    const cur = bestThis[s.exercise_id];
+    if (!cur || e1 > cur.e1rm) {
+      bestThis[s.exercise_id] = {
+        name: s.exercise_name ?? "Oefening",
+        e1rm: e1,
+        weight: Math.max(cur?.weight ?? 0, s.weight!),
+      };
+    } else {
+      cur.weight = Math.max(cur.weight, s.weight!);
+    }
+  }
+
+  // Eerdere records ophalen (alle sessies vóór deze).
+  const exerciseIds = Object.keys(bestThis);
+  const prevBest: Record<string, number> = {};
+  if (exerciseIds.length) {
+    const { data: prev } = await supabase
+      .from("workout_sets")
+      .select("exercise_id, weight, reps, rir, set_type, session:workout_sessions!inner(performed_at)")
+      .in("exercise_id", exerciseIds)
+      .neq("session_id", id);
+    for (const r of (prev ?? []) as unknown as SetRow[]) {
+      if (!r.weight || !r.reps || r.set_type === "warmup" || !r.session) continue;
+      if (r.session.performed_at >= session.performed_at) continue;
+      const e1 = estimateOneRepMax(r.weight, r.reps, r.rir ?? 0);
+      prevBest[r.exercise_id] = Math.max(prevBest[r.exercise_id] ?? 0, e1);
+    }
+  }
+
+  const prs = exerciseIds
+    .filter((eid) => bestThis[eid].e1rm > (prevBest[eid] ?? 0) + 0.01)
+    .map((eid) => ({
+      id: eid,
+      name: bestThis[eid].name,
+      e1rm: bestThis[eid].e1rm,
+      isFirst: !(eid in prevBest),
+    }));
+
+  return (
+    <>
+      <Header email={user?.email} />
+      <main className="mx-auto max-w-lg px-4 py-10 text-center">
+        <div className="mb-3 text-6xl">🎉</div>
+        <h1 className="text-3xl font-bold">Workout klaar!</h1>
+        <p className="mt-1 text-slate-400">{session.day_name}</p>
+
+        <div className="mt-6 grid grid-cols-3 gap-3">
+          {[
+            { label: "Duur", value: minutes != null ? `${minutes} min` : "—" },
+            { label: "Sets", value: setCount },
+            { label: "Volume", value: `${Math.round(volume).toLocaleString("nl-NL")} kg` },
+          ].map((s) => (
+            <div key={s.label} className="rounded-2xl border border-slate-800 bg-slate-900/50 p-4">
+              <p className="text-xl font-bold tabular-nums">{s.value}</p>
+              <p className="mt-0.5 text-xs text-slate-500">{s.label}</p>
+            </div>
+          ))}
+        </div>
+
+        {prs.length > 0 && (
+          <div className="mt-6 rounded-2xl border border-amber-500/30 bg-amber-500/10 p-5 text-left">
+            <h2 className="mb-3 text-center font-semibold text-amber-300">
+              🏆 {prs.length} nieuw{prs.length === 1 ? "" : "e"} record{prs.length === 1 ? "" : "s"}!
+            </h2>
+            <ul className="space-y-2">
+              {prs.map((pr) => (
+                <li key={pr.id} className="flex items-center justify-between gap-3">
+                  <Link href={`/exercises/${pr.id}`} className="truncate font-medium hover:text-amber-300">
+                    {pr.name}
+                  </Link>
+                  <span className="shrink-0 text-sm text-amber-200">
+                    {pr.isFirst ? "Eerste keer!" : `${pr.e1rm.toFixed(1)} kg e1RM`}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        <div className="mt-8 flex justify-center gap-3">
+          <Link
+            href="/history"
+            className="rounded-xl bg-gradient-to-r from-rose-500 to-orange-500 px-6 py-2.5 font-semibold text-white transition hover:opacity-90"
+          >
+            Naar geschiedenis
+          </Link>
+          <Link
+            href="/dashboard"
+            className="rounded-xl border border-slate-700 px-6 py-2.5 font-medium text-slate-200 transition hover:bg-slate-800"
+          >
+            Dashboard
+          </Link>
+        </div>
+      </main>
+    </>
+  );
+}

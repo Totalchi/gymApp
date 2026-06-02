@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { Header } from "@/components/Header";
 import { LineChart, type ChartPoint } from "@/components/LineChart";
 import { estimateOneRepMax } from "@/lib/rir";
+import { strengthLevel, liftKey } from "@/lib/strength";
 import type { Exercise } from "@/lib/types";
 
 interface SetRow {
@@ -49,6 +50,7 @@ export default async function ExerciseDetailPage({
     mostReps = 0;
   const sessionVolume: Record<string, { date: string; volume: number }> = {};
   const e1rmByDay: Record<string, number> = {};
+  const setRecords: Record<number, number> = {}; // reps -> max gewicht
 
   for (const s of sets) {
     const w = s.weight!,
@@ -58,11 +60,25 @@ export default async function ExerciseDetailPage({
     heaviest = Math.max(heaviest, w);
     bestSetVolume = Math.max(bestSetVolume, w * r);
     mostReps = Math.max(mostReps, r);
+    if (r >= 1 && r <= 12) setRecords[r] = Math.max(setRecords[r] ?? 0, w);
     const day = s.session!.performed_at.slice(0, 10);
     e1rmByDay[day] = Math.max(e1rmByDay[day] ?? 0, e1);
     const sid = s.session!.id;
     sessionVolume[sid] ??= { date: day, volume: 0 };
     sessionVolume[sid].volume += w * r;
+  }
+
+  // Krachtniveau (alleen bench/squat/deadlift), o.b.v. recentste lichaamsgewicht.
+  let level = null as ReturnType<typeof strengthLevel>;
+  if (liftKey(id) && best1RM) {
+    const { data: bw } = await supabase
+      .from("body_metrics")
+      .select("weight")
+      .not("weight", "is", null)
+      .order("measured_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (bw?.weight) level = strengthLevel(id, best1RM, bw.weight);
   }
   const bestSessionVolume = Math.max(
     0,
@@ -123,6 +139,46 @@ export default async function ExerciseDetailPage({
             </div>
           ))}
         </div>
+
+        {/* Krachtniveau */}
+        {level && (
+          <section className="mb-6 rounded-2xl border border-slate-800 bg-slate-900/50 p-5">
+            <div className="mb-2 flex items-center justify-between">
+              <h2 className="font-semibold">Krachtniveau</h2>
+              <span className="rounded-full bg-rose-500/15 px-3 py-1 text-sm font-semibold text-rose-300 ring-1 ring-rose-500/30">
+                {level.label}
+              </span>
+            </div>
+            <div className="h-2.5 w-full overflow-hidden rounded-full bg-slate-800">
+              <div
+                className="h-full rounded-full bg-gradient-to-r from-rose-500 to-orange-500"
+                style={{ width: `${Math.round(level.progress * 100)}%` }}
+              />
+            </div>
+            <p className="mt-2 text-xs text-slate-500">
+              {level.ratio.toFixed(2)}× lichaamsgewicht · gebaseerd op je geschat
+              1RM en je recentste gewicht.
+            </p>
+          </section>
+        )}
+
+        {/* Set-records per rep */}
+        {Object.keys(setRecords).length > 0 && (
+          <section className="mb-6 rounded-2xl border border-slate-800 bg-slate-900/50 p-5">
+            <h2 className="mb-3 font-semibold">Set-records (zwaarste per reps)</h2>
+            <div className="grid grid-cols-3 gap-2 sm:grid-cols-6">
+              {Object.entries(setRecords)
+                .map(([reps, w]) => ({ reps: Number(reps), w }))
+                .sort((a, b) => a.reps - b.reps)
+                .map(({ reps, w }) => (
+                  <div key={reps} className="rounded-xl bg-slate-800/60 p-2.5 text-center">
+                    <p className="text-sm font-bold tabular-nums">{w} kg</p>
+                    <p className="text-[11px] text-slate-500">{reps} reps</p>
+                  </div>
+                ))}
+            </div>
+          </section>
+        )}
 
         {/* Grafiek */}
         {chart.length >= 2 && (

@@ -19,26 +19,38 @@ export function Header({ email }: { email?: string | null }) {
             Oefeningen
           </Link>
           <Link
+            href="/templates"
+            className="hidden text-sm text-slate-300 hover:text-white sm:inline"
+          >
+            Programma&apos;s
+          </Link>
+          <Link
             href="/history"
             className="hidden text-sm text-slate-300 hover:text-white sm:inline"
           >
             Geschiedenis
           </Link>
           <Link
-            href="/progress"
+            href="/stats"
             className="hidden text-sm text-slate-300 hover:text-white sm:inline"
+          >
+            Stats
+          </Link>
+          <Link
+            href="/progress"
+            className="hidden text-sm text-slate-300 hover:text-white lg:inline"
           >
             Voortgang
           </Link>
           <Link
             href="/body"
-            className="hidden text-sm text-slate-300 hover:text-white sm:inline"
+            className="hidden text-sm text-slate-300 hover:text-white lg:inline"
           >
             Lichaam
           </Link>
           <Link
             href="/settings"
-            className="hidden text-sm text-slate-300 hover:text-white sm:inline"
+            className="hidden text-sm text-slate-300 hover:text-white lg:inline"
           >
             Instellingen
           </Link>
