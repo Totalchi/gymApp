@@ -151,7 +151,7 @@ export async function saveWorkout(
 
   revalidatePath("/history");
   revalidatePath("/progress");
-  redirect("/history");
+  redirect(`/workout/${sessionId}/done`);
 }
 
 export async function deleteSession(formData: FormData) {

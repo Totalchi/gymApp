@@ -93,6 +93,47 @@ export async function duplicateRoutine(formData: FormData) {
   redirect(`/routines/${newRoutine.id}`);
 }
 
+export async function addTemplate(formData: FormData) {
+  const { supabase, user } = await requireUser();
+  const templateId = String(formData.get("template_id"));
+  const { ROUTINE_TEMPLATES } = await import("@/lib/templates");
+  const tpl = ROUTINE_TEMPLATES.find((t) => t.id === templateId);
+  if (!tpl) return;
+
+  const { data: routine } = await supabase
+    .from("routines")
+    .insert({ user_id: user.id, name: tpl.name, description: tpl.description })
+    .select("id")
+    .single();
+  if (!routine) return;
+
+  for (let d = 0; d < tpl.days.length; d++) {
+    const day = tpl.days[d];
+    const { data: newDay } = await supabase
+      .from("routine_days")
+      .insert({
+        routine_id: routine.id,
+        name: day.name,
+        day_type: day.dayType,
+        day_order: d,
+      })
+      .select("id")
+      .single();
+    if (!newDay) continue;
+    const rows = day.exercises.map((ex, i) => ({
+      day_id: newDay.id,
+      exercise_id: ex.exerciseId,
+      position: i,
+      sets: ex.sets,
+      reps: ex.reps,
+    }));
+    if (rows.length) await supabase.from("routine_exercises").insert(rows);
+  }
+
+  revalidatePath("/dashboard");
+  redirect(`/routines/${routine.id}`);
+}
+
 // ---------------------------------------------------------------------------
 // Mappen
 // ---------------------------------------------------------------------------
