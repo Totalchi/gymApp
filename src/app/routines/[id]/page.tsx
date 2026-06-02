@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { Header } from "@/components/Header";
-import { DayCard } from "@/components/DayCard";
+import { RoutineDays } from "@/components/RoutineDays";
 import { AddDayForm } from "@/components/AddDayForm";
 import type { RoutineDayWithExercises } from "@/lib/types";
 
@@ -57,11 +57,12 @@ export default async function RoutinePage({
           )}
         </div>
 
-        <div className="space-y-5">
-          {days.map((day) => (
-            <DayCard key={day.id} day={day} routineId={routine.id} />
-          ))}
-        </div>
+        {days.length > 0 && (
+          <p className="mb-3 text-xs text-slate-500">
+            Tip: sleep met het ⠿-handvat om dagen en oefeningen te herordenen.
+          </p>
+        )}
+        <RoutineDays days={days} routineId={routine.id} />
 
         <AddDayForm routineId={routine.id} />
       </main>

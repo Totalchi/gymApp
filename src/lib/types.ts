@@ -50,6 +50,29 @@ export interface Exercise {
   secondary_muscles: string[];
   instructions: string[];
   image_urls: string[];
+  owner_id?: string | null;
+}
+
+export interface WorkoutSession {
+  id: string;
+  user_id: string;
+  routine_id: string | null;
+  day_id: string | null;
+  day_name: string | null;
+  performed_at: string;
+  notes: string | null;
+}
+
+export interface WorkoutSet {
+  id: string;
+  session_id: string;
+  exercise_id: string;
+  exercise_name: string | null;
+  set_number: number;
+  reps: number | null;
+  weight: number | null;
+  one_rep_max: number | null;
+  rir: number | null;
 }
 
 export interface Routine {

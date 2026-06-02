@@ -138,6 +138,41 @@ export async function deleteRoutineExercise(formData: FormData) {
   revalidatePath(`/routines/${routineId}`);
 }
 
+// ---------------------------------------------------------------------------
+// Herordenen (drag & drop)
+// ---------------------------------------------------------------------------
+export async function reorderDays(routineId: string, orderedIds: string[]) {
+  const { supabase } = await requireUser();
+  await Promise.all(
+    orderedIds.map((id, index) =>
+      supabase
+        .from("routine_days")
+        .update({ day_order: index })
+        .eq("id", id)
+        .eq("routine_id", routineId),
+    ),
+  );
+  revalidatePath(`/routines/${routineId}`);
+}
+
+export async function reorderExercises(
+  routineId: string,
+  dayId: string,
+  orderedIds: string[],
+) {
+  const { supabase } = await requireUser();
+  await Promise.all(
+    orderedIds.map((id, index) =>
+      supabase
+        .from("routine_exercises")
+        .update({ position: index })
+        .eq("id", id)
+        .eq("day_id", dayId),
+    ),
+  );
+  revalidatePath(`/routines/${routineId}`);
+}
+
 function toInt(v: FormDataEntryValue | null): number | null {
   const n = parseInt(String(v ?? ""), 10);
   return Number.isFinite(n) ? n : null;

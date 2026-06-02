@@ -2,10 +2,13 @@
 
 import { useMemo, useState } from "react";
 import Image from "next/image";
+import { useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 import {
   updateRoutineExercise,
   deleteRoutineExercise,
 } from "@/app/routines/actions";
+import { DragHandle } from "@/components/DragHandle";
 import { computeRir, estimateOneRepMax } from "@/lib/rir";
 import type { RoutineExerciseWithExercise } from "@/lib/types";
 
@@ -16,6 +19,14 @@ export function ExerciseRow({
   item: RoutineExerciseWithExercise;
   routineId: string;
 }) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: item.id });
   const [sets, setSets] = useState(String(item.sets));
   const [reps, setReps] = useState(String(item.reps));
   const [weight, setWeight] = useState(item.weight != null ? String(item.weight) : "");
@@ -47,15 +58,22 @@ export function ExerciseRow({
 
   return (
     <form
+      ref={setNodeRef}
+      style={{
+        transform: CSS.Transform.toString(transform),
+        transition,
+        opacity: isDragging ? 0.6 : 1,
+      }}
       action={updateRoutineExercise}
       onSubmit={() => setDirty(false)}
-      className="flex flex-col gap-3 px-5 py-4 sm:flex-row sm:items-center"
+      className="flex flex-col gap-3 bg-slate-900/50 px-4 py-4 sm:flex-row sm:items-center sm:px-5"
     >
       <input type="hidden" name="id" value={item.id} />
       <input type="hidden" name="routine_id" value={routineId} />
 
       {/* Afbeelding + naam */}
       <div className="flex min-w-0 flex-1 items-center gap-3">
+        <DragHandle attributes={attributes} listeners={listeners} />
         <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-xl bg-white ring-1 ring-slate-700">
           {img ? (
             <Image

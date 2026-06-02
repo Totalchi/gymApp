@@ -18,11 +18,18 @@ export function Header({ email }: { email?: string | null }) {
           >
             Oefeningen
           </Link>
-          {email && (
-            <span className="hidden text-sm text-slate-500 sm:inline">
-              {email}
-            </span>
-          )}
+          <Link
+            href="/history"
+            className="hidden text-sm text-slate-300 hover:text-white sm:inline"
+          >
+            Geschiedenis
+          </Link>
+          <Link
+            href="/progress"
+            className="hidden text-sm text-slate-300 hover:text-white sm:inline"
+          >
+            Voortgang
+          </Link>
           <form action={signout}>
             <button
               type="submit"

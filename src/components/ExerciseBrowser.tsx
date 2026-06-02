@@ -3,9 +3,10 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
+import { deleteCustomExercise } from "@/app/exercises/actions";
 import { MUSCLE_GROUPS, type Exercise } from "@/lib/types";
 
-export function ExerciseBrowser() {
+export function ExerciseBrowser({ refreshKey = 0 }: { refreshKey?: number }) {
   const [query, setQuery] = useState("");
   const [muscle, setMuscle] = useState("");
   const [results, setResults] = useState<Exercise[]>([]);
@@ -17,7 +18,13 @@ export function ExerciseBrowser() {
     let active = true;
     setLoading(true);
     const timer = setTimeout(async () => {
-      let q = supabase.from("exercises").select("*").order("name").limit(60);
+      // Eigen oefeningen eerst, daarna alfabetisch.
+      let q = supabase
+        .from("exercises")
+        .select("*")
+        .order("owner_id", { ascending: false, nullsFirst: false })
+        .order("name")
+        .limit(60);
       if (query.trim()) q = q.ilike("name", `%${query.trim()}%`);
       if (muscle) q = q.contains("primary_muscles", [muscle]);
       const { data } = await q;
@@ -30,7 +37,7 @@ export function ExerciseBrowser() {
       active = false;
       clearTimeout(timer);
     };
-  }, [query, muscle]);
+  }, [query, muscle, refreshKey]);
 
   return (
     <div>
@@ -75,6 +82,11 @@ export function ExerciseBrowser() {
                     🏋️
                   </div>
                 )}
+                {ex.owner_id && (
+                  <span className="absolute left-2 top-2 rounded-full bg-rose-500/90 px-2 py-0.5 text-[10px] font-semibold text-white">
+                    Eigen
+                  </span>
+                )}
               </div>
               <div className="p-3">
                 <p className="truncate text-sm font-medium">{ex.name}</p>
@@ -110,19 +122,25 @@ function ExerciseModal({
         className="max-h-[85vh] w-full max-w-lg overflow-y-auto rounded-2xl border border-slate-700 bg-slate-900"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="grid grid-cols-2 gap-1 bg-white">
-          {exercise.image_urls.slice(0, 2).map((url) => (
-            <div key={url} className="relative aspect-square">
-              <Image
-                src={url}
-                alt={exercise.name}
-                fill
-                sizes="50vw"
-                className="object-cover"
-              />
-            </div>
-          ))}
-        </div>
+        {exercise.image_urls.length > 0 ? (
+          <div className="grid grid-cols-2 gap-1 bg-white">
+            {exercise.image_urls.slice(0, 2).map((url) => (
+              <div key={url} className="relative aspect-square">
+                <Image
+                  src={url}
+                  alt={exercise.name}
+                  fill
+                  sizes="50vw"
+                  className="object-cover"
+                />
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="flex h-32 items-center justify-center bg-slate-800 text-4xl">
+            🏋️
+          </div>
+        )}
         <div className="p-5">
           <div className="mb-3 flex items-start justify-between gap-3">
             <h2 className="text-xl font-bold">{exercise.name}</h2>
@@ -156,6 +174,18 @@ function ExerciseModal({
                 <li key={i}>{step}</li>
               ))}
             </ol>
+          )}
+          {exercise.owner_id && (
+            <form action={deleteCustomExercise} className="mt-5">
+              <input type="hidden" name="id" value={exercise.id} />
+              <button
+                type="submit"
+                onClick={onClose}
+                className="text-sm text-slate-500 transition hover:text-rose-400"
+              >
+                Eigen oefening verwijderen
+              </button>
+            </form>
           )}
         </div>
       </div>
