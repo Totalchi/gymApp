@@ -11,7 +11,7 @@ export default async function HistoryPage() {
 
   const { data: sessions } = await supabase
     .from("workout_sessions")
-    .select("id, day_name, performed_at, notes, workout_sets(reps, weight)")
+    .select("id, day_name, performed_at, notes, duration_seconds, workout_sets(reps, weight)")
     .order("performed_at", { ascending: false });
 
   return (
@@ -59,6 +59,9 @@ export default async function HistoryPage() {
                     <p className="text-sm text-slate-400">{date}</p>
                     <p className="mt-1 text-xs text-slate-500">
                       {sets.length} sets · {Math.round(volume).toLocaleString("nl-NL")} kg volume
+                      {s.duration_seconds
+                        ? ` · ⏱ ${Math.round(s.duration_seconds / 60)} min`
+                        : ""}
                     </p>
                   </Link>
                   <form action={deleteSession}>

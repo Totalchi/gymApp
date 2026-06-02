@@ -41,6 +41,134 @@ export async function deleteRoutine(formData: FormData) {
   revalidatePath("/dashboard");
 }
 
+export async function duplicateRoutine(formData: FormData) {
+  const { supabase, user } = await requireUser();
+  const id = String(formData.get("id"));
+
+  const { data: src } = await supabase
+    .from("routines")
+    .select("name, description, folder_id, routine_days(name, day_type, day_order, routine_exercises(exercise_id, position, sets, reps, weight, one_rep_max, rir, notes, rest_seconds, superset_group))")
+    .eq("id", id)
+    .single();
+  if (!src) return;
+
+  const { data: newRoutine } = await supabase
+    .from("routines")
+    .insert({
+      user_id: user.id,
+      name: `${src.name} (kopie)`,
+      description: src.description,
+      folder_id: src.folder_id,
+    })
+    .select("id")
+    .single();
+  if (!newRoutine) return;
+
+  type Day = {
+    name: string;
+    day_type: string;
+    day_order: number;
+    routine_exercises: Record<string, unknown>[];
+  };
+  for (const day of (src.routine_days ?? []) as unknown as Day[]) {
+    const { data: newDay } = await supabase
+      .from("routine_days")
+      .insert({
+        routine_id: newRoutine.id,
+        name: day.name,
+        day_type: day.day_type,
+        day_order: day.day_order,
+      })
+      .select("id")
+      .single();
+    if (!newDay) continue;
+    const exRows = (day.routine_exercises ?? []).map((e) => ({
+      ...e,
+      day_id: newDay.id,
+    }));
+    if (exRows.length) await supabase.from("routine_exercises").insert(exRows);
+  }
+
+  revalidatePath("/dashboard");
+  redirect(`/routines/${newRoutine.id}`);
+}
+
+// ---------------------------------------------------------------------------
+// Mappen
+// ---------------------------------------------------------------------------
+export async function createFolder(formData: FormData) {
+  const { supabase, user } = await requireUser();
+  const name = String(formData.get("name") ?? "").trim();
+  if (!name) return;
+  await supabase.from("routine_folders").insert({ user_id: user.id, name });
+  revalidatePath("/dashboard");
+}
+
+export async function deleteFolder(formData: FormData) {
+  const { supabase } = await requireUser();
+  const id = String(formData.get("id"));
+  await supabase.from("routine_folders").delete().eq("id", id);
+  revalidatePath("/dashboard");
+}
+
+export async function setRoutineFolder(formData: FormData) {
+  const { supabase } = await requireUser();
+  const id = String(formData.get("routine_id"));
+  const folderId = String(formData.get("folder_id") || "");
+  await supabase
+    .from("routines")
+    .update({ folder_id: folderId || null })
+    .eq("id", id);
+  revalidatePath("/dashboard");
+}
+
+// ---------------------------------------------------------------------------
+// Supersets
+// ---------------------------------------------------------------------------
+export async function toggleSuperset(formData: FormData) {
+  const { supabase } = await requireUser();
+  const id = String(formData.get("id"));
+  const dayId = String(formData.get("day_id"));
+  const routineId = String(formData.get("routine_id"));
+
+  const { data: rows } = await supabase
+    .from("routine_exercises")
+    .select("id, position, superset_group")
+    .eq("day_id", dayId)
+    .order("position");
+  if (!rows) return;
+
+  const idx = rows.findIndex((r) => r.id === id);
+  if (idx <= 0) return; // eerste oefening kan niet met "vorige" gekoppeld worden
+
+  const me = rows[idx];
+  if (me.superset_group != null) {
+    // Loskoppelen.
+    await supabase
+      .from("routine_exercises")
+      .update({ superset_group: null })
+      .eq("id", id);
+  } else {
+    const prev = rows[idx - 1];
+    let group = prev.superset_group;
+    if (group == null) {
+      // Nieuw groepsnummer = hoogste bestaande + 1.
+      const max = Math.max(0, ...rows.map((r) => r.superset_group ?? 0));
+      group = max + 1;
+      await supabase
+        .from("routine_exercises")
+        .update({ superset_group: group })
+        .eq("id", prev.id);
+    }
+    await supabase
+      .from("routine_exercises")
+      .update({ superset_group: group })
+      .eq("id", id);
+  }
+
+  revalidatePath(`/routines/${routineId}`);
+}
+
 // ---------------------------------------------------------------------------
 // Dagen
 // ---------------------------------------------------------------------------

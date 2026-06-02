@@ -61,6 +61,7 @@ export interface WorkoutSession {
   day_name: string | null;
   performed_at: string;
   notes: string | null;
+  duration_seconds: number | null;
 }
 
 export interface WorkoutSet {
@@ -73,6 +74,8 @@ export interface WorkoutSet {
   weight: number | null;
   one_rep_max: number | null;
   rir: number | null;
+  set_type: SetType;
+  completed: boolean;
 }
 
 export interface Routine {
@@ -101,6 +104,46 @@ export interface RoutineExercise {
   weight: number | null;
   one_rep_max: number | null;
   rir: number | null;
+  notes: string | null;
+  rest_seconds: number | null;
+  superset_group: number | null;
+}
+
+/** Set-types zoals in Hevy. */
+export const SET_TYPES = ["warmup", "normal", "drop", "failure"] as const;
+export type SetType = (typeof SET_TYPES)[number];
+
+export const SET_TYPE_LABELS: Record<SetType, string> = {
+  warmup: "W",
+  normal: "",
+  drop: "D",
+  failure: "F",
+};
+
+export const SET_TYPE_COLORS: Record<SetType, string> = {
+  warmup: "text-amber-400",
+  normal: "text-slate-400",
+  drop: "text-sky-400",
+  failure: "text-rose-400",
+};
+
+export interface RoutineFolder {
+  id: string;
+  user_id: string;
+  name: string;
+  position: number;
+}
+
+export interface BodyMetric {
+  id: string;
+  user_id: string;
+  measured_at: string;
+  weight: number | null;
+  body_fat: number | null;
+  chest: number | null;
+  waist: number | null;
+  arms: number | null;
+  thighs: number | null;
   notes: string | null;
 }
 

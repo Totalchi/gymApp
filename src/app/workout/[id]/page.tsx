@@ -21,7 +21,7 @@ export default async function WorkoutPage({
 
   const { data: session } = await supabase
     .from("workout_sessions")
-    .select("id, day_name, notes")
+    .select("id, day_name, notes, performed_at")
     .eq("id", id)
     .single();
   if (!session) notFound();
@@ -35,7 +35,7 @@ export default async function WorkoutPage({
 
   const setRows = (sets ?? []) as WorkoutSet[];
 
-  // Oefening-meta (naam + foto) ophalen voor de gebruikte oefeningen.
+  // Oefening-meta (naam + foto).
   const exerciseIds = [...new Set(setRows.map((s) => s.exercise_id))];
   const { data: exercises } = await supabase
     .from("exercises")
@@ -48,7 +48,43 @@ export default async function WorkoutPage({
     ]),
   );
 
-  // Groepeer sets per oefening (volgorde van eerste voorkomen behouden).
+  // "Vorige keer": sets uit de meest recente eerdere sessie per oefening.
+  const previousByExercise: Record<string, { weight: number | null; reps: number | null }[]> = {};
+  if (exerciseIds.length) {
+    const { data: prev } = await supabase
+      .from("workout_sets")
+      .select("exercise_id, set_number, weight, reps, session:workout_sessions!inner(id, performed_at)")
+      .in("exercise_id", exerciseIds)
+      .neq("session_id", id)
+      .order("set_number");
+    type PrevRow = {
+      exercise_id: string;
+      set_number: number;
+      weight: number | null;
+      reps: number | null;
+      session: { id: string; performed_at: string } | null;
+    };
+    const latestSessionByEx: Record<string, string> = {};
+    const latestTimeByEx: Record<string, string> = {};
+    for (const r of (prev ?? []) as unknown as PrevRow[]) {
+      if (!r.session) continue;
+      const t = r.session.performed_at;
+      if (!latestTimeByEx[r.exercise_id] || t > latestTimeByEx[r.exercise_id]) {
+        latestTimeByEx[r.exercise_id] = t;
+        latestSessionByEx[r.exercise_id] = r.session.id;
+      }
+    }
+    for (const r of (prev ?? []) as unknown as PrevRow[]) {
+      if (!r.session) continue;
+      if (r.session.id !== latestSessionByEx[r.exercise_id]) continue;
+      (previousByExercise[r.exercise_id] ??= []).push({
+        weight: r.weight,
+        reps: r.reps,
+      });
+    }
+  }
+
+  // Groepeer sets per oefening (volgorde van eerste voorkomen).
   const groups: LoggerInitialGroup[] = [];
   const indexByExercise = new Map<string, number>();
   for (const s of setRows) {
@@ -61,6 +97,7 @@ export default async function WorkoutPage({
         exerciseId: s.exercise_id,
         name: meta?.name ?? s.exercise_name ?? "Oefening",
         image: meta?.image ?? null,
+        previous: previousByExercise[s.exercise_id] ?? [],
         sets: [],
       });
     }
@@ -68,6 +105,8 @@ export default async function WorkoutPage({
       reps: s.reps,
       weight: s.weight,
       oneRm: s.one_rep_max,
+      setType: s.set_type,
+      completed: s.completed,
     });
   }
 
@@ -80,11 +119,13 @@ export default async function WorkoutPage({
         </Link>
         <h1 className="mb-1 mt-2 text-3xl font-bold">Workout loggen</h1>
         <p className="mb-6 text-slate-400">
-          Vul je echte sets, reps en kg in. RIR wordt automatisch berekend.
+          Vink je sets af, RIR wordt automatisch berekend, en de rusttimer start
+          vanzelf.
         </p>
         <WorkoutLogger
           sessionId={session.id}
           dayName={session.day_name ?? "Workout"}
+          startedAt={session.performed_at}
           initialGroups={groups}
           initialNotes={session.notes ?? ""}
         />

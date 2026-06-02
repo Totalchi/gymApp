@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import type { Exercise } from "@/lib/types";
 
 /** Popup die de foto('s), tags en uitleg van een oefening groot toont. */
@@ -81,6 +82,13 @@ export function ExerciseDetailModal({
               Geen uitleg beschikbaar voor deze oefening.
             </p>
           )}
+
+          <Link
+            href={`/exercises/${exercise.id}`}
+            className="mt-5 inline-flex w-full items-center justify-center rounded-xl bg-slate-100 px-4 py-2.5 text-sm font-semibold text-slate-900 transition hover:bg-white"
+          >
+            📈 Historie & records bekijken
+          </Link>
         </div>
       </div>
     </div>
