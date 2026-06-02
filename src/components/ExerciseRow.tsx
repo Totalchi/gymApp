@@ -9,6 +9,7 @@ import {
   deleteRoutineExercise,
 } from "@/app/routines/actions";
 import { DragHandle } from "@/components/DragHandle";
+import { ExerciseDetailModal } from "@/components/ExerciseDetailModal";
 import { computeRir, estimateOneRepMax } from "@/lib/rir";
 import type { RoutineExerciseWithExercise } from "@/lib/types";
 
@@ -33,7 +34,9 @@ export function ExerciseRow({
   const [oneRm, setOneRm] = useState(
     item.one_rep_max != null ? String(item.one_rep_max) : "",
   );
+  const [notes, setNotes] = useState(item.notes ?? "");
   const [dirty, setDirty] = useState(false);
+  const [showDetail, setShowDetail] = useState(false);
 
   const img = item.exercise.image_urls?.[0];
 
@@ -66,31 +69,49 @@ export function ExerciseRow({
       }}
       action={updateRoutineExercise}
       onSubmit={() => setDirty(false)}
-      className="flex flex-col gap-3 bg-slate-900/50 px-4 py-4 sm:flex-row sm:items-center sm:px-5"
+      className="bg-slate-900/50 px-4 py-4 sm:px-5"
     >
       <input type="hidden" name="id" value={item.id} />
       <input type="hidden" name="routine_id" value={routineId} />
+      <input type="hidden" name="notes" value={notes} />
 
-      {/* Afbeelding + naam */}
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+      {/* Afbeelding (klikbaar) + naam */}
       <div className="flex min-w-0 flex-1 items-center gap-3">
         <DragHandle attributes={attributes} listeners={listeners} />
-        <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-xl bg-white ring-1 ring-slate-700">
+        <button
+          type="button"
+          onClick={() => setShowDetail(true)}
+          title="Klik om de foto en uitleg te bekijken"
+          className="group relative h-14 w-14 shrink-0 overflow-hidden rounded-xl bg-white ring-1 ring-slate-700 transition hover:ring-rose-500"
+        >
           {img ? (
-            <Image
-              src={img}
-              alt={item.exercise.name}
-              fill
-              sizes="56px"
-              className="object-cover"
-            />
+            <>
+              <Image
+                src={img}
+                alt={item.exercise.name}
+                fill
+                sizes="56px"
+                className="object-cover"
+              />
+              <span className="absolute inset-0 flex items-center justify-center bg-black/0 text-transparent transition group-hover:bg-black/40 group-hover:text-white">
+                🔍
+              </span>
+            </>
           ) : (
             <div className="flex h-full w-full items-center justify-center text-xl">
               🏋️
             </div>
           )}
-        </div>
+        </button>
         <div className="min-w-0">
-          <p className="truncate font-medium">{item.exercise.name}</p>
+          <button
+            type="button"
+            onClick={() => setShowDetail(true)}
+            className="truncate text-left font-medium hover:text-rose-400"
+          >
+            {item.exercise.name}
+          </button>
           <p className="truncate text-xs text-slate-500">
             {item.exercise.primary_muscles.join(", ")}
             {item.exercise.equipment ? ` · ${item.exercise.equipment}` : ""}
@@ -146,6 +167,26 @@ export function ExerciseRow({
           Verwijderen
         </button>
       </div>
+      </div>
+
+      {/* Notitie per oefening (blijft bewaard) */}
+      <input
+        type="text"
+        value={notes}
+        onChange={(e) => {
+          setNotes(e.target.value);
+          setDirty(true);
+        }}
+        placeholder="📝 Notitie (bijv. tempo, vorm, blessure)…"
+        className="mt-3 w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm placeholder:text-slate-600 focus:border-rose-500 focus:outline-none"
+      />
+
+      {showDetail && (
+        <ExerciseDetailModal
+          exercise={item.exercise}
+          onClose={() => setShowDetail(false)}
+        />
+      )}
     </form>
   );
 }
