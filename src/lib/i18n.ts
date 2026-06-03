@@ -139,6 +139,7 @@ const nl: Dict = {
   "wk.setsDone": "sets gedaan",
   "wk.finish": "Klaar",
   "wk.saving": "Opslaan...",
+  "wk.startRest": "Start rusttimer",
   // done
   "done.title": "Workout klaar!",
   "done.duration": "Duur",
@@ -342,6 +343,7 @@ const en: Dict = {
   "wk.setsDone": "sets done",
   "wk.finish": "Finish",
   "wk.saving": "Saving...",
+  "wk.startRest": "Start rest timer",
   "done.title": "Workout done!",
   "done.duration": "Duration",
   "done.sets": "Sets",

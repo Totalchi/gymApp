@@ -22,6 +22,7 @@ interface Group {
   exerciseId: string;
   name: string;
   image: string | null;
+  restSeconds: number | null;
   previous: { weight: number | null; reps: number | null }[];
   sets: SetRow[];
 }
@@ -30,6 +31,7 @@ export interface LoggerInitialGroup {
   exerciseId: string;
   name: string;
   image: string | null;
+  restSeconds: number | null;
   previous: { weight: number | null; reps: number | null }[];
   sets: {
     reps: number | null;
@@ -70,6 +72,7 @@ export function WorkoutLogger({
       exerciseId: g.exerciseId,
       name: g.name,
       image: g.image,
+      restSeconds: g.restSeconds ?? null,
       previous: g.previous,
       sets: g.sets.map((s) => ({
         reps: s.reps != null ? String(s.reps) : "",
@@ -104,14 +107,61 @@ export function WorkoutLogger({
   const [restDuration, setRestDuration] = useState(120);
   const [restLeft, setRestLeft] = useState<number | null>(null);
   const restRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const audioRef = useRef<AudioContext | null>(null);
+
+  // Audio voorbereiden tijdens een gebruikersactie (vereist op iOS).
+  function ensureAudio() {
+    try {
+      if (!audioRef.current) {
+        const Ctx =
+          window.AudioContext ||
+          (window as unknown as { webkitAudioContext: typeof AudioContext })
+            .webkitAudioContext;
+        audioRef.current = new Ctx();
+      }
+      void audioRef.current?.resume?.();
+    } catch {}
+  }
+
+  // Twee korte piepjes + trilling als de rust om is.
+  function playDone() {
+    const ctx = audioRef.current;
+    if (ctx) {
+      try {
+        const beep = (delay: number, freq: number) => {
+          const o = ctx.createOscillator();
+          const g = ctx.createGain();
+          o.connect(g);
+          g.connect(ctx.destination);
+          o.type = "sine";
+          o.frequency.value = freq;
+          const start = ctx.currentTime + delay;
+          g.gain.setValueAtTime(0.0001, start);
+          g.gain.exponentialRampToValueAtTime(0.4, start + 0.02);
+          g.gain.exponentialRampToValueAtTime(0.0001, start + 0.35);
+          o.start(start);
+          o.stop(start + 0.36);
+        };
+        beep(0, 880);
+        beep(0.45, 1175);
+      } catch {}
+    }
+    try {
+      navigator.vibrate?.([200, 90, 200]);
+    } catch {}
+  }
+
   function startRest(seconds: number) {
-    setRestLeft(seconds);
+    const dur = seconds && seconds > 0 ? seconds : restDuration;
+    ensureAudio();
+    setRestLeft(dur);
     if (restRef.current) clearInterval(restRef.current);
     restRef.current = setInterval(() => {
       setRestLeft((v) => {
         if (v === null) return null;
         if (v <= 1) {
           if (restRef.current) clearInterval(restRef.current);
+          playDone();
           return null;
         }
         return v - 1;
@@ -142,7 +192,7 @@ export function WorkoutLogger({
   function toggleComplete(gi: number, si: number) {
     const willComplete = !groups[gi].sets[si].completed;
     updateSet(gi, si, "completed", willComplete);
-    if (willComplete) startRest(restDuration);
+    if (willComplete) startRest(groups[gi].restSeconds ?? restDuration);
   }
 
   function cycleType(gi: number, si: number) {
@@ -219,7 +269,15 @@ export function WorkoutLogger({
                 <div className="flex h-full w-full items-center justify-center">🏋️</div>
               )}
             </div>
-            <h2 className="font-semibold">{g.name}</h2>
+            <h2 className="min-w-0 flex-1 truncate font-semibold">{g.name}</h2>
+            <button
+              type="button"
+              onClick={() => startRest(g.restSeconds ?? restDuration)}
+              title={t("wk.startRest")}
+              className="flex shrink-0 items-center gap-1 rounded-lg border border-line px-2.5 py-1.5 text-xs font-medium text-muted transition hover:border-primary hover:text-primary"
+            >
+              ⏱ {fmtTime(g.restSeconds ?? restDuration)}
+            </button>
           </header>
 
           <div className="space-y-1.5 p-3 sm:p-4">
