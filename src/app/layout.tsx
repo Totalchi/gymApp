@@ -10,6 +10,15 @@ export const metadata: Metadata = {
   title: "GymApp",
   description:
     "Build weekly training routines with push/pull/legs days, sets, reps, weight and automatic RIR.",
+  icons: {
+    icon: "/icon-192.png",
+    apple: "/icon-180.png",
+  },
+  appleWebApp: {
+    capable: true,
+    title: "GymApp",
+    statusBarStyle: "black-translucent",
+  },
 };
 
 export const viewport: Viewport = {
