@@ -46,7 +46,7 @@ export async function duplicateRoutine(formData: FormData) {
 
   const { data: src } = await supabase
     .from("routines")
-    .select("name, description, folder_id, routine_days(name, day_type, day_order, routine_exercises(exercise_id, position, sets, reps, reps_max, weight, one_rep_max, rir, notes, rest, rest_seconds, superset_group))")
+    .select("name, description, folder_id, routine_days(name, day_type, day_order, routine_exercises(exercise_id, position, sets, reps, reps_max, weight, one_rep_max, rir, rir_max, notes, rest, rest_seconds, superset_group))")
     .eq("id", id)
     .single();
   if (!src) return;
@@ -286,8 +286,13 @@ export async function updateRoutineExercise(formData: FormData) {
     repsMaxRaw.trim() !== "" ? repsMaxField : repsNums.length > 1 ? repsNums[1] : null;
   if (repsMax != null && repsMax <= reps) repsMax = null; // geen bereik nodig
 
-  // RIR wordt zelf ingevuld in de builder.
-  const rir = toNum(formData.get("rir"));
+  // RIR: één veld dat ook een bereik aankan ("2-3").
+  const rirRaw = String(formData.get("rir") ?? "");
+  const rirNums =
+    rirRaw.match(/\d+(?:[.,]\d+)?/g)?.map((n) => parseFloat(n.replace(",", "."))) ?? [];
+  const rir = rirNums[0] ?? null;
+  let rirMax = rirNums.length > 1 ? rirNums[1] : null;
+  if (rir != null && rirMax != null && rirMax <= rir) rirMax = null;
 
   await supabase
     .from("routine_exercises")
@@ -297,6 +302,7 @@ export async function updateRoutineExercise(formData: FormData) {
       reps_max: repsMax,
       weight,
       rir,
+      rir_max: rirMax,
       notes,
       rest,
     })
