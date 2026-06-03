@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import Image from "next/image";
 import { saveWorkout } from "@/app/workout/actions";
 import { useUnit } from "@/components/UnitProvider";
@@ -57,13 +57,11 @@ function fmtTime(total: number): string {
 export function WorkoutLogger({
   sessionId,
   dayName,
-  startedAt,
   initialGroups,
   initialNotes,
 }: {
   sessionId: string;
   dayName: string;
-  startedAt: string;
   initialGroups: LoggerInitialGroup[];
   initialNotes: string;
 }) {
@@ -90,18 +88,36 @@ export function WorkoutLogger({
   const unit = useUnit();
   const t = useT();
 
-  // Workout-duur (loopt vanaf de starttijd van de sessie).
-  const startMs = useMemo(() => new Date(startedAt).getTime(), [startedAt]);
-  const [elapsed, setElapsed] = useState(() =>
-    Math.max(0, Math.floor((Date.now() - startMs) / 1000)),
-  );
+  // Workout-duur: pas tellen vanaf "Start workout" (blijft bewaard bij reload).
+  const startKey = `gymapp-workout-start-${sessionId}`;
+  const [startMs, setStartMs] = useState<number | null>(null);
+  const [elapsed, setElapsed] = useState(0);
+
   useEffect(() => {
-    const t = setInterval(
-      () => setElapsed(Math.max(0, Math.floor((Date.now() - startMs) / 1000))),
-      1000,
-    );
-    return () => clearInterval(t);
+    try {
+      const v = localStorage.getItem(startKey);
+      if (v) setStartMs(parseInt(v, 10));
+    } catch {}
+  }, [startKey]);
+
+  useEffect(() => {
+    if (startMs == null) return;
+    const update = () =>
+      setElapsed(Math.max(0, Math.floor((Date.now() - startMs) / 1000)));
+    update();
+    const i = setInterval(update, 1000);
+    return () => clearInterval(i);
   }, [startMs]);
+
+  const running = startMs != null;
+
+  function startWorkout() {
+    const now = Date.now();
+    setStartMs(now);
+    try {
+      localStorage.setItem(startKey, String(now));
+    } catch {}
+  }
 
   // ---- Rusttimer (timestamp-gebaseerd zodat het klopt na vergrendelen) ----
   const [restDuration, setRestDuration] = useState(120);
@@ -306,7 +322,14 @@ export function WorkoutLogger({
     );
   }
 
-  function save() {
+  function stopWorkout() {
+    const secs =
+      startMs != null
+        ? Math.max(0, Math.floor((Date.now() - startMs) / 1000))
+        : elapsed;
+    try {
+      localStorage.removeItem(startKey);
+    } catch {}
     const flat = groups.flatMap((g) =>
       g.sets.map((s, idx) => ({
         exercise_id: g.exerciseId,
@@ -321,7 +344,7 @@ export function WorkoutLogger({
       })),
     );
     startTransition(() => {
-      void saveWorkout(sessionId, flat, notes, elapsed);
+      void saveWorkout(sessionId, flat, notes, secs);
     });
   }
 
@@ -500,13 +523,21 @@ export function WorkoutLogger({
         </div>
       )}
 
-      {/* Vaste onderbalk: duur + opslaan */}
+      {/* Vaste onderbalk: start/stop workout */}
       <div className="fixed inset-x-0 bottom-0 z-30 border-t border-line bg-canvas/90 backdrop-blur">
         <div className="mx-auto flex max-w-3xl items-center justify-between gap-3 px-4 py-3">
           <div className="min-w-0">
             <p className="truncate text-sm font-medium">{dayName}</p>
             <p className="text-xs text-muted">
-              ⏱ <span className="tabular-nums">{fmtTime(elapsed)}</span> · {completedCount} {t("wk.setsDone")}
+              {running ? (
+                <>
+                  <span className="mr-1 inline-block h-2 w-2 animate-pulse rounded-full bg-emerald-500 align-middle" />
+                  {t("wk.inProgress")}
+                </>
+              ) : (
+                t("wk.notStarted")
+              )}{" "}
+              · {completedCount} {t("wk.setsDone")}
             </p>
           </div>
           <div className="flex items-center gap-2">
@@ -530,13 +561,22 @@ export function WorkoutLogger({
                 </option>
               ))}
             </select>
-            <button
-              onClick={save}
-              disabled={pending}
-              className="rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 px-5 py-2.5 font-semibold text-white transition hover:opacity-90 disabled:opacity-50"
-            >
-              {pending ? t("wk.saving") : t("wk.finish")}
-            </button>
+            {running ? (
+              <button
+                onClick={stopWorkout}
+                disabled={pending}
+                className="rounded-xl bg-gradient-to-r from-rose-500 to-orange-500 px-5 py-2.5 font-semibold text-white transition hover:opacity-90 disabled:opacity-50"
+              >
+                {pending ? t("wk.saving") : `■ ${t("wk.stopWorkout")}`}
+              </button>
+            ) : (
+              <button
+                onClick={startWorkout}
+                className="rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 px-5 py-2.5 font-semibold text-white transition hover:opacity-90"
+              >
+                ▶ {t("wk.startWorkout")}
+              </button>
+            )}
           </div>
         </div>
       </div>

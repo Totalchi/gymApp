@@ -140,7 +140,6 @@ export default async function WorkoutPage({
         <WorkoutLogger
           sessionId={session.id}
           dayName={session.day_name ?? "Workout"}
-          startedAt={session.performed_at}
           initialGroups={groups}
           initialNotes={session.notes ?? ""}
         />
