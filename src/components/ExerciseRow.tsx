@@ -31,10 +31,11 @@ export function ExerciseRow({
     isDragging,
   } = useSortable({ id: item.id });
   const [sets, setSets] = useState(String(item.sets));
-  // Reps-bereik: aparte van/tot velden (tot is optioneel).
-  const [repsMinStr, setRepsMinStr] = useState(String(item.reps));
-  const [repsMaxStr, setRepsMaxStr] = useState(
-    item.reps_max != null && item.reps_max !== item.reps ? String(item.reps_max) : "",
+  // Reps: één veld dat ook een bereik aankan, bv. "6-8".
+  const [reps, setReps] = useState(
+    item.reps_max != null && item.reps_max !== item.reps
+      ? `${item.reps}-${item.reps_max}`
+      : String(item.reps),
   );
   const [weight, setWeight] = useState(item.weight != null ? String(item.weight) : "");
   const [restStr, setRestStr] = useState(item.rest ?? "");
@@ -116,34 +117,20 @@ export function ExerciseRow({
       {/* Velden */}
       <div className="flex flex-wrap items-end gap-2 sm:gap-3">
         <NumField label="Sets" name="sets" value={sets} onChange={(v) => { setSets(v); setDirty(true); }} />
-        {/* Reps: van–tot (tot optioneel) */}
+        {/* Reps: één veld, enkel getal of bereik (bv. 6-8) */}
         <label className="flex flex-col">
           <span className="mb-1 text-[11px] font-medium uppercase tracking-wide text-faint">
             Reps
           </span>
-          <span className="flex items-center gap-1">
-            <input
-              name="reps"
-              type="number"
-              inputMode="numeric"
-              min="0"
-              value={repsMinStr}
-              onChange={(e) => { setRepsMinStr(e.target.value); setDirty(true); }}
-              className="w-12 rounded-lg border border-line bg-canvas px-1 py-1.5 text-center tabular-nums focus:border-primary focus:outline-none sm:w-14"
-            />
-            <span className="text-faint">–</span>
-            <input
-              name="reps_max"
-              type="number"
-              inputMode="numeric"
-              min="0"
-              value={repsMaxStr}
-              onChange={(e) => { setRepsMaxStr(e.target.value); setDirty(true); }}
-              placeholder="max"
-              title="Optioneel: bovengrens van het bereik"
-              className="w-12 rounded-lg border border-line bg-canvas px-1 py-1.5 text-center tabular-nums placeholder:text-faint focus:border-primary focus:outline-none sm:w-14"
-            />
-          </span>
+          <input
+            name="reps"
+            type="text"
+            value={reps}
+            onChange={(e) => { setReps(e.target.value); setDirty(true); }}
+            placeholder="6-8"
+            title="Eén getal of een bereik, bv. 6-8"
+            className="w-16 rounded-lg border border-line bg-canvas px-2 py-1.5 text-center tabular-nums focus:border-primary focus:outline-none"
+          />
         </label>
         <NumField label={unit} name="weight" value={weight} onChange={(v) => { setWeight(v); setDirty(true); }} step="0.5" />
 
