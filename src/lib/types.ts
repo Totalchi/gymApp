@@ -105,6 +105,7 @@ export interface RoutineExercise {
   weight: number | null;
   one_rep_max: number | null;
   rir: number | null;
+  rir_max: number | null;
   notes: string | null;
   rest: string | null;
   rest_seconds: number | null;

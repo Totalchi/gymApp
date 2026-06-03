@@ -39,7 +39,14 @@ export function ExerciseRow({
   );
   const [weight, setWeight] = useState(item.weight != null ? String(item.weight) : "");
   const [restStr, setRestStr] = useState(item.rest ?? "");
-  const [rirInput, setRirInput] = useState(item.rir != null ? String(item.rir) : "");
+  // RIR: één veld dat ook een bereik aankan, bv. "2-3".
+  const [rirInput, setRirInput] = useState(
+    item.rir_max != null && item.rir_max !== item.rir
+      ? `${item.rir}-${item.rir_max}`
+      : item.rir != null
+        ? String(item.rir)
+        : "",
+  );
   const [notes, setNotes] = useState(item.notes ?? "");
   const [dirty, setDirty] = useState(false);
   const [showDetail, setShowDetail] = useState(false);
@@ -157,15 +164,13 @@ export function ExerciseRow({
           </span>
           <input
             name="rir"
-            type="number"
-            inputMode="decimal"
-            step="0.5"
-            min="0"
+            type="text"
             value={rirInput}
             onChange={(e) => { setRirInput(e.target.value); setDirty(true); }}
-            placeholder="–"
-            style={shownRir != null ? rirStyle(shownRir) : undefined}
-            className="w-14 rounded-lg border border-line bg-canvas px-1 py-1.5 text-center font-semibold tabular-nums focus:border-primary focus:outline-none sm:w-16"
+            placeholder="2-3"
+            title="Eén getal of een bereik, bv. 2-3"
+            style={shownRir != null && !Number.isNaN(shownRir) ? rirStyle(shownRir) : undefined}
+            className="w-16 rounded-lg border border-line bg-canvas px-2 py-1.5 text-center font-semibold tabular-nums focus:border-primary focus:outline-none"
           />
         </label>
       </div>
