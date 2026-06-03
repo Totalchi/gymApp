@@ -32,11 +32,10 @@ export function ExerciseRow({
     isDragging,
   } = useSortable({ id: item.id });
   const [sets, setSets] = useState(String(item.sets));
-  // Reps kan een bereik zijn, bv. "6-8". reps = ondergrens, reps_max = bovengrens.
-  const [reps, setReps] = useState(
-    item.reps_max != null && item.reps_max !== item.reps
-      ? `${item.reps}-${item.reps_max}`
-      : String(item.reps),
+  // Reps-bereik: aparte van/tot velden (tot is optioneel).
+  const [repsMinStr, setRepsMinStr] = useState(String(item.reps));
+  const [repsMaxStr, setRepsMaxStr] = useState(
+    item.reps_max != null && item.reps_max !== item.reps ? String(item.reps_max) : "",
   );
   const [weight, setWeight] = useState(item.weight != null ? String(item.weight) : "");
   const [oneRm, setOneRm] = useState(
@@ -51,8 +50,8 @@ export function ExerciseRow({
 
   const img = item.exercise.image_urls?.[0];
 
-  // Onder-/bovengrens van het reps-bereik.
-  const repsMin = parseInt(reps, 10);
+  // Ondergrens van het reps-bereik (voor de RIR-schatting).
+  const repsMin = parseInt(repsMinStr, 10);
 
   // Automatisch berekende RIR (suggestie) o.b.v. ondergrens van de reps.
   const computed = useMemo(() => {
@@ -138,23 +137,36 @@ export function ExerciseRow({
       </div>
 
       {/* Velden */}
-      <div className="grid grid-cols-5 gap-2 sm:flex sm:items-end sm:gap-3">
+      <div className="flex flex-wrap items-end gap-2 sm:gap-3">
         <NumField label="Sets" name="sets" value={sets} onChange={(v) => { setSets(v); setDirty(true); }} />
-        {/* Reps: enkel getal of bereik, bv. 6-8 */}
+        {/* Reps: van–tot (tot optioneel) */}
         <label className="flex flex-col">
           <span className="mb-1 text-[11px] font-medium uppercase tracking-wide text-faint">
             Reps
           </span>
-          <input
-            name="reps"
-            type="text"
-            inputMode="numeric"
-            value={reps}
-            onChange={(e) => { setReps(e.target.value); setDirty(true); }}
-            placeholder="6-8"
-            title="Eén getal of een bereik, bv. 6-8"
-            className="w-full rounded-lg border border-line bg-canvas px-1 py-1.5 text-center tabular-nums focus:border-primary focus:outline-none sm:w-16 sm:px-2"
-          />
+          <span className="flex items-center gap-1">
+            <input
+              name="reps"
+              type="number"
+              inputMode="numeric"
+              min="0"
+              value={repsMinStr}
+              onChange={(e) => { setRepsMinStr(e.target.value); setDirty(true); }}
+              className="w-12 rounded-lg border border-line bg-canvas px-1 py-1.5 text-center tabular-nums focus:border-primary focus:outline-none sm:w-14"
+            />
+            <span className="text-faint">–</span>
+            <input
+              name="reps_max"
+              type="number"
+              inputMode="numeric"
+              min="0"
+              value={repsMaxStr}
+              onChange={(e) => { setRepsMaxStr(e.target.value); setDirty(true); }}
+              placeholder="max"
+              title="Optioneel: bovengrens van het bereik"
+              className="w-12 rounded-lg border border-line bg-canvas px-1 py-1.5 text-center tabular-nums placeholder:text-faint focus:border-primary focus:outline-none sm:w-14"
+            />
+          </span>
         </label>
         <NumField label={unit} name="weight" value={weight} onChange={(v) => { setWeight(v); setDirty(true); }} step="0.5" />
         <NumField label="1RM" name="one_rep_max" value={oneRm} onChange={(v) => { setOneRm(v); setDirty(true); }} step="0.5" onDouble={suggestOneRm} />
@@ -175,7 +187,7 @@ export function ExerciseRow({
             placeholder={computed ? String(computed.rir) : "auto"}
             title="Laat leeg voor automatische berekening, of vul zelf in"
             style={shownRir != null ? rirStyle(shownRir) : undefined}
-            className="w-full rounded-lg border border-line bg-canvas px-1 py-1.5 text-center font-semibold tabular-nums focus:border-primary focus:outline-none sm:w-16 sm:px-2"
+            className="w-14 rounded-lg border border-line bg-canvas px-1 py-1.5 text-center font-semibold tabular-nums focus:border-primary focus:outline-none sm:w-16"
           />
         </label>
       </div>
@@ -266,7 +278,7 @@ function NumField({
         onChange={(e) => onChange(e.target.value)}
         onDoubleClick={onDouble}
         title={onDouble ? "Dubbelklik om 1RM te schatten uit kg × reps" : undefined}
-        className="w-full rounded-lg border border-line bg-canvas px-1 py-1.5 text-center tabular-nums focus:border-primary focus:outline-none sm:w-16 sm:px-2"
+        className="w-14 rounded-lg border border-line bg-canvas px-1 py-1.5 text-center tabular-nums focus:border-primary focus:outline-none sm:w-16 sm:px-2"
       />
     </label>
   );
