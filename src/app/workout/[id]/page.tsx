@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { Header } from "@/components/Header";
 import { getT } from "@/lib/serverLang";
+import { parseRestToSeconds } from "@/lib/rest";
 import {
   WorkoutLogger,
   type LoggerInitialGroup,
@@ -23,7 +24,7 @@ export default async function WorkoutPage({
 
   const { data: session } = await supabase
     .from("workout_sessions")
-    .select("id, day_name, notes, performed_at")
+    .select("id, day_name, notes, performed_at, day_id")
     .eq("id", id)
     .single();
   if (!session) notFound();
@@ -86,6 +87,19 @@ export default async function WorkoutPage({
     }
   }
 
+  // Rusttijd per oefening uit het schema (de dag van deze sessie).
+  const restByExercise: Record<string, number> = {};
+  if (session.day_id) {
+    const { data: planned } = await supabase
+      .from("routine_exercises")
+      .select("exercise_id, rest")
+      .eq("day_id", session.day_id);
+    for (const p of (planned ?? []) as { exercise_id: string; rest: string | null }[]) {
+      const secs = parseRestToSeconds(p.rest);
+      if (secs) restByExercise[p.exercise_id] = secs;
+    }
+  }
+
   // Groepeer sets per oefening (volgorde van eerste voorkomen).
   const groups: LoggerInitialGroup[] = [];
   const indexByExercise = new Map<string, number>();
@@ -99,6 +113,7 @@ export default async function WorkoutPage({
         exerciseId: s.exercise_id,
         name: meta?.name ?? s.exercise_name ?? "Oefening",
         image: meta?.image ?? null,
+        restSeconds: restByExercise[s.exercise_id] ?? null,
         previous: previousByExercise[s.exercise_id] ?? [],
         sets: [],
       });
