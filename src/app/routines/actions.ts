@@ -3,7 +3,6 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { computeRir } from "@/lib/rir";
 
 async function requireUser() {
   const supabase = await createClient();
@@ -47,7 +46,7 @@ export async function duplicateRoutine(formData: FormData) {
 
   const { data: src } = await supabase
     .from("routines")
-    .select("name, description, folder_id, routine_days(name, day_type, day_order, routine_exercises(exercise_id, position, sets, reps, reps_max, weight, one_rep_max, rir, notes, rest_seconds, superset_group))")
+    .select("name, description, folder_id, routine_days(name, day_type, day_order, routine_exercises(exercise_id, position, sets, reps, reps_max, weight, one_rep_max, rir, notes, rest, rest_seconds, superset_group))")
     .eq("id", id)
     .single();
   if (!src) return;
@@ -274,11 +273,10 @@ export async function updateRoutineExercise(formData: FormData) {
 
   const sets = toInt(formData.get("sets"));
   const weight = toNum(formData.get("weight"));
-  const oneRepMax = toNum(formData.get("one_rep_max"));
   const notes = String(formData.get("notes") ?? "").trim() || null;
+  const rest = String(formData.get("rest") ?? "").trim() || null;
 
   // Reps-bereik: aparte onder- en bovengrens. Bovengrens optioneel.
-  // (Ondersteunt ook nog "6-8" in één veld als fallback.)
   const repsRaw = String(formData.get("reps") ?? "");
   const repsMaxRaw = String(formData.get("reps_max") ?? "");
   const repsNums = repsRaw.match(/\d+/g)?.map((n) => parseInt(n, 10)) ?? [];
@@ -288,12 +286,8 @@ export async function updateRoutineExercise(formData: FormData) {
     repsMaxRaw.trim() !== "" ? repsMaxField : repsNums.length > 1 ? repsNums[1] : null;
   if (repsMax != null && repsMax <= reps) repsMax = null; // geen bereik nodig
 
-  // Handmatige RIR heeft voorrang; leeg => automatisch berekenen.
-  const manualRir = toNum(formData.get("rir"));
-  let rir: number | null = manualRir;
-  if (rir == null && weight && reps && oneRepMax) {
-    rir = computeRir({ weight, reps, oneRepMax })?.rir ?? null;
-  }
+  // RIR wordt zelf ingevuld in de builder.
+  const rir = toNum(formData.get("rir"));
 
   await supabase
     .from("routine_exercises")
@@ -302,9 +296,9 @@ export async function updateRoutineExercise(formData: FormData) {
       reps,
       reps_max: repsMax,
       weight,
-      one_rep_max: oneRepMax,
       rir,
       notes,
+      rest,
     })
     .eq("id", id);
 

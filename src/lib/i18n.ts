@@ -79,6 +79,8 @@ const nl: Dict = {
   "routine.supersetWithPrev": "Superset met vorige",
   "routine.supersetLinked": "Superset (klik om los te koppelen)",
   "routine.notePh": "📝 Notitie (bijv. tempo, vorm, blessure)…",
+  "routine.rest": "Rust",
+  "routine.restPh": "bv. 2-3 min",
   // exercise picker / browser
   "ex.chooseExercise": "Oefening kiezen",
   "ex.search": "Zoek een oefening...",
@@ -283,6 +285,8 @@ const en: Dict = {
   "routine.supersetWithPrev": "Superset with previous",
   "routine.supersetLinked": "Superset (tap to unlink)",
   "routine.notePh": "📝 Note (e.g. tempo, form, injury)…",
+  "routine.rest": "Rest",
+  "routine.restPh": "e.g. 2-3 min",
   "ex.chooseExercise": "Choose exercise",
   "ex.search": "Search an exercise...",
   "ex.all": "All",
