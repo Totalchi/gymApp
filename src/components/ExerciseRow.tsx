@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import Image from "next/image";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
@@ -13,7 +13,6 @@ import { DragHandle } from "@/components/DragHandle";
 import { ExerciseDetailModal } from "@/components/ExerciseDetailModal";
 import { useUnit } from "@/components/UnitProvider";
 import { useT } from "@/components/LangProvider";
-import { computeRir, estimateOneRepMax } from "@/lib/rir";
 import type { RoutineExerciseWithExercise } from "@/lib/types";
 
 export function ExerciseRow({
@@ -38,9 +37,7 @@ export function ExerciseRow({
     item.reps_max != null && item.reps_max !== item.reps ? String(item.reps_max) : "",
   );
   const [weight, setWeight] = useState(item.weight != null ? String(item.weight) : "");
-  const [oneRm, setOneRm] = useState(
-    item.one_rep_max != null ? String(item.one_rep_max) : "",
-  );
+  const [restStr, setRestStr] = useState(item.rest ?? "");
   const [rirInput, setRirInput] = useState(item.rir != null ? String(item.rir) : "");
   const [notes, setNotes] = useState(item.notes ?? "");
   const [dirty, setDirty] = useState(false);
@@ -50,28 +47,8 @@ export function ExerciseRow({
 
   const img = item.exercise.image_urls?.[0];
 
-  // Ondergrens van het reps-bereik (voor de RIR-schatting).
-  const repsMin = parseInt(repsMinStr, 10);
-
-  // Automatisch berekende RIR (suggestie) o.b.v. ondergrens van de reps.
-  const computed = useMemo(() => {
-    const w = parseFloat(weight.replace(",", "."));
-    const orm = parseFloat(oneRm.replace(",", "."));
-    if (!w || !repsMin || !orm) return null;
-    return computeRir({ weight: w, reps: repsMin, oneRepMax: orm });
-  }, [weight, repsMin, oneRm]);
-
-  // Toon de handmatige RIR als die is ingevuld, anders de berekende.
-  const shownRir = rirInput !== "" ? parseFloat(rirInput.replace(",", ".")) : computed?.rir ?? null;
-
-  // Voorstel voor 1RM op basis van het ingevoerde gewicht × reps (tot falen).
-  const suggestOneRm = () => {
-    const w = parseFloat(weight.replace(",", "."));
-    if (w && repsMin) {
-      setOneRm(estimateOneRepMax(w, repsMin, 0).toFixed(1));
-      setDirty(true);
-    }
-  };
+  // Handmatige RIR (voor de kleur van de badge).
+  const shownRir = rirInput !== "" ? parseFloat(rirInput.replace(",", ".")) : null;
 
   return (
     <form
@@ -169,9 +146,24 @@ export function ExerciseRow({
           </span>
         </label>
         <NumField label={unit} name="weight" value={weight} onChange={(v) => { setWeight(v); setDirty(true); }} step="0.5" />
-        <NumField label="1RM" name="one_rep_max" value={oneRm} onChange={(v) => { setOneRm(v); setDirty(true); }} step="0.5" onDouble={suggestOneRm} />
 
-        {/* RIR: zelf invulbaar; leeg = automatisch berekend */}
+        {/* Rusttijd: één vrij tekstveld, bv. "2-3 min" of "60-90 sec" */}
+        <label className="flex flex-col">
+          <span className="mb-1 text-[11px] font-medium uppercase tracking-wide text-faint">
+            {t("routine.rest")}
+          </span>
+          <input
+            name="rest"
+            type="text"
+            value={restStr}
+            onChange={(e) => { setRestStr(e.target.value); setDirty(true); }}
+            placeholder={t("routine.restPh")}
+            title={t("routine.restPh")}
+            className="w-24 rounded-lg border border-line bg-canvas px-2 py-1.5 text-center focus:border-primary focus:outline-none"
+          />
+        </label>
+
+        {/* RIR: zelf invulbaar */}
         <label className="flex flex-col">
           <span className="mb-1 text-[11px] font-medium uppercase tracking-wide text-faint">
             RIR
@@ -184,8 +176,7 @@ export function ExerciseRow({
             min="0"
             value={rirInput}
             onChange={(e) => { setRirInput(e.target.value); setDirty(true); }}
-            placeholder={computed ? String(computed.rir) : "auto"}
-            title="Laat leeg voor automatische berekening, of vul zelf in"
+            placeholder="–"
             style={shownRir != null ? rirStyle(shownRir) : undefined}
             className="w-14 rounded-lg border border-line bg-canvas px-1 py-1.5 text-center font-semibold tabular-nums focus:border-primary focus:outline-none sm:w-16"
           />
