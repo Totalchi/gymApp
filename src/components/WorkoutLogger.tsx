@@ -6,8 +6,9 @@ import { saveWorkout } from "@/app/workout/actions";
 import { useUnit } from "@/components/UnitProvider";
 import { useT } from "@/components/LangProvider";
 import { PlateCalculator } from "@/components/PlateCalculator";
+import { ExercisePicker } from "@/components/ExercisePicker";
 import { computeRir } from "@/lib/rir";
-import { SET_TYPES, SET_TYPE_COLORS, type SetType } from "@/lib/types";
+import { SET_TYPES, SET_TYPE_COLORS, type SetType, type Exercise } from "@/lib/types";
 
 interface SetRow {
   reps: string;
@@ -85,6 +86,23 @@ export function WorkoutLogger({
   const [notes, setNotes] = useState(initialNotes);
   const [pending, startTransition] = useTransition();
   const [showPlates, setShowPlates] = useState(false);
+  const [showAdd, setShowAdd] = useState(false);
+
+  function addExercise(ex: Exercise) {
+    setGroups((prev) => [
+      ...prev,
+      {
+        exerciseId: ex.id,
+        name: ex.name,
+        image: ex.image_urls?.[0] ?? null,
+        restSeconds: null,
+        previous: [],
+        sets: [
+          { reps: "", weight: "", oneRm: "", rir: "", setType: "normal", completed: false },
+        ],
+      },
+    ]);
+  }
   const unit = useUnit();
   const t = useT();
 
@@ -484,6 +502,14 @@ export function WorkoutLogger({
         </section>
       ))}
 
+      <button
+        type="button"
+        onClick={() => setShowAdd(true)}
+        className="w-full rounded-2xl border border-dashed border-line py-3 text-sm font-medium text-muted transition hover:border-primary hover:text-primary"
+      >
+        {t("wk.addExercise")}
+      </button>
+
       <textarea
         value={notes}
         onChange={(e) => setNotes(e.target.value)}
@@ -582,6 +608,12 @@ export function WorkoutLogger({
       </div>
 
       {showPlates && <PlateCalculator onClose={() => setShowPlates(false)} />}
+      {showAdd && (
+        <ExercisePicker
+          onPick={addExercise}
+          onClose={() => setShowAdd(false)}
+        />
+      )}
     </div>
   );
 }

@@ -11,10 +11,13 @@ export function ExercisePicker({
   dayId,
   routineId,
   onClose,
+  onPick,
 }: {
-  dayId: string;
-  routineId: string;
+  dayId?: string;
+  routineId?: string;
   onClose: () => void;
+  /** Indien gegeven: kies een oefening (i.p.v. direct aan een dag toevoegen). */
+  onPick?: (exercise: Exercise) => void;
 }) {
   const [query, setQuery] = useState("");
   const [muscle, setMuscle] = useState<string>("");
@@ -102,18 +105,9 @@ export function ExercisePicker({
             <p className="py-10 text-center text-sm text-faint">{t("ex.none")}</p>
           ) : (
             <ul className="space-y-1.5">
-              {results.map((ex) => (
-                <li key={ex.id}>
-                  <form
-                    action={addExerciseToDay}
-                    onSubmit={() =>
-                      setAdded((prev) => new Set(prev).add(ex.id))
-                    }
-                    className="flex items-center gap-3 rounded-xl p-2 transition hover:bg-surface2/70"
-                  >
-                    <input type="hidden" name="day_id" value={dayId} />
-                    <input type="hidden" name="routine_id" value={routineId} />
-                    <input type="hidden" name="exercise_id" value={ex.id} />
+              {results.map((ex) => {
+                const meta = (
+                  <>
                     <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-lg bg-white ring-1 ring-line">
                       {ex.image_urls?.[0] ? (
                         <Image
@@ -136,15 +130,46 @@ export function ExercisePicker({
                         {ex.equipment ? ` · ${ex.equipment}` : ""}
                       </p>
                     </div>
-                    <button
-                      type="submit"
-                      className="shrink-0 rounded-lg bg-primary px-3 py-1.5 text-sm font-semibold text-white transition hover:brightness-110"
-                    >
-                      {added.has(ex.id) ? t("ex.addAnother") : t("ex.add")}
-                    </button>
-                  </form>
-                </li>
-              ))}
+                  </>
+                );
+                const label = added.has(ex.id) ? t("ex.addAnother") : t("ex.add");
+                return (
+                  <li key={ex.id}>
+                    {onPick ? (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          onPick(ex);
+                          setAdded((prev) => new Set(prev).add(ex.id));
+                        }}
+                        className="flex w-full items-center gap-3 rounded-xl p-2 text-left transition hover:bg-surface2/70"
+                      >
+                        {meta}
+                        <span className="shrink-0 rounded-lg bg-primary px-3 py-1.5 text-sm font-semibold text-white">
+                          {label}
+                        </span>
+                      </button>
+                    ) : (
+                      <form
+                        action={addExerciseToDay}
+                        onSubmit={() => setAdded((prev) => new Set(prev).add(ex.id))}
+                        className="flex items-center gap-3 rounded-xl p-2 transition hover:bg-surface2/70"
+                      >
+                        <input type="hidden" name="day_id" value={dayId} />
+                        <input type="hidden" name="routine_id" value={routineId} />
+                        <input type="hidden" name="exercise_id" value={ex.id} />
+                        {meta}
+                        <button
+                          type="submit"
+                          className="shrink-0 rounded-lg bg-primary px-3 py-1.5 text-sm font-semibold text-white transition hover:brightness-110"
+                        >
+                          {label}
+                        </button>
+                      </form>
+                    )}
+                  </li>
+                );
+              })}
             </ul>
           )}
         </div>

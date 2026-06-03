@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { Header } from "@/components/Header";
+import { LineChart, type ChartPoint } from "@/components/LineChart";
 import { getT } from "@/lib/serverLang";
 
 export default async function StatsPage() {
@@ -8,7 +9,8 @@ export default async function StatsPage() {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  const { t } = await getT();
+  const { t, lang } = await getT();
+  const loc = lang === "en" ? "en-US" : "nl-NL";
 
   // Sessies + sets voor kalender en volume.
   const { data: sessions } = await supabase
@@ -24,6 +26,46 @@ export default async function StatsPage() {
     }
     dayVolume[day] = (dayVolume[day] ?? 0) + v;
   }
+
+  // Per week: totaal volume + aantal workouts (laatste 12 weken, maandag-start).
+  const weekStart = (d: Date) => {
+    const x = new Date(d);
+    const day = (x.getDay() + 6) % 7;
+    x.setDate(x.getDate() - day);
+    x.setHours(0, 0, 0, 0);
+    return x;
+  };
+  const WEEKN = 12;
+  const weeks: { label: string; volume: number; count: number }[] = [];
+  const weekIdx = new Map<string, number>();
+  const thisWeekStart = weekStart(new Date());
+  for (let i = WEEKN - 1; i >= 0; i--) {
+    const d = new Date(thisWeekStart);
+    d.setDate(d.getDate() - i * 7);
+    weekIdx.set(d.toISOString().slice(0, 10), weeks.length);
+    weeks.push({
+      label: d.toLocaleDateString(loc, { day: "numeric", month: "short" }),
+      volume: 0,
+      count: 0,
+    });
+  }
+  for (const s of sessions ?? []) {
+    const key = weekStart(new Date(s.performed_at)).toISOString().slice(0, 10);
+    const idx = weekIdx.get(key);
+    if (idx == null) continue;
+    let v = 0;
+    for (const set of (s.workout_sets ?? []) as { weight: number | null; reps: number | null }[]) {
+      v += (set.weight ?? 0) * (set.reps ?? 0);
+    }
+    weeks[idx].volume += v;
+    weeks[idx].count += 1;
+  }
+  const volumePoints: ChartPoint[] = weeks.map((w) => ({
+    label: w.label,
+    value: Math.round(w.volume),
+  }));
+  const maxWeekCount = Math.max(1, ...weeks.map((w) => w.count));
+  const hasWeekData = weeks.some((w) => w.count > 0);
 
   // Spiergroep-verdeling op basis van set-volume.
   const { data: setRows } = await supabase
@@ -113,6 +155,34 @@ export default async function StatsPage() {
             <span>{t("stats.more")}</span>
           </div>
         </section>
+
+        {/* Volume + workouts per week */}
+        {hasWeekData && (
+          <>
+            <section className="mb-6 rounded-2xl border border-line bg-surface p-5">
+              <h2 className="mb-2 font-semibold">{t("stats.weeklyVolume")}</h2>
+              <LineChart points={volumePoints} unit="" />
+            </section>
+
+            <section className="mb-6 rounded-2xl border border-line bg-surface p-5">
+              <h2 className="mb-3 font-semibold">{t("stats.workoutsPerWeek")}</h2>
+              <div className="flex h-28 items-end justify-between gap-1">
+                {weeks.map((w, i) => (
+                  <div key={i} className="flex flex-1 flex-col items-center justify-end gap-1">
+                    <span className="text-[10px] tabular-nums text-faint">
+                      {w.count || ""}
+                    </span>
+                    <div
+                      className="w-full rounded-t bg-primary"
+                      style={{ height: `${(w.count / maxWeekCount) * 80}px` }}
+                    />
+                    <span className="text-[9px] text-faint">{w.label}</span>
+                  </div>
+                ))}
+              </div>
+            </section>
+          </>
+        )}
 
         {/* Spiergroep-verdeling */}
         <section className="rounded-2xl border border-line bg-surface p-5">
