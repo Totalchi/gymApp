@@ -103,13 +103,17 @@ export function WorkoutLogger({
     return () => clearInterval(t);
   }, [startMs]);
 
-  // Rusttimer.
+  // ---- Rusttimer (timestamp-gebaseerd zodat het klopt na vergrendelen) ----
   const [restDuration, setRestDuration] = useState(120);
-  const [restLeft, setRestLeft] = useState<number | null>(null);
-  const restRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const [restLeft, setRestLeft] = useState<number | null>(null); // null = geen timer
+  const [restPaused, setRestPaused] = useState(false);
+  const endsAtRef = useRef<number | null>(null); // tijdstip (ms) waarop de rust om is
+  const pausedLeftRef = useRef<number | null>(null);
+  const firedRef = useRef(false); // piep al afgespeeld?
+  const tickRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const audioRef = useRef<AudioContext | null>(null);
 
-  // Audio voorbereiden tijdens een gebruikersactie (vereist op iOS).
+  // Audio ontgrendelen tijdens een gebruikersactie (vereist op iOS).
   function ensureAudio() {
     try {
       if (!audioRef.current) {
@@ -119,15 +123,23 @@ export function WorkoutLogger({
             .webkitAudioContext;
         audioRef.current = new Ctx();
       }
-      void audioRef.current?.resume?.();
+      const ctx = audioRef.current!;
+      if (ctx.state === "suspended") void ctx.resume();
+      // Stil buffertje om de audio-uitvoer te ontgrendelen.
+      const b = ctx.createBuffer(1, 1, 22050);
+      const s = ctx.createBufferSource();
+      s.buffer = b;
+      s.connect(ctx.destination);
+      s.start(0);
     } catch {}
   }
 
-  // Twee korte piepjes + trilling als de rust om is.
+  // Drie korte piepjes + trilling als de rust om is.
   function playDone() {
     const ctx = audioRef.current;
     if (ctx) {
       try {
+        if (ctx.state === "suspended") void ctx.resume();
         const beep = (delay: number, freq: number) => {
           const o = ctx.createOscillator();
           const g = ctx.createGain();
@@ -137,42 +149,109 @@ export function WorkoutLogger({
           o.frequency.value = freq;
           const start = ctx.currentTime + delay;
           g.gain.setValueAtTime(0.0001, start);
-          g.gain.exponentialRampToValueAtTime(0.4, start + 0.02);
-          g.gain.exponentialRampToValueAtTime(0.0001, start + 0.35);
+          g.gain.exponentialRampToValueAtTime(0.5, start + 0.02);
+          g.gain.exponentialRampToValueAtTime(0.0001, start + 0.3);
           o.start(start);
-          o.stop(start + 0.36);
+          o.stop(start + 0.32);
         };
         beep(0, 880);
-        beep(0.45, 1175);
+        beep(0.35, 880);
+        beep(0.7, 1320);
       } catch {}
     }
     try {
-      navigator.vibrate?.([200, 90, 200]);
+      navigator.vibrate?.([300, 120, 300]);
     } catch {}
+  }
+
+  function clearTick() {
+    if (tickRef.current) clearInterval(tickRef.current);
+    tickRef.current = null;
+  }
+
+  function finishRest() {
+    if (firedRef.current) return;
+    firedRef.current = true;
+    clearTick();
+    endsAtRef.current = null;
+    setRestLeft(0);
+    playDone();
+    window.setTimeout(() => setRestLeft((v) => (v === 0 ? null : v)), 1500);
+  }
+
+  function startTicking() {
+    clearTick();
+    tickRef.current = setInterval(() => {
+      if (endsAtRef.current == null) return;
+      const left = Math.round((endsAtRef.current - Date.now()) / 1000);
+      if (left <= 0) finishRest();
+      else setRestLeft(left);
+    }, 250);
   }
 
   function startRest(seconds: number) {
     const dur = seconds && seconds > 0 ? seconds : restDuration;
     ensureAudio();
+    firedRef.current = false;
+    pausedLeftRef.current = null;
+    setRestPaused(false);
+    endsAtRef.current = Date.now() + dur * 1000;
     setRestLeft(dur);
-    if (restRef.current) clearInterval(restRef.current);
-    restRef.current = setInterval(() => {
-      setRestLeft((v) => {
-        if (v === null) return null;
-        if (v <= 1) {
-          if (restRef.current) clearInterval(restRef.current);
-          playDone();
-          return null;
-        }
-        return v - 1;
-      });
-    }, 1000);
+    startTicking();
   }
+
+  function pauseRest() {
+    if (endsAtRef.current == null) return;
+    pausedLeftRef.current = Math.max(
+      0,
+      Math.round((endsAtRef.current - Date.now()) / 1000),
+    );
+    endsAtRef.current = null;
+    setRestPaused(true);
+    setRestLeft(pausedLeftRef.current);
+    clearTick();
+  }
+
+  function resumeRest() {
+    const left = pausedLeftRef.current ?? 0;
+    endsAtRef.current = Date.now() + left * 1000;
+    pausedLeftRef.current = null;
+    setRestPaused(false);
+    startTicking();
+  }
+
+  function adjustRest(delta: number) {
+    if (restPaused) {
+      pausedLeftRef.current = Math.max(0, (pausedLeftRef.current ?? 0) + delta);
+      setRestLeft(pausedLeftRef.current);
+    } else if (endsAtRef.current != null) {
+      endsAtRef.current = Math.max(Date.now(), endsAtRef.current + delta * 1000);
+      setRestLeft(Math.max(0, Math.round((endsAtRef.current - Date.now()) / 1000)));
+    }
+  }
+
   function stopRest() {
-    if (restRef.current) clearInterval(restRef.current);
+    clearTick();
+    endsAtRef.current = null;
+    pausedLeftRef.current = null;
+    firedRef.current = true;
+    setRestPaused(false);
     setRestLeft(null);
   }
-  useEffect(() => () => stopRest(), []);
+
+  // Bij terugkeer naar het scherm: bijwerken en alsnog piepen als de rust voorbij is.
+  useEffect(() => {
+    function onVisible() {
+      if (document.visibilityState !== "visible") return;
+      if (endsAtRef.current == null) return;
+      const left = Math.round((endsAtRef.current - Date.now()) / 1000);
+      if (left <= 0) finishRest();
+      else setRestLeft(left);
+    }
+    document.addEventListener("visibilitychange", onVisible);
+    return () => document.removeEventListener("visibilitychange", onVisible);
+  }, []);
+  useEffect(() => () => clearTick(), []);
 
   function updateSet<K extends keyof SetRow>(
     gi: number,
@@ -393,21 +472,30 @@ export function WorkoutLogger({
       {/* Rusttimer-balk */}
       {restLeft !== null && (
         <div className="fixed inset-x-0 bottom-[4.5rem] z-30 px-4">
-          <div className="mx-auto flex max-w-3xl items-center justify-between gap-3 rounded-xl border border-sky-500/40 bg-sky-500/15 px-4 py-2.5 backdrop-blur">
-            <span className="text-sm font-medium text-sky-200">
-              {t("wk.rest")}: <span className="tabular-nums">{fmtTime(restLeft)}</span>
+          <div className="mx-auto flex max-w-3xl items-center gap-2 rounded-xl border border-sky-500/40 bg-sky-500/15 px-3 py-2.5 backdrop-blur sm:gap-3 sm:px-4">
+            <span className="mr-auto text-sm font-medium text-sky-200">
+              {t("wk.rest")}:{" "}
+              <span className="tabular-nums text-base font-bold">{fmtTime(restLeft)}</span>
+              {restPaused && <span className="ml-1 text-xs">⏸</span>}
             </span>
-            <div className="flex items-center gap-2">
-              <button type="button" onClick={() => setRestLeft((v) => (v ?? 0) + 15)} className="rounded-md bg-sky-500/20 px-2 py-1 text-xs text-sky-100">
-                +15s
+            <button type="button" onClick={() => adjustRest(-15)} className="rounded-md bg-sky-500/20 px-2 py-1 text-xs font-medium text-sky-100">
+              −15
+            </button>
+            <button type="button" onClick={() => adjustRest(15)} className="rounded-md bg-sky-500/20 px-2 py-1 text-xs font-medium text-sky-100">
+              +15
+            </button>
+            {restPaused ? (
+              <button type="button" onClick={resumeRest} className="rounded-md bg-sky-500/30 px-3 py-1 text-xs font-semibold text-sky-50">
+                ▶ {t("wk.resume")}
               </button>
-              <button type="button" onClick={() => setRestLeft((v) => Math.max(0, (v ?? 0) - 15))} className="rounded-md bg-sky-500/20 px-2 py-1 text-xs text-sky-100">
-                −15s
+            ) : (
+              <button type="button" onClick={pauseRest} className="rounded-md bg-sky-500/30 px-3 py-1 text-xs font-semibold text-sky-50">
+                ⏸ {t("wk.pause")}
               </button>
-              <button type="button" onClick={stopRest} className="rounded-md bg-sky-500 px-3 py-1 text-xs font-semibold text-white">
-                {t("wk.skip")}
-              </button>
-            </div>
+            )}
+            <button type="button" onClick={stopRest} className="rounded-md bg-sky-500 px-3 py-1 text-xs font-semibold text-white">
+              {t("wk.stop")}
+            </button>
           </div>
         </div>
       )}
