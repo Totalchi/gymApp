@@ -9,17 +9,18 @@ import {
   IconClock,
   IconCog,
 } from "@/components/Icons";
-
-const TABS = [
-  { href: "/dashboard", label: "Schema's", Icon: IconHome },
-  { href: "/exercises", label: "Oefeningen", Icon: IconDumbbell },
-  { href: "/stats", label: "Stats", Icon: IconChart },
-  { href: "/history", label: "Historie", Icon: IconClock },
-  { href: "/settings", label: "Meer", Icon: IconCog },
-];
+import { useT } from "@/components/LangProvider";
 
 export function BottomNav() {
   const pathname = usePathname();
+  const t = useT();
+  const TABS = [
+    { href: "/dashboard", label: t("nav.routines"), Icon: IconHome },
+    { href: "/exercises", label: t("nav.exercises"), Icon: IconDumbbell },
+    { href: "/stats", label: t("nav.stats"), Icon: IconChart },
+    { href: "/history", label: t("nav.history"), Icon: IconClock },
+    { href: "/settings", label: t("nav.more"), Icon: IconCog },
+  ];
 
   // Verberg de tab-bar tijdens een actieve workout (eigen onderbalk).
   if (pathname.startsWith("/workout/")) return null;

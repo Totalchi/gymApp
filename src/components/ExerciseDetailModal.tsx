@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useT } from "@/components/LangProvider";
 import type { Exercise } from "@/lib/types";
 
 /** Popup die de foto('s), tags en uitleg van een oefening groot toont. */
@@ -12,6 +13,7 @@ export function ExerciseDetailModal({
   exercise: Exercise;
   onClose: () => void;
 }) {
+  const t = useT();
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4"
@@ -49,7 +51,7 @@ export function ExerciseDetailModal({
               onClick={onClose}
               className="shrink-0 rounded-lg px-3 py-1 text-sm text-muted hover:bg-surface2"
             >
-              Sluiten
+              {t("common.close")}
             </button>
           </div>
 
@@ -78,16 +80,14 @@ export function ExerciseDetailModal({
               ))}
             </ol>
           ) : (
-            <p className="text-sm text-faint">
-              Geen uitleg beschikbaar voor deze oefening.
-            </p>
+            <p className="text-sm text-faint">{t("ex.noExplanation")}</p>
           )}
 
           <Link
             href={`/exercises/${exercise.id}`}
-            className="mt-5 inline-flex w-full items-center justify-center rounded-xl bg-slate-100 px-4 py-2.5 text-sm font-semibold text-slate-900 transition hover:bg-white"
+            className="mt-5 inline-flex w-full items-center justify-center rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-fg transition hover:brightness-110"
           >
-            📈 Historie & records bekijken
+            {t("ex.viewHistory")}
           </Link>
         </div>
       </div>

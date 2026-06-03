@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { Header } from "@/components/Header";
+import { getT } from "@/lib/serverLang";
 import { deleteSession } from "@/app/workout/actions";
 
 export default async function HistoryPage() {
@@ -8,6 +9,8 @@ export default async function HistoryPage() {
   const {
     data: { user },
   } = await supabase.auth.getUser();
+  const { t, lang } = await getT();
+  const loc = lang === "en" ? "en-US" : "nl-NL";
 
   const { data: sessions } = await supabase
     .from("workout_sessions")
@@ -19,18 +22,18 @@ export default async function HistoryPage() {
       <Header email={user?.email} />
       <main className="mx-auto max-w-3xl px-4 py-8">
         <div className="mb-6 flex items-center justify-between">
-          <h1 className="text-3xl font-bold">Geschiedenis</h1>
+          <h1 className="text-3xl font-bold">{t("hist.title")}</h1>
           <Link
             href="/progress"
             className="rounded-lg border border-line px-3 py-1.5 text-sm text-fg transition hover:border-primary hover:text-primary"
           >
-            📈 Voortgang
+            {t("hist.progress")}
           </Link>
         </div>
 
         {!sessions || sessions.length === 0 ? (
           <div className="rounded-2xl border border-dashed border-line py-16 text-center text-faint">
-            Nog geen workouts gelogd. Start er één vanaf een dag in je schema! 💪
+            {t("hist.empty")}
           </div>
         ) : (
           <div className="space-y-3">
@@ -43,7 +46,7 @@ export default async function HistoryPage() {
                 (sum, st) => sum + (st.reps ?? 0) * (st.weight ?? 0),
                 0,
               );
-              const date = new Date(s.performed_at).toLocaleDateString("nl-NL", {
+              const date = new Date(s.performed_at).toLocaleDateString(loc, {
                 weekday: "short",
                 day: "numeric",
                 month: "short",
@@ -58,9 +61,9 @@ export default async function HistoryPage() {
                     <p className="font-semibold">{s.day_name ?? "Workout"}</p>
                     <p className="text-sm text-muted">{date}</p>
                     <p className="mt-1 text-xs text-faint">
-                      {sets.length} sets · {Math.round(volume).toLocaleString("nl-NL")} kg volume
+                      {sets.length} {t("hist.sets")} · {Math.round(volume).toLocaleString()} kg {t("hist.volume")}
                       {s.duration_seconds
-                        ? ` · ⏱ ${Math.round(s.duration_seconds / 60)} min`
+                        ? ` · ⏱ ${Math.round(s.duration_seconds / 60)} ${t("hist.min")}`
                         : ""}
                     </p>
                   </Link>
@@ -68,9 +71,9 @@ export default async function HistoryPage() {
                     <input type="hidden" name="id" value={s.id} />
                     <button
                       type="submit"
-                      className="text-xs text-faint transition hover:text-primary"
+                      className="text-xs text-faint transition hover:text-danger"
                     >
-                      Verwijderen
+                      {t("common.delete")}
                     </button>
                   </form>
                 </div>

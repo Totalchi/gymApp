@@ -2,13 +2,14 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { createClient } from "@/lib/supabase/server";
 import { UnitProvider } from "@/components/UnitProvider";
+import { LangProvider } from "@/components/LangProvider";
 import { BottomNav } from "@/components/BottomNav";
-import type { WeightUnit } from "@/lib/units";
+import { getLang, getUnit } from "@/lib/serverLang";
 
 export const metadata: Metadata = {
-  title: "GymApp — Bouw je trainingsschema",
+  title: "GymApp",
   description:
-    "Maak eenvoudig wekelijkse trainingsschema's met push/pull/legs-dagen, sets, reps, kg en automatische RIR-berekening.",
+    "Build weekly training routines with push/pull/legs days, sets, reps, weight and automatic RIR.",
 };
 
 export const viewport: Viewport = {
@@ -26,36 +27,33 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
+  // Snel: lees voorkeuren uit cookies (geen DB-round-trip per pagina).
+  const [lang, unit] = await Promise.all([getLang(), getUnit()]);
+
+  // Lichte auth-check (gecachet door Supabase) om navigatie te bepalen.
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  let unit: WeightUnit = "kg";
-  if (user) {
-    const { data } = await supabase
-      .from("profiles")
-      .select("weight_unit")
-      .eq("id", user.id)
-      .single();
-    if (data?.weight_unit === "lb") unit = "lb";
-  }
 
   return (
-    <html lang="nl">
+    <html lang={lang}>
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
       <body className="min-h-screen">
-        <UnitProvider unit={unit}>
-          {user ? (
-            <>
-              <div className="pb-20 md:pb-0">{children}</div>
-              <BottomNav />
-            </>
-          ) : (
-            children
-          )}
-        </UnitProvider>
+        <LangProvider lang={lang}>
+          <UnitProvider unit={unit}>
+            {user ? (
+              <>
+                <div className="pb-20 md:pb-0">{children}</div>
+                <BottomNav />
+              </>
+            ) : (
+              children
+            )}
+          </UnitProvider>
+        </LangProvider>
       </body>
     </html>
   );

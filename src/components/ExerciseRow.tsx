@@ -12,6 +12,7 @@ import {
 import { DragHandle } from "@/components/DragHandle";
 import { ExerciseDetailModal } from "@/components/ExerciseDetailModal";
 import { useUnit } from "@/components/UnitProvider";
+import { useT } from "@/components/LangProvider";
 import { computeRir, estimateOneRepMax } from "@/lib/rir";
 import type { RoutineExerciseWithExercise } from "@/lib/types";
 
@@ -31,33 +32,44 @@ export function ExerciseRow({
     isDragging,
   } = useSortable({ id: item.id });
   const [sets, setSets] = useState(String(item.sets));
-  const [reps, setReps] = useState(String(item.reps));
+  // Reps kan een bereik zijn, bv. "6-8". reps = ondergrens, reps_max = bovengrens.
+  const [reps, setReps] = useState(
+    item.reps_max != null && item.reps_max !== item.reps
+      ? `${item.reps}-${item.reps_max}`
+      : String(item.reps),
+  );
   const [weight, setWeight] = useState(item.weight != null ? String(item.weight) : "");
   const [oneRm, setOneRm] = useState(
     item.one_rep_max != null ? String(item.one_rep_max) : "",
   );
+  const [rirInput, setRirInput] = useState(item.rir != null ? String(item.rir) : "");
   const [notes, setNotes] = useState(item.notes ?? "");
   const [dirty, setDirty] = useState(false);
   const [showDetail, setShowDetail] = useState(false);
   const unit = useUnit();
+  const t = useT();
 
   const img = item.exercise.image_urls?.[0];
 
-  // Live RIR-berekening terwijl je typt.
-  const rir = useMemo(() => {
+  // Onder-/bovengrens van het reps-bereik.
+  const repsMin = parseInt(reps, 10);
+
+  // Automatisch berekende RIR (suggestie) o.b.v. ondergrens van de reps.
+  const computed = useMemo(() => {
     const w = parseFloat(weight.replace(",", "."));
-    const r = parseInt(reps, 10);
     const orm = parseFloat(oneRm.replace(",", "."));
-    if (!w || !r || !orm) return null;
-    return computeRir({ weight: w, reps: r, oneRepMax: orm });
-  }, [weight, reps, oneRm]);
+    if (!w || !repsMin || !orm) return null;
+    return computeRir({ weight: w, reps: repsMin, oneRepMax: orm });
+  }, [weight, repsMin, oneRm]);
+
+  // Toon de handmatige RIR als die is ingevuld, anders de berekende.
+  const shownRir = rirInput !== "" ? parseFloat(rirInput.replace(",", ".")) : computed?.rir ?? null;
 
   // Voorstel voor 1RM op basis van het ingevoerde gewicht × reps (tot falen).
   const suggestOneRm = () => {
     const w = parseFloat(weight.replace(",", "."));
-    const r = parseInt(reps, 10);
-    if (w && r) {
-      setOneRm(estimateOneRepMax(w, r, 0).toFixed(1));
+    if (w && repsMin) {
+      setOneRm(estimateOneRepMax(w, repsMin, 0).toFixed(1));
       setDirty(true);
     }
   };
@@ -126,34 +138,46 @@ export function ExerciseRow({
       </div>
 
       {/* Velden */}
-      <div className="grid grid-cols-4 gap-2 sm:flex sm:items-end sm:gap-3">
+      <div className="grid grid-cols-5 gap-2 sm:flex sm:items-end sm:gap-3">
         <NumField label="Sets" name="sets" value={sets} onChange={(v) => { setSets(v); setDirty(true); }} />
-        <NumField label="Reps" name="reps" value={reps} onChange={(v) => { setReps(v); setDirty(true); }} />
+        {/* Reps: enkel getal of bereik, bv. 6-8 */}
+        <label className="flex flex-col">
+          <span className="mb-1 text-[11px] font-medium uppercase tracking-wide text-faint">
+            Reps
+          </span>
+          <input
+            name="reps"
+            type="text"
+            inputMode="numeric"
+            value={reps}
+            onChange={(e) => { setReps(e.target.value); setDirty(true); }}
+            placeholder="6-8"
+            title="Eén getal of een bereik, bv. 6-8"
+            className="w-full rounded-lg border border-line bg-canvas px-1 py-1.5 text-center tabular-nums focus:border-primary focus:outline-none sm:w-16 sm:px-2"
+          />
+        </label>
         <NumField label={unit} name="weight" value={weight} onChange={(v) => { setWeight(v); setDirty(true); }} step="0.5" />
         <NumField label="1RM" name="one_rep_max" value={oneRm} onChange={(v) => { setOneRm(v); setDirty(true); }} step="0.5" onDouble={suggestOneRm} />
 
-        {/* RIR badge */}
-        <div className="col-span-4 flex flex-col items-center sm:col-span-1">
+        {/* RIR: zelf invulbaar; leeg = automatisch berekend */}
+        <label className="flex flex-col">
           <span className="mb-1 text-[11px] font-medium uppercase tracking-wide text-faint">
             RIR
           </span>
-          {rir ? (
-            <span
-              className="rounded-lg px-2.5 py-1.5 text-sm font-bold tabular-nums ring-1"
-              style={rirStyle(rir.rir)}
-              title={`RPE ${rir.rpe} · ${Math.round(rir.intensity * 100)}% 1RM`}
-            >
-              {rir.rir}
-            </span>
-          ) : (
-            <span
-              className="rounded-lg px-2.5 py-1.5 text-sm text-faint ring-1 ring-line"
-              title="Vul kg en 1RM in voor automatische RIR"
-            >
-              –
-            </span>
-          )}
-        </div>
+          <input
+            name="rir"
+            type="number"
+            inputMode="decimal"
+            step="0.5"
+            min="0"
+            value={rirInput}
+            onChange={(e) => { setRirInput(e.target.value); setDirty(true); }}
+            placeholder={computed ? String(computed.rir) : "auto"}
+            title="Laat leeg voor automatische berekening, of vul zelf in"
+            style={shownRir != null ? rirStyle(shownRir) : undefined}
+            className="w-full rounded-lg border border-line bg-canvas px-1 py-1.5 text-center font-semibold tabular-nums focus:border-primary focus:outline-none sm:w-16 sm:px-2"
+          />
+        </label>
       </div>
 
       {/* Acties */}
@@ -167,14 +191,14 @@ export function ExerciseRow({
               : "border border-line text-faint"
           }`}
         >
-          {dirty ? "Opslaan" : "Opgeslagen"}
+          {dirty ? t("common.save") : t("common.saved")}
         </button>
         <button
           type="submit"
           formAction={deleteRoutineExercise}
-          className="text-xs text-faint transition hover:text-primary"
+          className="text-xs text-faint transition hover:text-danger"
         >
-          Verwijderen
+          {t("common.delete")}
         </button>
       </div>
       </div>
@@ -187,7 +211,7 @@ export function ExerciseRow({
           setNotes(e.target.value);
           setDirty(true);
         }}
-        placeholder="📝 Notitie (bijv. tempo, vorm, blessure)…"
+        placeholder={t("routine.notePh")}
         className="mt-3 w-full rounded-lg border border-line bg-canvas px-3 py-2 text-sm placeholder:text-faint focus:border-primary focus:outline-none"
       />
 
@@ -199,7 +223,7 @@ export function ExerciseRow({
         }`}
         title="Koppel deze oefening als superset met de oefening erboven"
       >
-        🔗 {item.superset_group != null ? "Superset (klik om los te koppelen)" : "Superset met vorige"}
+        🔗 {item.superset_group != null ? t("routine.supersetLinked") : t("routine.supersetWithPrev")}
       </button>
 
       {showDetail && (
@@ -242,7 +266,7 @@ function NumField({
         onChange={(e) => onChange(e.target.value)}
         onDoubleClick={onDouble}
         title={onDouble ? "Dubbelklik om 1RM te schatten uit kg × reps" : undefined}
-        className="w-16 rounded-lg border border-line bg-canvas px-2 py-1.5 text-center tabular-nums focus:border-primary focus:outline-none"
+        className="w-full rounded-lg border border-line bg-canvas px-1 py-1.5 text-center tabular-nums focus:border-primary focus:outline-none sm:w-16 sm:px-2"
       />
     </label>
   );

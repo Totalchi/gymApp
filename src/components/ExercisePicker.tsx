@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
 import { addExerciseToDay } from "@/app/routines/actions";
+import { useT } from "@/components/LangProvider";
 import { MUSCLE_GROUPS, type Exercise } from "@/lib/types";
 
 export function ExercisePicker({
@@ -20,6 +21,7 @@ export function ExercisePicker({
   const [results, setResults] = useState<Exercise[]>([]);
   const [loading, setLoading] = useState(false);
   const [added, setAdded] = useState<Set<string>>(new Set());
+  const t = useT();
 
   useEffect(() => {
     const supabase = createClient();
@@ -61,24 +63,24 @@ export function ExercisePicker({
         {/* Header + filters */}
         <div className="border-b border-line p-4">
           <div className="mb-3 flex items-center justify-between">
-            <h3 className="text-lg font-semibold">Oefening kiezen</h3>
+            <h3 className="text-lg font-semibold">{t("ex.chooseExercise")}</h3>
             <button
               onClick={onClose}
               className="rounded-lg px-3 py-1.5 text-sm text-muted hover:bg-surface2"
             >
-              Klaar
+              {t("common.done")}
             </button>
           </div>
           <input
             autoFocus
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Zoek een oefening..."
+            placeholder={t("ex.search")}
             className="mb-3 w-full rounded-xl border border-line bg-canvas px-3.5 py-2.5 placeholder:text-faint focus:border-primary focus:outline-none"
           />
           <div className="flex flex-wrap gap-1.5">
             <FilterChip active={muscle === ""} onClick={() => setMuscle("")}>
-              Alle
+              {t("ex.all")}
             </FilterChip>
             {MUSCLE_GROUPS.map((m) => (
               <FilterChip
@@ -95,11 +97,9 @@ export function ExercisePicker({
         {/* Resultaten */}
         <div className="scrollbar-thin flex-1 overflow-y-auto p-3">
           {loading ? (
-            <p className="py-10 text-center text-sm text-faint">Laden...</p>
+            <p className="py-10 text-center text-sm text-faint">{t("common.loading")}</p>
           ) : results.length === 0 ? (
-            <p className="py-10 text-center text-sm text-faint">
-              Geen oefeningen gevonden.
-            </p>
+            <p className="py-10 text-center text-sm text-faint">{t("ex.none")}</p>
           ) : (
             <ul className="space-y-1.5">
               {results.map((ex) => (
@@ -140,7 +140,7 @@ export function ExercisePicker({
                       type="submit"
                       className="shrink-0 rounded-lg bg-primary px-3 py-1.5 text-sm font-semibold text-white transition hover:brightness-110"
                     >
-                      {added.has(ex.id) ? "+ Nog een" : "Toevoegen"}
+                      {added.has(ex.id) ? t("ex.addAnother") : t("ex.add")}
                     </button>
                   </form>
                 </li>

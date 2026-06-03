@@ -3,6 +3,8 @@
 import { useActionState } from "react";
 import Link from "next/link";
 import { login, signup, type AuthState } from "@/app/login/actions";
+import { useT } from "@/components/LangProvider";
+import { IconDumbbell } from "@/components/Icons";
 
 export function AuthForm({ mode }: { mode: "login" | "register" }) {
   const action = mode === "login" ? login : signup;
@@ -10,35 +12,34 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
     action,
     {},
   );
+  const t = useT();
 
   return (
     <div className="w-full max-w-sm">
       <div className="mb-8 text-center">
-        <div className="mb-3 inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-primary text-2xl">
-          🏋️
+        <div className="mb-3 inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-primary text-primary-fg">
+          <IconDumbbell className="h-6 w-6" />
         </div>
         <h1 className="text-2xl font-bold">
-          {mode === "login" ? "Welkom terug" : "Account aanmaken"}
+          {mode === "login" ? t("auth.welcomeBack") : t("auth.createAccount")}
         </h1>
         <p className="mt-1 text-sm text-muted">
-          {mode === "login"
-            ? "Log in om je schema's te bekijken."
-            : "Maak een account om je schema's op te slaan."}
+          {mode === "login" ? t("auth.loginSub") : t("auth.registerSub")}
         </p>
       </div>
 
       <form action={formAction} className="space-y-4">
         {mode === "register" && (
           <Field
-            label="Naam"
+            label={t("auth.name")}
             name="display_name"
             type="text"
-            placeholder="Je naam"
+            placeholder={t("auth.namePh")}
             autoComplete="name"
           />
         )}
         <Field
-          label="E-mailadres"
+          label={t("auth.email")}
           name="email"
           type="email"
           placeholder="jij@voorbeeld.nl"
@@ -46,7 +47,7 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
           required
         />
         <Field
-          label="Wachtwoord"
+          label={t("auth.password")}
           name="password"
           type="password"
           placeholder="••••••••"
@@ -71,26 +72,26 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
           className="w-full rounded-xl bg-primary px-4 py-2.5 font-semibold text-white shadow-lg  transition hover:opacity-90 disabled:opacity-50"
         >
           {pending
-            ? "Bezig..."
+            ? t("auth.working")
             : mode === "login"
-              ? "Inloggen"
-              : "Account aanmaken"}
+              ? t("auth.login")
+              : t("auth.register")}
         </button>
       </form>
 
       <p className="mt-6 text-center text-sm text-muted">
         {mode === "login" ? (
           <>
-            Nog geen account?{" "}
+            {t("auth.noAccount")}{" "}
             <Link href="/register" className="font-medium text-primary hover:underline">
-              Registreren
+              {t("auth.registerLink")}
             </Link>
           </>
         ) : (
           <>
-            Heb je al een account?{" "}
+            {t("auth.haveAccount")}{" "}
             <Link href="/login" className="font-medium text-primary hover:underline">
-              Inloggen
+              {t("auth.loginLink")}
             </Link>
           </>
         )}

@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { Header } from "@/components/Header";
 import { LineChart, type ChartPoint } from "@/components/LineChart";
 import { addBodyMetric, deleteBodyMetric } from "@/app/body/actions";
+import { getT } from "@/lib/serverLang";
 import type { BodyMetric } from "@/lib/types";
 
 export default async function BodyPage() {
@@ -9,6 +10,7 @@ export default async function BodyPage() {
   const {
     data: { user },
   } = await supabase.auth.getUser();
+  const { t } = await getT();
 
   const { data } = await supabase
     .from("body_metrics")
@@ -33,14 +35,12 @@ export default async function BodyPage() {
     <>
       <Header email={user?.email} />
       <main className="mx-auto max-w-3xl px-4 py-8">
-        <h1 className="mb-1 text-3xl font-bold">Lichaam</h1>
-        <p className="mb-6 text-muted">
-          Houd je gewicht en lichaamsmaten bij en zie je voortgang.
-        </p>
+        <h1 className="mb-1 text-3xl font-bold">{t("body.title")}</h1>
+        <p className="mb-6 text-muted">{t("body.subtitle")}</p>
 
         {weightChart.length >= 2 && (
           <section className="mb-6 rounded-2xl border border-line bg-surface p-5">
-            <h2 className="mb-2 font-semibold">Gewicht (kg)</h2>
+            <h2 className="mb-2 font-semibold">{t("body.weightChart")} (kg)</h2>
             <LineChart points={weightChart} unit="" color="#34d399" />
           </section>
         )}
@@ -50,29 +50,29 @@ export default async function BodyPage() {
           action={addBodyMetric}
           className="mb-6 rounded-2xl border border-line bg-surface p-5"
         >
-          <h2 className="mb-3 font-semibold">Nieuwe meting</h2>
+          <h2 className="mb-3 font-semibold">{t("body.newMeasurement")}</h2>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-            <Field label="Datum" name="measured_at" type="date" defaultValue={today} />
-            <Field label="Gewicht (kg)" name="weight" type="number" step="0.1" />
-            <Field label="Vet %" name="body_fat" type="number" step="0.1" />
-            <Field label="Borst (cm)" name="chest" type="number" step="0.1" />
-            <Field label="Taille (cm)" name="waist" type="number" step="0.1" />
-            <Field label="Armen (cm)" name="arms" type="number" step="0.1" />
-            <Field label="Benen (cm)" name="thighs" type="number" step="0.1" />
+            <Field label={t("body.date")} name="measured_at" type="date" defaultValue={today} />
+            <Field label={`${t("body.weight")} (kg)`} name="weight" type="number" step="0.1" />
+            <Field label={t("body.bodyfat")} name="body_fat" type="number" step="0.1" />
+            <Field label={t("body.chest")} name="chest" type="number" step="0.1" />
+            <Field label={t("body.waist")} name="waist" type="number" step="0.1" />
+            <Field label={t("body.arms")} name="arms" type="number" step="0.1" />
+            <Field label={t("body.thighs")} name="thighs" type="number" step="0.1" />
           </div>
           <button
             type="submit"
-            className="mt-4 rounded-xl bg-primary px-5 py-2.5 font-semibold text-white transition hover:opacity-90"
+            className="mt-4 rounded-xl bg-primary px-5 py-2.5 font-semibold text-primary-fg transition hover:brightness-110"
           >
-            Opslaan
+            {t("common.save")}
           </button>
         </form>
 
         {/* Lijst */}
-        <h2 className="mb-2 font-semibold">Metingen</h2>
+        <h2 className="mb-2 font-semibold">{t("body.measurements")}</h2>
         {metrics.length === 0 ? (
           <div className="rounded-2xl border border-dashed border-line py-12 text-center text-faint">
-            Nog geen metingen. Voeg je eerste meting hierboven toe.
+            {t("body.empty")}
           </div>
         ) : (
           <div className="space-y-2">
@@ -106,9 +106,9 @@ export default async function BodyPage() {
                   <input type="hidden" name="id" value={m.id} />
                   <button
                     type="submit"
-                    className="text-xs text-faint transition hover:text-primary"
+                    className="text-xs text-faint transition hover:text-danger"
                   >
-                    Verwijderen
+                    {t("common.delete")}
                   </button>
                 </form>
               </div>

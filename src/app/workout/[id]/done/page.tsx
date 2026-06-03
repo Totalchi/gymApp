@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { Header } from "@/components/Header";
+import { getT } from "@/lib/serverLang";
 import { estimateOneRepMax } from "@/lib/rir";
 
 interface SetRow {
@@ -24,6 +25,7 @@ export default async function WorkoutDonePage({
   const {
     data: { user },
   } = await supabase.auth.getUser();
+  const { t } = await getT();
 
   const { data: session } = await supabase
     .from("workout_sessions")
@@ -95,14 +97,14 @@ export default async function WorkoutDonePage({
       <Header email={user?.email} />
       <main className="mx-auto max-w-lg px-4 py-10 text-center">
         <div className="mb-3 text-6xl">🎉</div>
-        <h1 className="text-3xl font-bold">Workout klaar!</h1>
+        <h1 className="text-3xl font-bold">{t("done.title")}</h1>
         <p className="mt-1 text-muted">{session.day_name}</p>
 
         <div className="mt-6 grid grid-cols-3 gap-3">
           {[
-            { label: "Duur", value: minutes != null ? `${minutes} min` : "—" },
-            { label: "Sets", value: setCount },
-            { label: "Volume", value: `${Math.round(volume).toLocaleString("nl-NL")} kg` },
+            { label: t("done.duration"), value: minutes != null ? `${minutes} ${t("done.min")}` : "—" },
+            { label: t("done.sets"), value: setCount },
+            { label: t("done.volume"), value: `${Math.round(volume).toLocaleString()} kg` },
           ].map((s) => (
             <div key={s.label} className="rounded-2xl border border-line bg-surface p-4">
               <p className="text-xl font-bold tabular-nums">{s.value}</p>
@@ -114,7 +116,7 @@ export default async function WorkoutDonePage({
         {prs.length > 0 && (
           <div className="mt-6 rounded-2xl border border-amber-500/30 bg-amber-500/10 p-5 text-left">
             <h2 className="mb-3 text-center font-semibold text-amber-300">
-              🏆 {prs.length} nieuw{prs.length === 1 ? "" : "e"} record{prs.length === 1 ? "" : "s"}!
+              🏆 {prs.length} {prs.length === 1 ? t("done.record") : t("done.records")}
             </h2>
             <ul className="space-y-2">
               {prs.map((pr) => (
@@ -123,7 +125,7 @@ export default async function WorkoutDonePage({
                     {pr.name}
                   </Link>
                   <span className="shrink-0 text-sm text-amber-200">
-                    {pr.isFirst ? "Eerste keer!" : `${pr.e1rm.toFixed(1)} kg e1RM`}
+                    {pr.isFirst ? t("done.firstTime") : `${pr.e1rm.toFixed(1)} kg e1RM`}
                   </span>
                 </li>
               ))}
@@ -134,15 +136,15 @@ export default async function WorkoutDonePage({
         <div className="mt-8 flex justify-center gap-3">
           <Link
             href="/history"
-            className="rounded-xl bg-primary px-6 py-2.5 font-semibold text-white transition hover:opacity-90"
+            className="rounded-xl bg-primary px-6 py-2.5 font-semibold text-primary-fg transition hover:brightness-110"
           >
-            Naar geschiedenis
+            {t("done.toHistory")}
           </Link>
           <Link
             href="/dashboard"
             className="rounded-xl border border-line px-6 py-2.5 font-medium text-fg transition hover:bg-surface2"
           >
-            Dashboard
+            {t("done.dashboard")}
           </Link>
         </div>
       </main>

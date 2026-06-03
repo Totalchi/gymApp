@@ -101,6 +101,7 @@ export interface RoutineExercise {
   position: number;
   sets: number;
   reps: number;
+  reps_max: number | null;
   weight: number | null;
   one_rep_max: number | null;
   rir: number | null;

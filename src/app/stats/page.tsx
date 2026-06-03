@@ -1,12 +1,14 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { Header } from "@/components/Header";
+import { getT } from "@/lib/serverLang";
 
 export default async function StatsPage() {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
+  const { t } = await getT();
 
   // Sessies + sets voor kalender en volume.
   const { data: sessions } = await supabase
@@ -76,18 +78,18 @@ export default async function StatsPage() {
       <Header email={user?.email} />
       <main className="mx-auto max-w-3xl px-4 py-8">
         <div className="mb-6 flex items-center justify-between">
-          <h1 className="text-3xl font-bold">Statistieken</h1>
+          <h1 className="text-3xl font-bold">{t("stats.title")}</h1>
           <a
             href="/api/export"
             className="rounded-lg border border-line px-3 py-1.5 text-sm text-fg transition hover:border-primary hover:text-primary"
           >
-            ⬇ Export CSV
+            {t("stats.export")}
           </a>
         </div>
 
         {/* Kalender */}
         <section className="mb-6 rounded-2xl border border-line bg-surface p-5">
-          <h2 className="mb-3 font-semibold">Trainingskalender</h2>
+          <h2 className="mb-3 font-semibold">{t("stats.calendar")}</h2>
           <div className="flex gap-1 overflow-x-auto pb-1">
             {columns.map((col, i) => (
               <div key={i} className="flex flex-col gap-1">
@@ -102,24 +104,24 @@ export default async function StatsPage() {
             ))}
           </div>
           <div className="mt-3 flex items-center gap-2 text-xs text-faint">
-            <span>minder</span>
+            <span>{t("stats.less")}</span>
             <span className="h-3 w-3 rounded-sm bg-surface2" />
             <span className="h-3 w-3 rounded-sm bg-emerald-900" />
             <span className="h-3 w-3 rounded-sm bg-emerald-700" />
             <span className="h-3 w-3 rounded-sm bg-emerald-500" />
             <span className="h-3 w-3 rounded-sm bg-emerald-400" />
-            <span>meer</span>
+            <span>{t("stats.more")}</span>
           </div>
         </section>
 
         {/* Spiergroep-verdeling */}
         <section className="rounded-2xl border border-line bg-surface p-5">
-          <h2 className="mb-3 font-semibold">Volume per spiergroep</h2>
+          <h2 className="mb-3 font-semibold">{t("stats.volumePerMuscle")}</h2>
           {muscles.length === 0 ? (
             <p className="text-sm text-faint">
-              Nog geen gelogde sets.{" "}
+              {t("stats.noSets")}{" "}
               <Link href="/dashboard" className="text-primary hover:underline">
-                Start een workout
+                {t("stats.startWorkout")}
               </Link>
               .
             </p>

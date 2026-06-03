@@ -6,6 +6,7 @@ import { Header } from "@/components/Header";
 import { LineChart, type ChartPoint } from "@/components/LineChart";
 import { estimateOneRepMax } from "@/lib/rir";
 import { strengthLevel, liftKey } from "@/lib/strength";
+import { getT } from "@/lib/serverLang";
 import type { Exercise } from "@/lib/types";
 
 interface SetRow {
@@ -26,6 +27,8 @@ export default async function ExerciseDetailPage({
   const {
     data: { user },
   } = await supabase.auth.getUser();
+  const { t, lang } = await getT();
+  const loc = lang === "en" ? "en-US" : "nl-NL";
 
   const { data: exercise } = await supabase
     .from("exercises")
@@ -88,7 +91,7 @@ export default async function ExerciseDetailPage({
   const chart: ChartPoint[] = Object.entries(e1rmByDay)
     .sort(([a], [b]) => a.localeCompare(b))
     .map(([day, val]) => ({
-      label: new Date(day).toLocaleDateString("nl-NL", { day: "numeric", month: "short" }),
+      label: new Date(day).toLocaleDateString(loc, { day: "numeric", month: "short" }),
       value: Math.round(val * 10) / 10,
     }));
 
@@ -97,11 +100,11 @@ export default async function ExerciseDetailPage({
     .map(([, v]) => v);
 
   const records = [
-    { label: "Geschat 1RM", value: best1RM ? `${best1RM.toFixed(1)} kg` : "—" },
-    { label: "Zwaarste gewicht", value: heaviest ? `${heaviest} kg` : "—" },
-    { label: "Beste set-volume", value: bestSetVolume ? `${Math.round(bestSetVolume)} kg` : "—" },
-    { label: "Meeste reps", value: mostReps || "—" },
-    { label: "Beste sessie-volume", value: bestSessionVolume ? `${Math.round(bestSessionVolume)} kg` : "—" },
+    { label: t("exd.rec1rm"), value: best1RM ? `${best1RM.toFixed(1)} kg` : "—" },
+    { label: t("exd.recHeaviest"), value: heaviest ? `${heaviest} kg` : "—" },
+    { label: t("exd.recSetVol"), value: bestSetVolume ? `${Math.round(bestSetVolume)} kg` : "—" },
+    { label: t("exd.recReps"), value: mostReps || "—" },
+    { label: t("exd.recSessionVol"), value: bestSessionVolume ? `${Math.round(bestSessionVolume)} kg` : "—" },
   ];
 
   return (
@@ -109,7 +112,7 @@ export default async function ExerciseDetailPage({
       <Header email={user?.email} />
       <main className="mx-auto max-w-3xl px-4 py-8">
         <Link href="/exercises" className="text-sm text-muted hover:text-fg">
-          ← Oefeningen
+          ← {t("nav.exercises")}
         </Link>
 
         <div className="mb-6 mt-2 flex items-center gap-4">
@@ -130,7 +133,7 @@ export default async function ExerciseDetailPage({
         </div>
 
         {/* Records */}
-        <h2 className="mb-2 font-semibold">Persoonlijke records 🏆</h2>
+        <h2 className="mb-2 font-semibold">{t("exd.records")}</h2>
         <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-3">
           {records.map((r) => (
             <div key={r.label} className="rounded-2xl border border-line bg-surface p-4">
@@ -144,7 +147,7 @@ export default async function ExerciseDetailPage({
         {level && (
           <section className="mb-6 rounded-2xl border border-line bg-surface p-5">
             <div className="mb-2 flex items-center justify-between">
-              <h2 className="font-semibold">Krachtniveau</h2>
+              <h2 className="font-semibold">{t("exd.strength")}</h2>
               <span className="rounded-full bg-primary/15 px-3 py-1 text-sm font-semibold text-primary ring-1 ring-primary/30">
                 {level.label}
               </span>
@@ -156,8 +159,7 @@ export default async function ExerciseDetailPage({
               />
             </div>
             <p className="mt-2 text-xs text-faint">
-              {level.ratio.toFixed(2)}× lichaamsgewicht · gebaseerd op je geschat
-              1RM en je recentste gewicht.
+              {level.ratio.toFixed(2)}{t("exd.strengthHint")}
             </p>
           </section>
         )}
@@ -165,7 +167,7 @@ export default async function ExerciseDetailPage({
         {/* Set-records per rep */}
         {Object.keys(setRecords).length > 0 && (
           <section className="mb-6 rounded-2xl border border-line bg-surface p-5">
-            <h2 className="mb-3 font-semibold">Set-records (zwaarste per reps)</h2>
+            <h2 className="mb-3 font-semibold">{t("exd.setRecords")}</h2>
             <div className="grid grid-cols-3 gap-2 sm:grid-cols-6">
               {Object.entries(setRecords)
                 .map(([reps, w]) => ({ reps: Number(reps), w }))
@@ -173,7 +175,7 @@ export default async function ExerciseDetailPage({
                 .map(({ reps, w }) => (
                   <div key={reps} className="rounded-xl bg-surface2/60 p-2.5 text-center">
                     <p className="text-sm font-bold tabular-nums">{w} kg</p>
-                    <p className="text-[11px] text-faint">{reps} reps</p>
+                    <p className="text-[11px] text-faint">{reps} {t("exd.reps")}</p>
                   </div>
                 ))}
             </div>
@@ -183,16 +185,16 @@ export default async function ExerciseDetailPage({
         {/* Grafiek */}
         {chart.length >= 2 && (
           <section className="mb-6 rounded-2xl border border-line bg-surface p-5">
-            <h2 className="mb-2 font-semibold">Geschat 1RM over tijd</h2>
+            <h2 className="mb-2 font-semibold">{t("exd.e1rmOverTime")}</h2>
             <LineChart points={chart} unit="" />
           </section>
         )}
 
         {/* Historie */}
-        <h2 className="mb-2 font-semibold">Historie</h2>
+        <h2 className="mb-2 font-semibold">{t("exd.history")}</h2>
         {sessions.length === 0 ? (
           <div className="rounded-2xl border border-dashed border-line py-12 text-center text-faint">
-            Nog geen gelogde sets voor deze oefening.
+            {t("exd.noSets")}
           </div>
         ) : (
           <div className="space-y-2">
@@ -202,7 +204,7 @@ export default async function ExerciseDetailPage({
                 className="flex items-center justify-between rounded-xl border border-line bg-surface px-4 py-3"
               >
                 <span className="text-sm">
-                  {new Date(s.date).toLocaleDateString("nl-NL", {
+                  {new Date(s.date).toLocaleDateString(loc, {
                     weekday: "short",
                     day: "numeric",
                     month: "short",
@@ -210,7 +212,7 @@ export default async function ExerciseDetailPage({
                   })}
                 </span>
                 <span className="text-sm text-muted">
-                  {Math.round(s.volume).toLocaleString("nl-NL")} kg volume
+                  {Math.round(s.volume).toLocaleString()} kg {t("exd.volume")}
                 </span>
               </div>
             ))}
@@ -220,7 +222,7 @@ export default async function ExerciseDetailPage({
         {/* Uitleg */}
         {ex.instructions.length > 0 && (
           <section className="mt-6">
-            <h2 className="mb-2 font-semibold">Uitleg</h2>
+            <h2 className="mb-2 font-semibold">{t("exd.explanation")}</h2>
             <ol className="list-decimal space-y-2 pl-5 text-sm text-muted">
               {ex.instructions.map((step, i) => (
                 <li key={i}>{step}</li>

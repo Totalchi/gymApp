@@ -4,9 +4,11 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
 import { deleteCustomExercise } from "@/app/exercises/actions";
+import { useT } from "@/components/LangProvider";
 import { MUSCLE_GROUPS, type Exercise } from "@/lib/types";
 
 export function ExerciseBrowser({ refreshKey = 0 }: { refreshKey?: number }) {
+  const t = useT();
   const [query, setQuery] = useState("");
   const [muscle, setMuscle] = useState("");
   const [results, setResults] = useState<Exercise[]>([]);
@@ -44,12 +46,12 @@ export function ExerciseBrowser({ refreshKey = 0 }: { refreshKey?: number }) {
       <input
         value={query}
         onChange={(e) => setQuery(e.target.value)}
-        placeholder="Zoek een oefening..."
+        placeholder={t("ex.search")}
         className="mb-3 w-full rounded-xl border border-line bg-surface px-3.5 py-2.5 placeholder:text-faint focus:border-primary focus:outline-none"
       />
       <div className="mb-5 flex flex-wrap gap-1.5">
         <Chip active={muscle === ""} onClick={() => setMuscle("")}>
-          Alle
+          {t("ex.all")}
         </Chip>
         {MUSCLE_GROUPS.map((m) => (
           <Chip key={m} active={muscle === m} onClick={() => setMuscle(m)}>
@@ -59,7 +61,7 @@ export function ExerciseBrowser({ refreshKey = 0 }: { refreshKey?: number }) {
       </div>
 
       {loading ? (
-        <p className="py-10 text-center text-faint">Laden...</p>
+        <p className="py-10 text-center text-faint">{t("common.loading")}</p>
       ) : (
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
           {results.map((ex) => (
@@ -84,7 +86,7 @@ export function ExerciseBrowser({ refreshKey = 0 }: { refreshKey?: number }) {
                 )}
                 {ex.owner_id && (
                   <span className="absolute left-2 top-2 rounded-full bg-primary px-2 py-0.5 text-[10px] font-semibold text-white">
-                    Eigen
+                    {t("ex.own")}
                   </span>
                 )}
               </div>
@@ -113,6 +115,7 @@ function ExerciseModal({
   exercise: Exercise;
   onClose: () => void;
 }) {
+  const t = useT();
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4"
@@ -148,7 +151,7 @@ function ExerciseModal({
               onClick={onClose}
               className="rounded-lg px-3 py-1 text-sm text-muted hover:bg-surface2"
             >
-              Sluiten
+              {t("common.close")}
             </button>
           </div>
           <div className="mb-4 flex flex-wrap gap-2 text-xs">
@@ -181,9 +184,9 @@ function ExerciseModal({
               <button
                 type="submit"
                 onClick={onClose}
-                className="text-sm text-faint transition hover:text-primary"
+                className="text-sm text-faint transition hover:text-danger"
               >
-                Eigen oefening verwijderen
+                {t("ex.deleteCustom")}
               </button>
             </form>
           )}

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { calcPlates } from "@/lib/plates";
 import { useUnit } from "@/components/UnitProvider";
+import { useT } from "@/components/LangProvider";
 
 const PLATE_COLORS: Record<number, string> = {
   25: "bg-rose-600",
@@ -16,6 +17,7 @@ const PLATE_COLORS: Record<number, string> = {
 
 export function PlateCalculator({ onClose }: { onClose: () => void }) {
   const unit = useUnit();
+  const t = useT();
   const [weight, setWeight] = useState("60");
   const [bar, setBar] = useState(20);
 
@@ -32,20 +34,20 @@ export function PlateCalculator({ onClose }: { onClose: () => void }) {
         onClick={(e) => e.stopPropagation()}
       >
         <div className="mb-4 flex items-center justify-between">
-          <h3 className="text-lg font-semibold">Plate calculator</h3>
+          <h3 className="text-lg font-semibold">{t("plate.title")}</h3>
           <button
             type="button"
             onClick={onClose}
             className="rounded-lg px-3 py-1 text-sm text-muted hover:bg-surface2"
           >
-            Sluiten
+            {t("common.close")}
           </button>
         </div>
 
         <div className="mb-4 flex gap-2">
           <label className="flex-1">
             <span className="mb-1 block text-xs text-muted">
-              Doelgewicht ({unit})
+              {t("plate.target")} ({unit})
             </span>
             <input
               type="number"
@@ -57,7 +59,7 @@ export function PlateCalculator({ onClose }: { onClose: () => void }) {
             />
           </label>
           <label className="w-24">
-            <span className="mb-1 block text-xs text-muted">Stang</span>
+            <span className="mb-1 block text-xs text-muted">{t("plate.bar")}</span>
             <select
               value={bar}
               onChange={(e) => setBar(Number(e.target.value))}
@@ -72,10 +74,10 @@ export function PlateCalculator({ onClose }: { onClose: () => void }) {
           </label>
         </div>
 
-        <p className="mb-2 text-sm text-muted">Per kant:</p>
+        <p className="mb-2 text-sm text-muted">{t("plate.perSide")}</p>
         {result.perSide.length === 0 ? (
           <p className="rounded-lg bg-surface2 px-3 py-4 text-center text-sm text-faint">
-            Alleen de stang ({bar} {unit}).
+            {t("plate.barOnly")} ({bar} {unit}).
           </p>
         ) : (
           <div className="flex flex-wrap items-center gap-2">
@@ -96,7 +98,7 @@ export function PlateCalculator({ onClose }: { onClose: () => void }) {
 
         {result.leftover > 0.01 && (
           <p className="mt-3 text-xs text-amber-400">
-            Niet exact te maken — dichtstbij: {result.achievable} {unit}.
+            {t("plate.notExact")}: {result.achievable} {unit}.
           </p>
         )}
       </div>

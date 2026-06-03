@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { Header } from "@/components/Header";
+import { getT } from "@/lib/serverLang";
 import {
   createRoutine,
   deleteRoutine,
@@ -22,13 +23,15 @@ interface RoutineRow {
 function RoutineCard({
   r,
   folders,
+  t,
 }: {
   r: RoutineRow;
   folders: { id: string; name: string }[];
+  t: (k: string) => string;
 }) {
   const dayTypes = [...new Set(r.routine_days.map((d) => d.day_type))];
   return (
-    <div className="group relative flex flex-col rounded-2xl border border-line bg-surface p-5 transition hover:border-line">
+    <div className="group relative flex flex-col rounded-2xl border border-line bg-surface p-5 transition hover:border-primary/40">
       <Link href={`/routines/${r.id}`} className="flex-1">
         <h3 className="text-lg font-semibold group-hover:text-primary">{r.name}</h3>
         {r.description && (
@@ -36,14 +39,14 @@ function RoutineCard({
         )}
         <div className="mt-3 flex flex-wrap gap-1.5">
           {dayTypes.length === 0 ? (
-            <span className="text-xs text-faint">Nog geen dagen</span>
+            <span className="text-xs text-faint">{t("dash.noDays")}</span>
           ) : (
-            dayTypes.map((t) => (
+            dayTypes.map((d) => (
               <span
-                key={t}
-                className={`rounded-full px-2 py-0.5 text-xs font-medium ring-1 ${DAY_TYPE_COLORS[t]}`}
+                key={d}
+                className={`rounded-full px-2 py-0.5 text-xs font-medium ring-1 ${DAY_TYPE_COLORS[d]}`}
               >
-                {DAY_TYPE_LABELS[t]}
+                {DAY_TYPE_LABELS[d]}
               </span>
             ))
           )}
@@ -54,7 +57,7 @@ function RoutineCard({
         <form action={duplicateRoutine}>
           <input type="hidden" name="id" value={r.id} />
           <button type="submit" className="text-muted transition hover:text-primary">
-            Dupliceren
+            {t("dash.duplicate")}
           </button>
         </form>
         {folders.length > 0 && (
@@ -65,7 +68,7 @@ function RoutineCard({
               defaultValue={r.folder_id ?? ""}
               className="rounded-md border border-line bg-canvas px-1.5 py-1 text-xs text-muted focus:outline-none"
             >
-              <option value="">Geen map</option>
+              <option value="">{t("dash.withoutFolder")}</option>
               {folders.map((f) => (
                 <option key={f.id} value={f.id}>
                   {f.name}
@@ -79,8 +82,8 @@ function RoutineCard({
         )}
         <form action={deleteRoutine} className="ml-auto">
           <input type="hidden" name="id" value={r.id} />
-          <button type="submit" className="text-faint transition hover:text-primary">
-            Verwijderen
+          <button type="submit" className="text-faint transition hover:text-danger">
+            {t("common.delete")}
           </button>
         </form>
       </div>
@@ -93,6 +96,7 @@ export default async function DashboardPage() {
   const {
     data: { user },
   } = await supabase.auth.getUser();
+  const { t } = await getT();
 
   const { data: routines } = await supabase
     .from("routines")
@@ -105,7 +109,6 @@ export default async function DashboardPage() {
     .order("position")
     .order("name");
 
-  // Stats.
   const { data: sessions } = await supabase
     .from("workout_sessions")
     .select("performed_at, workout_sets(weight, reps)");
@@ -124,13 +127,11 @@ export default async function DashboardPage() {
     (s) => new Date(s.performed_at).getTime() >= weekAgo,
   ).length;
 
-  // Streak: opeenvolgende dagen met een workout (incl. vandaag/gisteren).
   const days = new Set(
     allSessions.map((s) => new Date(s.performed_at).toISOString().slice(0, 10)),
   );
   let streak = 0;
   const cur = new Date();
-  // Sta toe dat de streak gisteren eindigt (vandaag nog niet getraind).
   if (!days.has(cur.toISOString().slice(0, 10))) cur.setDate(cur.getDate() - 1);
   while (days.has(cur.toISOString().slice(0, 10))) {
     streak += 1;
@@ -138,26 +139,39 @@ export default async function DashboardPage() {
   }
 
   const stats = [
-    { label: "Workouts", value: totalWorkouts },
-    { label: "Deze week", value: thisWeek },
-    { label: "Dag-streak", value: `${streak}🔥` },
-    { label: "Sets gelogd", value: totalSets },
-    { label: "Totaal volume", value: `${Math.round(totalVolume).toLocaleString("nl-NL")} kg` },
+    { label: t("dash.workouts"), value: totalWorkouts },
+    { label: t("dash.thisWeek"), value: thisWeek },
+    { label: t("dash.streak"), value: `${streak}🔥` },
+    { label: t("dash.setsLogged"), value: totalSets },
+    { label: t("dash.totalVolume"), value: `${Math.round(totalVolume).toLocaleString()} kg` },
   ];
+
+  const all = (routines as RoutineRow[]) ?? [];
+  const folderList = folders ?? [];
+  const sections = [
+    ...folderList.map((f) => ({
+      id: f.id as string | null,
+      name: f.name,
+      items: all.filter((r) => r.folder_id === f.id),
+      deletable: true,
+    })),
+    {
+      id: null as string | null,
+      name: t("dash.withoutFolder"),
+      items: all.filter((r) => !r.folder_id),
+      deletable: false,
+    },
+  ].filter((s) => s.items.length > 0 || s.deletable);
 
   return (
     <>
       <Header email={user?.email} />
       <main className="mx-auto max-w-5xl px-4 py-8">
         <div className="mb-6">
-          <h1 className="text-3xl font-bold">Mijn schema&apos;s</h1>
-          <p className="mt-1 text-muted">
-            Bouw wekelijkse trainingsschema&apos;s met push/pull/legs-dagen,
-            sets, reps, kg en automatische RIR.
-          </p>
+          <h1 className="text-3xl font-bold">{t("dash.title")}</h1>
+          <p className="mt-1 text-muted">{t("dash.subtitle")}</p>
         </div>
 
-        {/* Stats */}
         <div className="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-5">
           {stats.map((s) => (
             <div
@@ -170,110 +184,84 @@ export default async function DashboardPage() {
           ))}
         </div>
 
-        {/* Nieuw schema */}
         <form
           action={createRoutine}
-          className="mb-8 rounded-2xl border border-line bg-surface p-5"
+          className="mb-6 rounded-2xl border border-line bg-surface p-5"
         >
-          <h2 className="mb-3 font-semibold">Nieuw schema</h2>
+          <h2 className="mb-3 font-semibold">{t("dash.newSchema")}</h2>
           <div className="flex flex-col gap-3 sm:flex-row">
             <input
               name="name"
               required
-              placeholder="Bijv. Push / Pull / Legs"
+              placeholder={t("dash.namePh")}
               className="flex-1 rounded-xl border border-line bg-canvas px-3.5 py-2.5 placeholder:text-faint focus:border-primary focus:outline-none"
             />
             <input
               name="description"
-              placeholder="Korte omschrijving (optioneel)"
+              placeholder={t("dash.descPh")}
               className="flex-1 rounded-xl border border-line bg-canvas px-3.5 py-2.5 placeholder:text-faint focus:border-primary focus:outline-none"
             />
             <button
               type="submit"
-              className="rounded-xl bg-primary px-5 py-2.5 font-semibold text-white transition hover:opacity-90"
+              className="rounded-xl bg-primary px-5 py-2.5 font-semibold text-primary-fg transition hover:brightness-110"
             >
-              Aanmaken
+              {t("dash.create")}
             </button>
           </div>
         </form>
 
-        {/* Map aanmaken */}
         <form action={createFolder} className="mb-6 flex gap-2">
           <input
             name="name"
-            placeholder="Nieuwe map (bijv. 'Bulk 2026')"
+            placeholder={t("dash.folderPh")}
             className="flex-1 rounded-xl border border-line bg-canvas px-3.5 py-2 text-sm placeholder:text-faint focus:border-primary focus:outline-none"
           />
           <button
             type="submit"
             className="rounded-xl border border-line px-4 py-2 text-sm text-fg transition hover:border-primary hover:text-primary"
           >
-            + Map
+            {t("dash.addFolder")}
           </button>
         </form>
 
-        {/* Lijst */}
-        {!routines || routines.length === 0 ? (
+        {all.length === 0 ? (
           <div className="rounded-2xl border border-dashed border-line py-16 text-center text-faint">
-            Nog geen schema&apos;s. Maak je eerste schema hierboven aan! 💪
+            {t("dash.empty")}
           </div>
         ) : (
-          (() => {
-            const all = (routines as RoutineRow[]) ?? [];
-            const folderList = folders ?? [];
-            const sections = [
-              ...folderList.map((f) => ({
-                id: f.id,
-                name: f.name,
-                items: all.filter((r) => r.folder_id === f.id),
-                deletable: true,
-              })),
-              {
-                id: null as string | null,
-                name: "Zonder map",
-                items: all.filter((r) => !r.folder_id),
-                deletable: false,
-              },
-            ].filter((s) => s.items.length > 0 || s.deletable);
-
-            return (
-              <div className="space-y-8">
-                {sections.map((section) => (
-                  <div key={section.id ?? "none"}>
-                    <div className="mb-3 flex items-center gap-2">
-                      <h2 className="font-semibold text-muted">
-                        {section.id ? "📁 " : ""}
-                        {section.name}
-                      </h2>
-                      <span className="text-xs text-faint">
-                        {section.items.length}
-                      </span>
-                      {section.deletable && (
-                        <form action={deleteFolder} className="ml-auto">
-                          <input type="hidden" name="id" value={section.id!} />
-                          <button
-                            type="submit"
-                            className="text-xs text-faint transition hover:text-primary"
-                          >
-                            Map verwijderen
-                          </button>
-                        </form>
-                      )}
-                    </div>
-                    {section.items.length === 0 ? (
-                      <p className="text-sm text-faint">Leeg.</p>
-                    ) : (
-                      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                        {section.items.map((r) => (
-                          <RoutineCard key={r.id} r={r} folders={folderList} />
-                        ))}
-                      </div>
-                    )}
+          <div className="space-y-8">
+            {sections.map((section) => (
+              <div key={section.id ?? "none"}>
+                <div className="mb-3 flex items-center gap-2">
+                  <h2 className="font-semibold text-muted">
+                    {section.id ? "📁 " : ""}
+                    {section.name}
+                  </h2>
+                  <span className="text-xs text-faint">{section.items.length}</span>
+                  {section.deletable && (
+                    <form action={deleteFolder} className="ml-auto">
+                      <input type="hidden" name="id" value={section.id!} />
+                      <button
+                        type="submit"
+                        className="text-xs text-faint transition hover:text-danger"
+                      >
+                        {t("dash.deleteFolder")}
+                      </button>
+                    </form>
+                  )}
+                </div>
+                {section.items.length === 0 ? (
+                  <p className="text-sm text-faint">{t("dash.folderEmpty")}</p>
+                ) : (
+                  <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                    {section.items.map((r) => (
+                      <RoutineCard key={r.id} r={r} folders={folderList} t={t} />
+                    ))}
                   </div>
-                ))}
+                )}
               </div>
-            );
-          })()
+            ))}
+          </div>
         )}
       </main>
     </>

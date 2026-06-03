@@ -47,7 +47,7 @@ export async function duplicateRoutine(formData: FormData) {
 
   const { data: src } = await supabase
     .from("routines")
-    .select("name, description, folder_id, routine_days(name, day_type, day_order, routine_exercises(exercise_id, position, sets, reps, weight, one_rep_max, rir, notes, rest_seconds, superset_group))")
+    .select("name, description, folder_id, routine_days(name, day_type, day_order, routine_exercises(exercise_id, position, sets, reps, reps_max, weight, one_rep_max, rir, notes, rest_seconds, superset_group))")
     .eq("id", id)
     .single();
   if (!src) return;
@@ -273,14 +273,20 @@ export async function updateRoutineExercise(formData: FormData) {
   const routineId = String(formData.get("routine_id"));
 
   const sets = toInt(formData.get("sets"));
-  const reps = toInt(formData.get("reps"));
   const weight = toNum(formData.get("weight"));
   const oneRepMax = toNum(formData.get("one_rep_max"));
   const notes = String(formData.get("notes") ?? "").trim() || null;
 
-  // RIR server-side opnieuw berekenen zodat de opgeslagen waarde klopt.
-  let rir: number | null = null;
-  if (weight && reps && oneRepMax) {
+  // Reps kan een bereik zijn ("6-8"): ondergrens -> reps, bovengrens -> reps_max.
+  const repsRaw = String(formData.get("reps") ?? "");
+  const nums = repsRaw.match(/\d+/g)?.map((n) => parseInt(n, 10)) ?? [];
+  const reps = nums[0] ?? 10;
+  const repsMax = nums.length > 1 ? Math.max(nums[0], nums[1]) : null;
+
+  // Handmatige RIR heeft voorrang; leeg => automatisch berekenen.
+  const manualRir = toNum(formData.get("rir"));
+  let rir: number | null = manualRir;
+  if (rir == null && weight && reps && oneRepMax) {
     rir = computeRir({ weight, reps, oneRepMax })?.rir ?? null;
   }
 
@@ -288,7 +294,8 @@ export async function updateRoutineExercise(formData: FormData) {
     .from("routine_exercises")
     .update({
       sets: sets ?? 3,
-      reps: reps ?? 10,
+      reps,
+      reps_max: repsMax,
       weight,
       one_rep_max: oneRepMax,
       rir,

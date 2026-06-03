@@ -2,7 +2,10 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { cookies } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
+
+const YEAR = 60 * 60 * 24 * 365;
 
 export async function updateProfile(formData: FormData) {
   const supabase = await createClient();
@@ -12,12 +15,23 @@ export async function updateProfile(formData: FormData) {
   if (!user) redirect("/login");
 
   const displayName = String(formData.get("display_name") ?? "").trim() || null;
-  const weightUnit = String(formData.get("weight_unit") ?? "kg") === "lb" ? "lb" : "kg";
+  const weightUnit =
+    String(formData.get("weight_unit") ?? "kg") === "lb" ? "lb" : "kg";
 
-  // Upsert zodat het ook werkt als er nog geen profielrij is.
   await supabase
     .from("profiles")
     .upsert({ id: user.id, display_name: displayName, weight_unit: weightUnit });
 
+  // Cookie zodat de layout het snel kan lezen (zonder DB).
+  const store = await cookies();
+  store.set("unit", weightUnit, { path: "/", maxAge: YEAR });
+
+  revalidatePath("/", "layout");
+}
+
+export async function setLanguage(formData: FormData) {
+  const lang = String(formData.get("lang") ?? "nl") === "en" ? "en" : "nl";
+  const store = await cookies();
+  store.set("lang", lang, { path: "/", maxAge: YEAR });
   revalidatePath("/", "layout");
 }

@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { Header } from "@/components/Header";
 import { RoutineDays } from "@/components/RoutineDays";
 import { AddDayForm } from "@/components/AddDayForm";
+import { getT } from "@/lib/serverLang";
 import type { RoutineDayWithExercises } from "@/lib/types";
 
 export default async function RoutinePage({
@@ -16,6 +17,7 @@ export default async function RoutinePage({
   const {
     data: { user },
   } = await supabase.auth.getUser();
+  const { t } = await getT();
 
   const { data: routine } = await supabase
     .from("routines")
@@ -48,7 +50,7 @@ export default async function RoutinePage({
           href="/dashboard"
           className="text-sm text-muted hover:text-fg"
         >
-          ← Terug naar schema&apos;s
+          {t("routine.backToSchemas")}
         </Link>
         <div className="mb-6 mt-2">
           <h1 className="text-3xl font-bold">{routine.name}</h1>
@@ -58,9 +60,7 @@ export default async function RoutinePage({
         </div>
 
         {days.length > 0 && (
-          <p className="mb-3 text-xs text-faint">
-            Tip: sleep met het ⠿-handvat om dagen en oefeningen te herordenen.
-          </p>
+          <p className="mb-3 text-xs text-faint">{t("routine.tipReorder")}</p>
         )}
         <RoutineDays days={days} routineId={routine.id} />
 
