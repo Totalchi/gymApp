@@ -32,7 +32,7 @@ export function CustomExerciseForm({
     return (
       <button
         onClick={() => setOpen(true)}
-        className="mb-5 rounded-xl border border-slate-700 px-4 py-2.5 text-sm font-medium text-slate-200 transition hover:border-rose-500 hover:text-rose-400"
+        className="mb-5 rounded-xl border border-line px-4 py-2.5 text-sm font-medium text-fg transition hover:border-primary hover:text-primary"
       >
         + Eigen oefening maken
       </button>
@@ -43,14 +43,14 @@ export function CustomExerciseForm({
     <form
       ref={formRef}
       action={formAction}
-      className="mb-6 space-y-3 rounded-2xl border border-slate-800 bg-slate-900/50 p-5"
+      className="mb-6 space-y-3 rounded-2xl border border-line bg-surface p-5"
     >
       <div className="flex items-center justify-between">
         <h2 className="font-semibold">Eigen oefening</h2>
         <button
           type="button"
           onClick={() => setOpen(false)}
-          className="text-sm text-slate-400 hover:text-white"
+          className="text-sm text-muted hover:text-fg"
         >
           Annuleren
         </button>
@@ -58,19 +58,19 @@ export function CustomExerciseForm({
 
       <div className="grid gap-3 sm:grid-cols-2">
         <label className="block">
-          <span className="mb-1 block text-sm text-slate-300">Naam *</span>
+          <span className="mb-1 block text-sm text-muted">Naam *</span>
           <input
             name="name"
             required
             placeholder="Bijv. Kabel-crossover"
-            className="w-full rounded-xl border border-slate-700 bg-slate-950 px-3.5 py-2.5 focus:border-rose-500 focus:outline-none"
+            className="w-full rounded-xl border border-line bg-canvas px-3.5 py-2.5 focus:border-primary focus:outline-none"
           />
         </label>
         <label className="block">
-          <span className="mb-1 block text-sm text-slate-300">Spiergroep</span>
+          <span className="mb-1 block text-sm text-muted">Spiergroep</span>
           <select
             name="primary_muscle"
-            className="w-full rounded-xl border border-slate-700 bg-slate-950 px-3.5 py-2.5 capitalize focus:border-rose-500 focus:outline-none"
+            className="w-full rounded-xl border border-line bg-canvas px-3.5 py-2.5 capitalize focus:border-primary focus:outline-none"
           >
             <option value="">—</option>
             {MUSCLE_GROUPS.map((m) => (
@@ -83,40 +83,40 @@ export function CustomExerciseForm({
       </div>
 
       <label className="block">
-        <span className="mb-1 block text-sm text-slate-300">Materiaal</span>
+        <span className="mb-1 block text-sm text-muted">Materiaal</span>
         <input
           name="equipment"
           placeholder="Bijv. kabel, dumbbell, machine"
-          className="w-full rounded-xl border border-slate-700 bg-slate-950 px-3.5 py-2.5 focus:border-rose-500 focus:outline-none"
+          className="w-full rounded-xl border border-line bg-canvas px-3.5 py-2.5 focus:border-primary focus:outline-none"
         />
       </label>
 
       <label className="block">
-        <span className="mb-1 block text-sm text-slate-300">
+        <span className="mb-1 block text-sm text-muted">
           Uitleg (één stap per regel)
         </span>
         <textarea
           name="instructions"
           rows={3}
           placeholder={"Ga rechtop staan...\nTrek de kabels naar elkaar toe..."}
-          className="w-full rounded-xl border border-slate-700 bg-slate-950 px-3.5 py-2.5 focus:border-rose-500 focus:outline-none"
+          className="w-full rounded-xl border border-line bg-canvas px-3.5 py-2.5 focus:border-primary focus:outline-none"
         />
       </label>
 
       <label className="block">
-        <span className="mb-1 block text-sm text-slate-300">
+        <span className="mb-1 block text-sm text-muted">
           Foto (optioneel, max 5 MB)
         </span>
         <input
           name="image"
           type="file"
           accept="image/*"
-          className="block w-full text-sm text-slate-400 file:mr-3 file:rounded-lg file:border-0 file:bg-slate-800 file:px-3 file:py-2 file:text-sm file:text-slate-200 hover:file:bg-slate-700"
+          className="block w-full text-sm text-muted file:mr-3 file:rounded-lg file:border-0 file:bg-surface2 file:px-3 file:py-2 file:text-sm file:text-fg hover:file:bg-surface2"
         />
       </label>
 
       {state.error && (
-        <p className="rounded-lg bg-rose-500/10 px-3 py-2 text-sm text-rose-300 ring-1 ring-rose-500/30">
+        <p className="rounded-lg bg-danger/10 px-3 py-2 text-sm text-danger ring-1 ring-danger/30">
           {state.error}
         </p>
       )}
@@ -124,7 +124,7 @@ export function CustomExerciseForm({
       <button
         type="submit"
         disabled={pending}
-        className="rounded-xl bg-gradient-to-r from-rose-500 to-orange-500 px-5 py-2.5 font-semibold text-white transition hover:opacity-90 disabled:opacity-50"
+        className="rounded-xl bg-primary px-5 py-2.5 font-semibold text-white transition hover:opacity-90 disabled:opacity-50"
       >
         {pending ? "Opslaan..." : "Oefening opslaan"}
       </button>

@@ -14,13 +14,13 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
   return (
     <div className="w-full max-w-sm">
       <div className="mb-8 text-center">
-        <div className="mb-3 inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-rose-500 to-orange-500 text-2xl">
+        <div className="mb-3 inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-primary text-2xl">
           🏋️
         </div>
         <h1 className="text-2xl font-bold">
           {mode === "login" ? "Welkom terug" : "Account aanmaken"}
         </h1>
-        <p className="mt-1 text-sm text-slate-400">
+        <p className="mt-1 text-sm text-muted">
           {mode === "login"
             ? "Log in om je schema's te bekijken."
             : "Maak een account om je schema's op te slaan."}
@@ -55,7 +55,7 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
         />
 
         {state.error && (
-          <p className="rounded-lg bg-rose-500/10 px-3 py-2 text-sm text-rose-300 ring-1 ring-rose-500/30">
+          <p className="rounded-lg bg-danger/10 px-3 py-2 text-sm text-danger ring-1 ring-danger/30">
             {state.error}
           </p>
         )}
@@ -68,7 +68,7 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
         <button
           type="submit"
           disabled={pending}
-          className="w-full rounded-xl bg-gradient-to-r from-rose-500 to-orange-500 px-4 py-2.5 font-semibold text-white shadow-lg shadow-rose-500/20 transition hover:opacity-90 disabled:opacity-50"
+          className="w-full rounded-xl bg-primary px-4 py-2.5 font-semibold text-white shadow-lg  transition hover:opacity-90 disabled:opacity-50"
         >
           {pending
             ? "Bezig..."
@@ -78,18 +78,18 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
         </button>
       </form>
 
-      <p className="mt-6 text-center text-sm text-slate-400">
+      <p className="mt-6 text-center text-sm text-muted">
         {mode === "login" ? (
           <>
             Nog geen account?{" "}
-            <Link href="/register" className="font-medium text-rose-400 hover:underline">
+            <Link href="/register" className="font-medium text-primary hover:underline">
               Registreren
             </Link>
           </>
         ) : (
           <>
             Heb je al een account?{" "}
-            <Link href="/login" className="font-medium text-rose-400 hover:underline">
+            <Link href="/login" className="font-medium text-primary hover:underline">
               Inloggen
             </Link>
           </>
@@ -105,12 +105,12 @@ function Field({
 }: { label: string } & React.InputHTMLAttributes<HTMLInputElement>) {
   return (
     <label className="block">
-      <span className="mb-1.5 block text-sm font-medium text-slate-300">
+      <span className="mb-1.5 block text-sm font-medium text-muted">
         {label}
       </span>
       <input
         {...props}
-        className="w-full rounded-xl border border-slate-700 bg-slate-900 px-3.5 py-2.5 text-slate-100 placeholder:text-slate-500 focus:border-rose-500 focus:outline-none focus:ring-1 focus:ring-rose-500"
+        className="w-full rounded-xl border border-line bg-surface px-3.5 py-2.5 text-fg placeholder:text-faint focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
       />
     </label>
   );

@@ -108,12 +108,12 @@ export default async function ExerciseDetailPage({
     <>
       <Header email={user?.email} />
       <main className="mx-auto max-w-3xl px-4 py-8">
-        <Link href="/exercises" className="text-sm text-slate-400 hover:text-white">
+        <Link href="/exercises" className="text-sm text-muted hover:text-fg">
           ← Oefeningen
         </Link>
 
         <div className="mb-6 mt-2 flex items-center gap-4">
-          <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-2xl bg-white ring-1 ring-slate-700">
+          <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-2xl bg-white ring-1 ring-line">
             {ex.image_urls?.[0] ? (
               <Image src={ex.image_urls[0]} alt={ex.name} fill sizes="80px" className="object-cover" />
             ) : (
@@ -122,7 +122,7 @@ export default async function ExerciseDetailPage({
           </div>
           <div>
             <h1 className="text-2xl font-bold">{ex.name}</h1>
-            <p className="text-sm capitalize text-slate-400">
+            <p className="text-sm capitalize text-muted">
               {ex.primary_muscles.join(", ")}
               {ex.equipment ? ` · ${ex.equipment}` : ""}
             </p>
@@ -133,8 +133,8 @@ export default async function ExerciseDetailPage({
         <h2 className="mb-2 font-semibold">Persoonlijke records 🏆</h2>
         <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-3">
           {records.map((r) => (
-            <div key={r.label} className="rounded-2xl border border-slate-800 bg-slate-900/50 p-4">
-              <p className="text-xs text-slate-500">{r.label}</p>
+            <div key={r.label} className="rounded-2xl border border-line bg-surface p-4">
+              <p className="text-xs text-faint">{r.label}</p>
               <p className="mt-1 text-lg font-bold tabular-nums">{r.value}</p>
             </div>
           ))}
@@ -142,20 +142,20 @@ export default async function ExerciseDetailPage({
 
         {/* Krachtniveau */}
         {level && (
-          <section className="mb-6 rounded-2xl border border-slate-800 bg-slate-900/50 p-5">
+          <section className="mb-6 rounded-2xl border border-line bg-surface p-5">
             <div className="mb-2 flex items-center justify-between">
               <h2 className="font-semibold">Krachtniveau</h2>
-              <span className="rounded-full bg-rose-500/15 px-3 py-1 text-sm font-semibold text-rose-300 ring-1 ring-rose-500/30">
+              <span className="rounded-full bg-primary/15 px-3 py-1 text-sm font-semibold text-primary ring-1 ring-primary/30">
                 {level.label}
               </span>
             </div>
-            <div className="h-2.5 w-full overflow-hidden rounded-full bg-slate-800">
+            <div className="h-2.5 w-full overflow-hidden rounded-full bg-surface2">
               <div
-                className="h-full rounded-full bg-gradient-to-r from-rose-500 to-orange-500"
+                className="h-full rounded-full bg-primary"
                 style={{ width: `${Math.round(level.progress * 100)}%` }}
               />
             </div>
-            <p className="mt-2 text-xs text-slate-500">
+            <p className="mt-2 text-xs text-faint">
               {level.ratio.toFixed(2)}× lichaamsgewicht · gebaseerd op je geschat
               1RM en je recentste gewicht.
             </p>
@@ -164,16 +164,16 @@ export default async function ExerciseDetailPage({
 
         {/* Set-records per rep */}
         {Object.keys(setRecords).length > 0 && (
-          <section className="mb-6 rounded-2xl border border-slate-800 bg-slate-900/50 p-5">
+          <section className="mb-6 rounded-2xl border border-line bg-surface p-5">
             <h2 className="mb-3 font-semibold">Set-records (zwaarste per reps)</h2>
             <div className="grid grid-cols-3 gap-2 sm:grid-cols-6">
               {Object.entries(setRecords)
                 .map(([reps, w]) => ({ reps: Number(reps), w }))
                 .sort((a, b) => a.reps - b.reps)
                 .map(({ reps, w }) => (
-                  <div key={reps} className="rounded-xl bg-slate-800/60 p-2.5 text-center">
+                  <div key={reps} className="rounded-xl bg-surface2/60 p-2.5 text-center">
                     <p className="text-sm font-bold tabular-nums">{w} kg</p>
-                    <p className="text-[11px] text-slate-500">{reps} reps</p>
+                    <p className="text-[11px] text-faint">{reps} reps</p>
                   </div>
                 ))}
             </div>
@@ -182,7 +182,7 @@ export default async function ExerciseDetailPage({
 
         {/* Grafiek */}
         {chart.length >= 2 && (
-          <section className="mb-6 rounded-2xl border border-slate-800 bg-slate-900/50 p-5">
+          <section className="mb-6 rounded-2xl border border-line bg-surface p-5">
             <h2 className="mb-2 font-semibold">Geschat 1RM over tijd</h2>
             <LineChart points={chart} unit="" />
           </section>
@@ -191,7 +191,7 @@ export default async function ExerciseDetailPage({
         {/* Historie */}
         <h2 className="mb-2 font-semibold">Historie</h2>
         {sessions.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-slate-800 py-12 text-center text-slate-500">
+          <div className="rounded-2xl border border-dashed border-line py-12 text-center text-faint">
             Nog geen gelogde sets voor deze oefening.
           </div>
         ) : (
@@ -199,7 +199,7 @@ export default async function ExerciseDetailPage({
             {sessions.map((s, i) => (
               <div
                 key={i}
-                className="flex items-center justify-between rounded-xl border border-slate-800 bg-slate-900/50 px-4 py-3"
+                className="flex items-center justify-between rounded-xl border border-line bg-surface px-4 py-3"
               >
                 <span className="text-sm">
                   {new Date(s.date).toLocaleDateString("nl-NL", {
@@ -209,7 +209,7 @@ export default async function ExerciseDetailPage({
                     year: "numeric",
                   })}
                 </span>
-                <span className="text-sm text-slate-400">
+                <span className="text-sm text-muted">
                   {Math.round(s.volume).toLocaleString("nl-NL")} kg volume
                 </span>
               </div>
@@ -221,7 +221,7 @@ export default async function ExerciseDetailPage({
         {ex.instructions.length > 0 && (
           <section className="mt-6">
             <h2 className="mb-2 font-semibold">Uitleg</h2>
-            <ol className="list-decimal space-y-2 pl-5 text-sm text-slate-300">
+            <ol className="list-decimal space-y-2 pl-5 text-sm text-muted">
               {ex.instructions.map((step, i) => (
                 <li key={i}>{step}</li>
               ))}

@@ -28,15 +28,15 @@ function RoutineCard({
 }) {
   const dayTypes = [...new Set(r.routine_days.map((d) => d.day_type))];
   return (
-    <div className="group relative flex flex-col rounded-2xl border border-slate-800 bg-slate-900/50 p-5 transition hover:border-slate-700">
+    <div className="group relative flex flex-col rounded-2xl border border-line bg-surface p-5 transition hover:border-line">
       <Link href={`/routines/${r.id}`} className="flex-1">
-        <h3 className="text-lg font-semibold group-hover:text-rose-400">{r.name}</h3>
+        <h3 className="text-lg font-semibold group-hover:text-primary">{r.name}</h3>
         {r.description && (
-          <p className="mt-1 line-clamp-2 text-sm text-slate-400">{r.description}</p>
+          <p className="mt-1 line-clamp-2 text-sm text-muted">{r.description}</p>
         )}
         <div className="mt-3 flex flex-wrap gap-1.5">
           {dayTypes.length === 0 ? (
-            <span className="text-xs text-slate-500">Nog geen dagen</span>
+            <span className="text-xs text-faint">Nog geen dagen</span>
           ) : (
             dayTypes.map((t) => (
               <span
@@ -50,10 +50,10 @@ function RoutineCard({
         </div>
       </Link>
 
-      <div className="mt-4 flex flex-wrap items-center gap-3 border-t border-slate-800 pt-3 text-xs">
+      <div className="mt-4 flex flex-wrap items-center gap-3 border-t border-line pt-3 text-xs">
         <form action={duplicateRoutine}>
           <input type="hidden" name="id" value={r.id} />
-          <button type="submit" className="text-slate-400 transition hover:text-rose-400">
+          <button type="submit" className="text-muted transition hover:text-primary">
             Dupliceren
           </button>
         </form>
@@ -63,7 +63,7 @@ function RoutineCard({
             <select
               name="folder_id"
               defaultValue={r.folder_id ?? ""}
-              className="rounded-md border border-slate-700 bg-slate-950 px-1.5 py-1 text-xs text-slate-300 focus:outline-none"
+              className="rounded-md border border-line bg-canvas px-1.5 py-1 text-xs text-muted focus:outline-none"
             >
               <option value="">Geen map</option>
               {folders.map((f) => (
@@ -72,14 +72,14 @@ function RoutineCard({
                 </option>
               ))}
             </select>
-            <button type="submit" className="text-slate-400 transition hover:text-rose-400">
+            <button type="submit" className="text-muted transition hover:text-primary">
               ↦
             </button>
           </form>
         )}
         <form action={deleteRoutine} className="ml-auto">
           <input type="hidden" name="id" value={r.id} />
-          <button type="submit" className="text-slate-500 transition hover:text-rose-400">
+          <button type="submit" className="text-faint transition hover:text-primary">
             Verwijderen
           </button>
         </form>
@@ -151,7 +151,7 @@ export default async function DashboardPage() {
       <main className="mx-auto max-w-5xl px-4 py-8">
         <div className="mb-6">
           <h1 className="text-3xl font-bold">Mijn schema&apos;s</h1>
-          <p className="mt-1 text-slate-400">
+          <p className="mt-1 text-muted">
             Bouw wekelijkse trainingsschema&apos;s met push/pull/legs-dagen,
             sets, reps, kg en automatische RIR.
           </p>
@@ -162,10 +162,10 @@ export default async function DashboardPage() {
           {stats.map((s) => (
             <div
               key={s.label}
-              className="rounded-2xl border border-slate-800 bg-slate-900/50 p-4 text-center"
+              className="rounded-2xl border border-line bg-surface p-4 text-center"
             >
               <p className="text-xl font-bold tabular-nums">{s.value}</p>
-              <p className="mt-0.5 text-xs text-slate-500">{s.label}</p>
+              <p className="mt-0.5 text-xs text-faint">{s.label}</p>
             </div>
           ))}
         </div>
@@ -173,7 +173,7 @@ export default async function DashboardPage() {
         {/* Nieuw schema */}
         <form
           action={createRoutine}
-          className="mb-8 rounded-2xl border border-slate-800 bg-slate-900/50 p-5"
+          className="mb-8 rounded-2xl border border-line bg-surface p-5"
         >
           <h2 className="mb-3 font-semibold">Nieuw schema</h2>
           <div className="flex flex-col gap-3 sm:flex-row">
@@ -181,16 +181,16 @@ export default async function DashboardPage() {
               name="name"
               required
               placeholder="Bijv. Push / Pull / Legs"
-              className="flex-1 rounded-xl border border-slate-700 bg-slate-950 px-3.5 py-2.5 placeholder:text-slate-500 focus:border-rose-500 focus:outline-none"
+              className="flex-1 rounded-xl border border-line bg-canvas px-3.5 py-2.5 placeholder:text-faint focus:border-primary focus:outline-none"
             />
             <input
               name="description"
               placeholder="Korte omschrijving (optioneel)"
-              className="flex-1 rounded-xl border border-slate-700 bg-slate-950 px-3.5 py-2.5 placeholder:text-slate-500 focus:border-rose-500 focus:outline-none"
+              className="flex-1 rounded-xl border border-line bg-canvas px-3.5 py-2.5 placeholder:text-faint focus:border-primary focus:outline-none"
             />
             <button
               type="submit"
-              className="rounded-xl bg-gradient-to-r from-rose-500 to-orange-500 px-5 py-2.5 font-semibold text-white transition hover:opacity-90"
+              className="rounded-xl bg-primary px-5 py-2.5 font-semibold text-white transition hover:opacity-90"
             >
               Aanmaken
             </button>
@@ -202,11 +202,11 @@ export default async function DashboardPage() {
           <input
             name="name"
             placeholder="Nieuwe map (bijv. 'Bulk 2026')"
-            className="flex-1 rounded-xl border border-slate-800 bg-slate-950 px-3.5 py-2 text-sm placeholder:text-slate-600 focus:border-rose-500 focus:outline-none"
+            className="flex-1 rounded-xl border border-line bg-canvas px-3.5 py-2 text-sm placeholder:text-faint focus:border-primary focus:outline-none"
           />
           <button
             type="submit"
-            className="rounded-xl border border-slate-700 px-4 py-2 text-sm text-slate-200 transition hover:border-rose-500 hover:text-rose-400"
+            className="rounded-xl border border-line px-4 py-2 text-sm text-fg transition hover:border-primary hover:text-primary"
           >
             + Map
           </button>
@@ -214,7 +214,7 @@ export default async function DashboardPage() {
 
         {/* Lijst */}
         {!routines || routines.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-slate-800 py-16 text-center text-slate-500">
+          <div className="rounded-2xl border border-dashed border-line py-16 text-center text-faint">
             Nog geen schema&apos;s. Maak je eerste schema hierboven aan! 💪
           </div>
         ) : (
@@ -241,11 +241,11 @@ export default async function DashboardPage() {
                 {sections.map((section) => (
                   <div key={section.id ?? "none"}>
                     <div className="mb-3 flex items-center gap-2">
-                      <h2 className="font-semibold text-slate-300">
+                      <h2 className="font-semibold text-muted">
                         {section.id ? "📁 " : ""}
                         {section.name}
                       </h2>
-                      <span className="text-xs text-slate-600">
+                      <span className="text-xs text-faint">
                         {section.items.length}
                       </span>
                       {section.deletable && (
@@ -253,7 +253,7 @@ export default async function DashboardPage() {
                           <input type="hidden" name="id" value={section.id!} />
                           <button
                             type="submit"
-                            className="text-xs text-slate-600 transition hover:text-rose-400"
+                            className="text-xs text-faint transition hover:text-primary"
                           >
                             Map verwijderen
                           </button>
@@ -261,7 +261,7 @@ export default async function DashboardPage() {
                       )}
                     </div>
                     {section.items.length === 0 ? (
-                      <p className="text-sm text-slate-600">Leeg.</p>
+                      <p className="text-sm text-faint">Leeg.</p>
                     ) : (
                       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                         {section.items.map((r) => (

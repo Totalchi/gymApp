@@ -21,7 +21,7 @@ export function LineChart({
 }) {
   if (points.length === 0) {
     return (
-      <div className="flex h-40 items-center justify-center text-sm text-slate-500">
+      <div className="flex h-40 items-center justify-center text-sm text-faint">
         Nog geen data.
       </div>
     );

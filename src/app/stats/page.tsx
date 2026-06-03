@@ -64,7 +64,7 @@ export default async function StatsPage() {
   }
 
   const cellColor = (v: number) => {
-    if (v <= 0) return "bg-slate-800";
+    if (v <= 0) return "bg-surface2";
     if (v < 2000) return "bg-emerald-900";
     if (v < 5000) return "bg-emerald-700";
     if (v < 9000) return "bg-emerald-500";
@@ -79,14 +79,14 @@ export default async function StatsPage() {
           <h1 className="text-3xl font-bold">Statistieken</h1>
           <a
             href="/api/export"
-            className="rounded-lg border border-slate-700 px-3 py-1.5 text-sm text-slate-200 transition hover:border-rose-500 hover:text-rose-400"
+            className="rounded-lg border border-line px-3 py-1.5 text-sm text-fg transition hover:border-primary hover:text-primary"
           >
             ⬇ Export CSV
           </a>
         </div>
 
         {/* Kalender */}
-        <section className="mb-6 rounded-2xl border border-slate-800 bg-slate-900/50 p-5">
+        <section className="mb-6 rounded-2xl border border-line bg-surface p-5">
           <h2 className="mb-3 font-semibold">Trainingskalender</h2>
           <div className="flex gap-1 overflow-x-auto pb-1">
             {columns.map((col, i) => (
@@ -101,9 +101,9 @@ export default async function StatsPage() {
               </div>
             ))}
           </div>
-          <div className="mt-3 flex items-center gap-2 text-xs text-slate-500">
+          <div className="mt-3 flex items-center gap-2 text-xs text-faint">
             <span>minder</span>
-            <span className="h-3 w-3 rounded-sm bg-slate-800" />
+            <span className="h-3 w-3 rounded-sm bg-surface2" />
             <span className="h-3 w-3 rounded-sm bg-emerald-900" />
             <span className="h-3 w-3 rounded-sm bg-emerald-700" />
             <span className="h-3 w-3 rounded-sm bg-emerald-500" />
@@ -113,12 +113,12 @@ export default async function StatsPage() {
         </section>
 
         {/* Spiergroep-verdeling */}
-        <section className="rounded-2xl border border-slate-800 bg-slate-900/50 p-5">
+        <section className="rounded-2xl border border-line bg-surface p-5">
           <h2 className="mb-3 font-semibold">Volume per spiergroep</h2>
           {muscles.length === 0 ? (
-            <p className="text-sm text-slate-500">
+            <p className="text-sm text-faint">
               Nog geen gelogde sets.{" "}
-              <Link href="/dashboard" className="text-rose-400 hover:underline">
+              <Link href="/dashboard" className="text-primary hover:underline">
                 Start een workout
               </Link>
               .
@@ -127,16 +127,16 @@ export default async function StatsPage() {
             <div className="space-y-2">
               {muscles.map(([muscle, vol]) => (
                 <div key={muscle} className="flex items-center gap-3">
-                  <span className="w-24 shrink-0 text-right text-xs capitalize text-slate-400">
+                  <span className="w-24 shrink-0 text-right text-xs capitalize text-muted">
                     {muscle}
                   </span>
-                  <div className="h-4 flex-1 overflow-hidden rounded-full bg-slate-800">
+                  <div className="h-4 flex-1 overflow-hidden rounded-full bg-surface2">
                     <div
-                      className="h-full rounded-full bg-gradient-to-r from-rose-500 to-orange-500"
+                      className="h-full rounded-full bg-primary"
                       style={{ width: `${Math.max(3, (vol / maxMuscle) * 100)}%` }}
                     />
                   </div>
-                  <span className="w-16 shrink-0 text-right text-xs tabular-nums text-slate-500">
+                  <span className="w-16 shrink-0 text-right text-xs tabular-nums text-faint">
                     {Math.round(vol / 1000)}k
                   </span>
                 </div>

@@ -1,7 +1,8 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { createClient } from "@/lib/supabase/server";
 import { UnitProvider } from "@/components/UnitProvider";
+import { BottomNav } from "@/components/BottomNav";
 import type { WeightUnit } from "@/lib/units";
 
 export const metadata: Metadata = {
@@ -9,6 +10,16 @@ export const metadata: Metadata = {
   description:
     "Maak eenvoudig wekelijkse trainingsschema's met push/pull/legs-dagen, sets, reps, kg en automatische RIR-berekening.",
 };
+
+export const viewport: Viewport = {
+  themeColor: "#0a0c11",
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+};
+
+// Zet het thema vóór de eerste paint (voorkomt flikkering).
+const themeScript = `(function(){try{var t=localStorage.getItem('theme');if(t==='light')document.documentElement.classList.add('light');}catch(e){}})();`;
 
 export default async function RootLayout({
   children,
@@ -31,8 +42,20 @@ export default async function RootLayout({
 
   return (
     <html lang="nl">
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+      </head>
       <body className="min-h-screen">
-        <UnitProvider unit={unit}>{children}</UnitProvider>
+        <UnitProvider unit={unit}>
+          {user ? (
+            <>
+              <div className="pb-20 md:pb-0">{children}</div>
+              <BottomNav />
+            </>
+          ) : (
+            children
+          )}
+        </UnitProvider>
       </body>
     </html>
   );

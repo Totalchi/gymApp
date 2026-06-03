@@ -22,14 +22,14 @@ export default async function HistoryPage() {
           <h1 className="text-3xl font-bold">Geschiedenis</h1>
           <Link
             href="/progress"
-            className="rounded-lg border border-slate-700 px-3 py-1.5 text-sm text-slate-200 transition hover:border-rose-500 hover:text-rose-400"
+            className="rounded-lg border border-line px-3 py-1.5 text-sm text-fg transition hover:border-primary hover:text-primary"
           >
             📈 Voortgang
           </Link>
         </div>
 
         {!sessions || sessions.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-slate-800 py-16 text-center text-slate-500">
+          <div className="rounded-2xl border border-dashed border-line py-16 text-center text-faint">
             Nog geen workouts gelogd. Start er één vanaf een dag in je schema! 💪
           </div>
         ) : (
@@ -52,12 +52,12 @@ export default async function HistoryPage() {
               return (
                 <div
                   key={s.id}
-                  className="flex items-center justify-between gap-3 rounded-2xl border border-slate-800 bg-slate-900/50 p-4"
+                  className="flex items-center justify-between gap-3 rounded-2xl border border-line bg-surface p-4"
                 >
                   <Link href={`/workout/${s.id}`} className="min-w-0 flex-1">
                     <p className="font-semibold">{s.day_name ?? "Workout"}</p>
-                    <p className="text-sm text-slate-400">{date}</p>
-                    <p className="mt-1 text-xs text-slate-500">
+                    <p className="text-sm text-muted">{date}</p>
+                    <p className="mt-1 text-xs text-faint">
                       {sets.length} sets · {Math.round(volume).toLocaleString("nl-NL")} kg volume
                       {s.duration_seconds
                         ? ` · ⏱ ${Math.round(s.duration_seconds / 60)} min`
@@ -68,7 +68,7 @@ export default async function HistoryPage() {
                     <input type="hidden" name="id" value={s.id} />
                     <button
                       type="submit"
-                      className="text-xs text-slate-500 transition hover:text-rose-400"
+                      className="text-xs text-faint transition hover:text-primary"
                     >
                       Verwijderen
                     </button>

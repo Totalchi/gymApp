@@ -45,7 +45,7 @@ export function ExerciseBrowser({ refreshKey = 0 }: { refreshKey?: number }) {
         value={query}
         onChange={(e) => setQuery(e.target.value)}
         placeholder="Zoek een oefening..."
-        className="mb-3 w-full rounded-xl border border-slate-700 bg-slate-900 px-3.5 py-2.5 placeholder:text-slate-500 focus:border-rose-500 focus:outline-none"
+        className="mb-3 w-full rounded-xl border border-line bg-surface px-3.5 py-2.5 placeholder:text-faint focus:border-primary focus:outline-none"
       />
       <div className="mb-5 flex flex-wrap gap-1.5">
         <Chip active={muscle === ""} onClick={() => setMuscle("")}>
@@ -59,14 +59,14 @@ export function ExerciseBrowser({ refreshKey = 0 }: { refreshKey?: number }) {
       </div>
 
       {loading ? (
-        <p className="py-10 text-center text-slate-500">Laden...</p>
+        <p className="py-10 text-center text-faint">Laden...</p>
       ) : (
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
           {results.map((ex) => (
             <button
               key={ex.id}
               onClick={() => setSelected(ex)}
-              className="group overflow-hidden rounded-2xl border border-slate-800 bg-slate-900/50 text-left transition hover:border-slate-600"
+              className="group overflow-hidden rounded-2xl border border-line bg-surface text-left transition hover:border-muted"
             >
               <div className="relative aspect-square w-full bg-white">
                 {ex.image_urls?.[0] ? (
@@ -83,14 +83,14 @@ export function ExerciseBrowser({ refreshKey = 0 }: { refreshKey?: number }) {
                   </div>
                 )}
                 {ex.owner_id && (
-                  <span className="absolute left-2 top-2 rounded-full bg-rose-500/90 px-2 py-0.5 text-[10px] font-semibold text-white">
+                  <span className="absolute left-2 top-2 rounded-full bg-primary px-2 py-0.5 text-[10px] font-semibold text-white">
                     Eigen
                   </span>
                 )}
               </div>
               <div className="p-3">
                 <p className="truncate text-sm font-medium">{ex.name}</p>
-                <p className="truncate text-xs capitalize text-slate-500">
+                <p className="truncate text-xs capitalize text-faint">
                   {ex.primary_muscles.join(", ")}
                 </p>
               </div>
@@ -119,7 +119,7 @@ function ExerciseModal({
       onClick={onClose}
     >
       <div
-        className="max-h-[85vh] w-full max-w-lg overflow-y-auto rounded-2xl border border-slate-700 bg-slate-900"
+        className="max-h-[85vh] w-full max-w-lg overflow-y-auto rounded-2xl border border-line bg-surface"
         onClick={(e) => e.stopPropagation()}
       >
         {exercise.image_urls.length > 0 ? (
@@ -137,7 +137,7 @@ function ExerciseModal({
             ))}
           </div>
         ) : (
-          <div className="flex h-32 items-center justify-center bg-slate-800 text-4xl">
+          <div className="flex h-32 items-center justify-center bg-surface2 text-4xl">
             🏋️
           </div>
         )}
@@ -146,7 +146,7 @@ function ExerciseModal({
             <h2 className="text-xl font-bold">{exercise.name}</h2>
             <button
               onClick={onClose}
-              className="rounded-lg px-3 py-1 text-sm text-slate-400 hover:bg-slate-800"
+              className="rounded-lg px-3 py-1 text-sm text-muted hover:bg-surface2"
             >
               Sluiten
             </button>
@@ -162,14 +162,14 @@ function ExerciseModal({
               .map((tag) => (
                 <span
                   key={tag}
-                  className="rounded-full bg-slate-800 px-2.5 py-1 capitalize text-slate-300"
+                  className="rounded-full bg-surface2 px-2.5 py-1 capitalize text-muted"
                 >
                   {tag}
                 </span>
               ))}
           </div>
           {exercise.instructions.length > 0 && (
-            <ol className="list-decimal space-y-2 pl-5 text-sm text-slate-300">
+            <ol className="list-decimal space-y-2 pl-5 text-sm text-muted">
               {exercise.instructions.map((step, i) => (
                 <li key={i}>{step}</li>
               ))}
@@ -181,7 +181,7 @@ function ExerciseModal({
               <button
                 type="submit"
                 onClick={onClose}
-                className="text-sm text-slate-500 transition hover:text-rose-400"
+                className="text-sm text-faint transition hover:text-primary"
               >
                 Eigen oefening verwijderen
               </button>
@@ -207,8 +207,8 @@ function Chip({
       onClick={onClick}
       className={`rounded-full px-2.5 py-1 text-xs capitalize ring-1 transition ${
         active
-          ? "bg-rose-500 text-white ring-rose-500"
-          : "bg-slate-900 text-slate-300 ring-slate-700 hover:ring-slate-500"
+          ? "bg-primary text-white ring-primary"
+          : "bg-surface text-muted ring-line hover:ring-muted"
       }`}
     >
       {children}

@@ -96,7 +96,7 @@ export default async function WorkoutDonePage({
       <main className="mx-auto max-w-lg px-4 py-10 text-center">
         <div className="mb-3 text-6xl">🎉</div>
         <h1 className="text-3xl font-bold">Workout klaar!</h1>
-        <p className="mt-1 text-slate-400">{session.day_name}</p>
+        <p className="mt-1 text-muted">{session.day_name}</p>
 
         <div className="mt-6 grid grid-cols-3 gap-3">
           {[
@@ -104,9 +104,9 @@ export default async function WorkoutDonePage({
             { label: "Sets", value: setCount },
             { label: "Volume", value: `${Math.round(volume).toLocaleString("nl-NL")} kg` },
           ].map((s) => (
-            <div key={s.label} className="rounded-2xl border border-slate-800 bg-slate-900/50 p-4">
+            <div key={s.label} className="rounded-2xl border border-line bg-surface p-4">
               <p className="text-xl font-bold tabular-nums">{s.value}</p>
-              <p className="mt-0.5 text-xs text-slate-500">{s.label}</p>
+              <p className="mt-0.5 text-xs text-faint">{s.label}</p>
             </div>
           ))}
         </div>
@@ -134,13 +134,13 @@ export default async function WorkoutDonePage({
         <div className="mt-8 flex justify-center gap-3">
           <Link
             href="/history"
-            className="rounded-xl bg-gradient-to-r from-rose-500 to-orange-500 px-6 py-2.5 font-semibold text-white transition hover:opacity-90"
+            className="rounded-xl bg-primary px-6 py-2.5 font-semibold text-white transition hover:opacity-90"
           >
             Naar geschiedenis
           </Link>
           <Link
             href="/dashboard"
-            className="rounded-xl border border-slate-700 px-6 py-2.5 font-medium text-slate-200 transition hover:bg-slate-800"
+            className="rounded-xl border border-line px-6 py-2.5 font-medium text-fg transition hover:bg-surface2"
           >
             Dashboard
           </Link>

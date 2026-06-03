@@ -55,16 +55,16 @@ export function ExercisePicker({
       onClick={onClose}
     >
       <div
-        className="flex max-h-[85vh] w-full max-w-2xl flex-col overflow-hidden rounded-2xl border border-slate-700 bg-slate-900"
+        className="flex max-h-[85vh] w-full max-w-2xl flex-col overflow-hidden rounded-2xl border border-line bg-surface"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header + filters */}
-        <div className="border-b border-slate-800 p-4">
+        <div className="border-b border-line p-4">
           <div className="mb-3 flex items-center justify-between">
             <h3 className="text-lg font-semibold">Oefening kiezen</h3>
             <button
               onClick={onClose}
-              className="rounded-lg px-3 py-1.5 text-sm text-slate-300 hover:bg-slate-800"
+              className="rounded-lg px-3 py-1.5 text-sm text-muted hover:bg-surface2"
             >
               Klaar
             </button>
@@ -74,7 +74,7 @@ export function ExercisePicker({
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Zoek een oefening..."
-            className="mb-3 w-full rounded-xl border border-slate-700 bg-slate-950 px-3.5 py-2.5 placeholder:text-slate-500 focus:border-rose-500 focus:outline-none"
+            className="mb-3 w-full rounded-xl border border-line bg-canvas px-3.5 py-2.5 placeholder:text-faint focus:border-primary focus:outline-none"
           />
           <div className="flex flex-wrap gap-1.5">
             <FilterChip active={muscle === ""} onClick={() => setMuscle("")}>
@@ -95,9 +95,9 @@ export function ExercisePicker({
         {/* Resultaten */}
         <div className="scrollbar-thin flex-1 overflow-y-auto p-3">
           {loading ? (
-            <p className="py-10 text-center text-sm text-slate-500">Laden...</p>
+            <p className="py-10 text-center text-sm text-faint">Laden...</p>
           ) : results.length === 0 ? (
-            <p className="py-10 text-center text-sm text-slate-500">
+            <p className="py-10 text-center text-sm text-faint">
               Geen oefeningen gevonden.
             </p>
           ) : (
@@ -109,12 +109,12 @@ export function ExercisePicker({
                     onSubmit={() =>
                       setAdded((prev) => new Set(prev).add(ex.id))
                     }
-                    className="flex items-center gap-3 rounded-xl p-2 transition hover:bg-slate-800/70"
+                    className="flex items-center gap-3 rounded-xl p-2 transition hover:bg-surface2/70"
                   >
                     <input type="hidden" name="day_id" value={dayId} />
                     <input type="hidden" name="routine_id" value={routineId} />
                     <input type="hidden" name="exercise_id" value={ex.id} />
-                    <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-lg bg-white ring-1 ring-slate-700">
+                    <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-lg bg-white ring-1 ring-line">
                       {ex.image_urls?.[0] ? (
                         <Image
                           src={ex.image_urls[0]}
@@ -131,14 +131,14 @@ export function ExercisePicker({
                     </div>
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-sm font-medium">{ex.name}</p>
-                      <p className="truncate text-xs text-slate-500">
+                      <p className="truncate text-xs text-faint">
                         {ex.primary_muscles.join(", ")}
                         {ex.equipment ? ` · ${ex.equipment}` : ""}
                       </p>
                     </div>
                     <button
                       type="submit"
-                      className="shrink-0 rounded-lg bg-rose-500/90 px-3 py-1.5 text-sm font-semibold text-white transition hover:bg-rose-500"
+                      className="shrink-0 rounded-lg bg-primary px-3 py-1.5 text-sm font-semibold text-white transition hover:brightness-110"
                     >
                       {added.has(ex.id) ? "+ Nog een" : "Toevoegen"}
                     </button>
@@ -167,8 +167,8 @@ function FilterChip({
       onClick={onClick}
       className={`rounded-full px-2.5 py-1 text-xs capitalize ring-1 transition ${
         active
-          ? "bg-rose-500 text-white ring-rose-500"
-          : "bg-slate-950 text-slate-300 ring-slate-700 hover:ring-slate-500"
+          ? "bg-primary text-white ring-primary"
+          : "bg-canvas text-muted ring-line hover:ring-muted"
       }`}
     >
       {children}

@@ -198,15 +198,15 @@ export function WorkoutLogger({
   return (
     <div className="space-y-5 pb-40">
       {groups.length === 0 && (
-        <p className="rounded-2xl border border-dashed border-slate-800 py-12 text-center text-slate-500">
+        <p className="rounded-2xl border border-dashed border-line py-12 text-center text-faint">
           Deze sessie heeft geen oefeningen.
         </p>
       )}
 
       {groups.map((g, gi) => (
-        <section key={g.exerciseId + gi} className="rounded-2xl border border-slate-800 bg-slate-900/50">
-          <header className="flex items-center gap-3 border-b border-slate-800 px-4 py-3">
-            <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-lg bg-white ring-1 ring-slate-700">
+        <section key={g.exerciseId + gi} className="rounded-2xl border border-line bg-surface">
+          <header className="flex items-center gap-3 border-b border-line px-4 py-3">
+            <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-lg bg-white ring-1 ring-line">
               {g.image ? (
                 <Image src={g.image} alt={g.name} fill sizes="40px" className="object-cover" />
               ) : (
@@ -217,7 +217,7 @@ export function WorkoutLogger({
           </header>
 
           <div className="space-y-1.5 p-3 sm:p-4">
-            <div className="grid grid-cols-[1.75rem_4rem_1fr_1fr_2.75rem_2rem_2rem] items-center gap-1.5 px-1 text-[10px] font-medium uppercase tracking-wide text-slate-500">
+            <div className="grid grid-cols-[1.75rem_4rem_1fr_1fr_2.75rem_2rem_2rem] items-center gap-1.5 px-1 text-[10px] font-medium uppercase tracking-wide text-faint">
               <span>Set</span>
               <span>Vorige</span>
               <span>Reps</span>
@@ -261,13 +261,13 @@ export function WorkoutLogger({
                           ? "F"
                           : workingNumber}
                   </button>
-                  <span className="truncate text-xs text-slate-500" title="Vorige keer">
+                  <span className="truncate text-xs text-faint" title="Vorige keer">
                     {prevLabel}
                   </span>
                   <NumInput value={s.reps} onChange={(v) => updateSet(gi, si, "reps", v)} />
                   <NumInput value={s.weight} step="0.5" onChange={(v) => updateSet(gi, si, "weight", v)} />
                   <NumInput value={s.oneRm} step="0.5" small onChange={(v) => updateSet(gi, si, "oneRm", v)} />
-                  <span className="text-center text-sm font-bold tabular-nums text-slate-300">
+                  <span className="text-center text-sm font-bold tabular-nums text-muted">
                     {rir ? rir.rir : "–"}
                   </span>
                   <div className="flex items-center justify-end gap-1">
@@ -278,7 +278,7 @@ export function WorkoutLogger({
                       className={`flex h-6 w-6 items-center justify-center rounded-md text-xs transition ${
                         s.completed
                           ? "bg-emerald-500 text-white"
-                          : "bg-slate-800 text-slate-500 hover:bg-slate-700"
+                          : "bg-surface2 text-faint hover:bg-surface2"
                       }`}
                     >
                       ✓
@@ -292,7 +292,7 @@ export function WorkoutLogger({
               <button
                 type="button"
                 onClick={() => addSet(gi)}
-                className="text-sm font-medium text-rose-400 hover:underline"
+                className="text-sm font-medium text-primary hover:underline"
               >
                 + Set
               </button>
@@ -300,7 +300,7 @@ export function WorkoutLogger({
                 <button
                   type="button"
                   onClick={() => removeSet(gi, g.sets.length - 1)}
-                  className="text-xs text-slate-500 hover:text-rose-400"
+                  className="text-xs text-faint hover:text-primary"
                 >
                   − Set
                 </button>
@@ -315,7 +315,7 @@ export function WorkoutLogger({
         onChange={(e) => setNotes(e.target.value)}
         placeholder="Notities over deze workout (optioneel)"
         rows={3}
-        className="w-full rounded-2xl border border-slate-800 bg-slate-900/50 px-4 py-3 placeholder:text-slate-500 focus:border-rose-500 focus:outline-none"
+        className="w-full rounded-2xl border border-line bg-surface px-4 py-3 placeholder:text-faint focus:border-primary focus:outline-none"
       />
 
       {/* Rusttimer-balk */}
@@ -341,11 +341,11 @@ export function WorkoutLogger({
       )}
 
       {/* Vaste onderbalk: duur + opslaan */}
-      <div className="fixed inset-x-0 bottom-0 z-30 border-t border-slate-800 bg-slate-950/90 backdrop-blur">
+      <div className="fixed inset-x-0 bottom-0 z-30 border-t border-line bg-canvas/90 backdrop-blur">
         <div className="mx-auto flex max-w-3xl items-center justify-between gap-3 px-4 py-3">
           <div className="min-w-0">
             <p className="truncate text-sm font-medium">{dayName}</p>
-            <p className="text-xs text-slate-400">
+            <p className="text-xs text-muted">
               ⏱ <span className="tabular-nums">{fmtTime(elapsed)}</span> · {completedCount} sets gedaan
             </p>
           </div>
@@ -354,7 +354,7 @@ export function WorkoutLogger({
               type="button"
               onClick={() => setShowPlates(true)}
               title="Plate calculator"
-              className="rounded-lg border border-slate-700 bg-slate-900 px-2.5 py-2 text-sm"
+              className="rounded-lg border border-line bg-surface px-2.5 py-2 text-sm"
             >
               🏋️
             </button>
@@ -362,7 +362,7 @@ export function WorkoutLogger({
               value={restDuration}
               onChange={(e) => setRestDuration(Number(e.target.value))}
               title="Standaard rusttijd"
-              className="rounded-lg border border-slate-700 bg-slate-900 px-2 py-2 text-xs text-slate-300 focus:outline-none"
+              className="rounded-lg border border-line bg-surface px-2 py-2 text-xs text-muted focus:outline-none"
             >
               {[60, 90, 120, 150, 180, 240].map((s) => (
                 <option key={s} value={s}>
@@ -405,7 +405,7 @@ function NumInput({
       min="0"
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      className={`w-full rounded-lg border border-slate-700 bg-slate-950 px-1 py-1.5 text-center tabular-nums focus:border-rose-500 focus:outline-none ${
+      className={`w-full rounded-lg border border-line bg-canvas px-1 py-1.5 text-center tabular-nums focus:border-primary focus:outline-none ${
         small ? "text-xs" : ""
       }`}
     />

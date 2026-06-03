@@ -12,7 +12,7 @@ export function AddDayForm({ routineId }: { routineId: string }) {
     return (
       <button
         onClick={() => setOpen(true)}
-        className="mt-5 w-full rounded-2xl border border-dashed border-slate-700 py-4 text-slate-400 transition hover:border-rose-500 hover:text-rose-400"
+        className="mt-5 w-full rounded-2xl border border-dashed border-line py-4 text-muted transition hover:border-primary hover:text-primary"
       >
         + Dag toevoegen
       </button>
@@ -23,7 +23,7 @@ export function AddDayForm({ routineId }: { routineId: string }) {
     <form
       action={addDay}
       onSubmit={() => setOpen(false)}
-      className="mt-5 rounded-2xl border border-slate-800 bg-slate-900/50 p-5"
+      className="mt-5 rounded-2xl border border-line bg-surface p-5"
     >
       <input type="hidden" name="routine_id" value={routineId} />
       <h3 className="mb-3 font-semibold">Nieuwe dag</h3>
@@ -34,8 +34,8 @@ export function AddDayForm({ routineId }: { routineId: string }) {
             key={t}
             className={`cursor-pointer rounded-full px-3 py-1.5 text-sm ring-1 transition ${
               dayType === t
-                ? "bg-rose-500 text-white ring-rose-500"
-                : "bg-slate-950 text-slate-300 ring-slate-700 hover:ring-slate-500"
+                ? "bg-primary text-white ring-primary"
+                : "bg-canvas text-muted ring-line hover:ring-muted"
             }`}
           >
             <input
@@ -57,19 +57,19 @@ export function AddDayForm({ routineId }: { routineId: string }) {
           defaultValue={DAY_TYPE_LABELS[dayType]}
           key={dayType}
           placeholder="Naam van de dag"
-          className="flex-1 rounded-xl border border-slate-700 bg-slate-950 px-3.5 py-2.5 focus:border-rose-500 focus:outline-none"
+          className="flex-1 rounded-xl border border-line bg-canvas px-3.5 py-2.5 focus:border-primary focus:outline-none"
         />
         <div className="flex gap-2">
           <button
             type="submit"
-            className="rounded-xl bg-gradient-to-r from-rose-500 to-orange-500 px-5 py-2.5 font-semibold text-white transition hover:opacity-90"
+            className="rounded-xl bg-primary px-5 py-2.5 font-semibold text-white transition hover:opacity-90"
           >
             Toevoegen
           </button>
           <button
             type="button"
             onClick={() => setOpen(false)}
-            className="rounded-xl border border-slate-700 px-4 py-2.5 text-slate-300 transition hover:bg-slate-800"
+            className="rounded-xl border border-line px-4 py-2.5 text-muted transition hover:bg-surface2"
           >
             Annuleren
           </button>

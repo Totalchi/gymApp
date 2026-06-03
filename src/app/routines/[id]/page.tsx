@@ -46,19 +46,19 @@ export default async function RoutinePage({
       <main className="mx-auto max-w-5xl px-4 py-8">
         <Link
           href="/dashboard"
-          className="text-sm text-slate-400 hover:text-white"
+          className="text-sm text-muted hover:text-fg"
         >
           ← Terug naar schema&apos;s
         </Link>
         <div className="mb-6 mt-2">
           <h1 className="text-3xl font-bold">{routine.name}</h1>
           {routine.description && (
-            <p className="mt-1 text-slate-400">{routine.description}</p>
+            <p className="mt-1 text-muted">{routine.description}</p>
           )}
         </div>
 
         {days.length > 0 && (
-          <p className="mb-3 text-xs text-slate-500">
+          <p className="mb-3 text-xs text-faint">
             Tip: sleep met het ⠿-handvat om dagen en oefeningen te herordenen.
           </p>
         )}
