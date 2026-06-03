@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { Header } from "@/components/Header";
+import { getT } from "@/lib/serverLang";
 import {
   WorkoutLogger,
   type LoggerInitialGroup,
@@ -18,6 +19,7 @@ export default async function WorkoutPage({
   const {
     data: { user },
   } = await supabase.auth.getUser();
+  const { t } = await getT();
 
   const { data: session } = await supabase
     .from("workout_sessions")
@@ -105,6 +107,7 @@ export default async function WorkoutPage({
       reps: s.reps,
       weight: s.weight,
       oneRm: s.one_rep_max,
+      rir: s.rir,
       setType: s.set_type,
       completed: s.completed,
     });
@@ -117,11 +120,8 @@ export default async function WorkoutPage({
         <Link href="/dashboard" className="text-sm text-muted hover:text-fg">
           ← Dashboard
         </Link>
-        <h1 className="mb-1 mt-2 text-3xl font-bold">Workout loggen</h1>
-        <p className="mb-6 text-muted">
-          Vink je sets af, RIR wordt automatisch berekend, en de rusttimer start
-          vanzelf.
-        </p>
+        <h1 className="mb-1 mt-2 text-3xl font-bold">{t("wk.title")}</h1>
+        <p className="mb-6 text-muted">{t("wk.subtitle")}</p>
         <WorkoutLogger
           sessionId={session.id}
           dayName={session.day_name ?? "Workout"}

@@ -53,11 +53,11 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* Vloeiende thema-overgang */
-body,
-body * {
-  transition-property: background-color, border-color, color;
-  transition-duration: 120ms;
+/* Alleen expliciete thema-vlakken animeren bij het wisselen (snappy). */
+html.theming,
+html.theming * {
+  transition: background-color 150ms ease, border-color 150ms ease,
+    color 150ms ease !important;
 }
 
 /* Subtiele scrollbar */

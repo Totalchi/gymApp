@@ -2,11 +2,13 @@
 
 import { useState } from "react";
 import { addDay } from "@/app/routines/actions";
+import { useT } from "@/components/LangProvider";
 import { DAY_TYPES, DAY_TYPE_LABELS, type DayType } from "@/lib/types";
 
 export function AddDayForm({ routineId }: { routineId: string }) {
   const [open, setOpen] = useState(false);
   const [dayType, setDayType] = useState<DayType>("push");
+  const t = useT();
 
   if (!open) {
     return (
@@ -14,7 +16,7 @@ export function AddDayForm({ routineId }: { routineId: string }) {
         onClick={() => setOpen(true)}
         className="mt-5 w-full rounded-2xl border border-dashed border-line py-4 text-muted transition hover:border-primary hover:text-primary"
       >
-        + Dag toevoegen
+        {t("routine.addDay")}
       </button>
     );
   }
@@ -26,7 +28,7 @@ export function AddDayForm({ routineId }: { routineId: string }) {
       className="mt-5 rounded-2xl border border-line bg-surface p-5"
     >
       <input type="hidden" name="routine_id" value={routineId} />
-      <h3 className="mb-3 font-semibold">Nieuwe dag</h3>
+      <h3 className="mb-3 font-semibold">{t("routine.newDay")}</h3>
 
       <div className="mb-3 flex flex-wrap gap-2">
         {DAY_TYPES.map((t) => (
@@ -56,22 +58,22 @@ export function AddDayForm({ routineId }: { routineId: string }) {
           name="name"
           defaultValue={DAY_TYPE_LABELS[dayType]}
           key={dayType}
-          placeholder="Naam van de dag"
+          placeholder={t("routine.dayNamePh")}
           className="flex-1 rounded-xl border border-line bg-canvas px-3.5 py-2.5 focus:border-primary focus:outline-none"
         />
         <div className="flex gap-2">
           <button
             type="submit"
-            className="rounded-xl bg-primary px-5 py-2.5 font-semibold text-white transition hover:opacity-90"
+            className="rounded-xl bg-primary px-5 py-2.5 font-semibold text-primary-fg transition hover:brightness-110"
           >
-            Toevoegen
+            {t("routine.add")}
           </button>
           <button
             type="button"
             onClick={() => setOpen(false)}
             className="rounded-xl border border-line px-4 py-2.5 text-muted transition hover:bg-surface2"
           >
-            Annuleren
+            {t("common.cancel")}
           </button>
         </div>
       </div>

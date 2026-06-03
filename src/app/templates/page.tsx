@@ -3,22 +3,21 @@ import { Header } from "@/components/Header";
 import { addTemplate } from "@/app/routines/actions";
 import { ROUTINE_TEMPLATES } from "@/lib/templates";
 import { DAY_TYPE_COLORS } from "@/lib/types";
+import { getT } from "@/lib/serverLang";
 
 export default async function TemplatesPage() {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
+  const { t } = await getT();
 
   return (
     <>
       <Header email={user?.email} />
       <main className="mx-auto max-w-3xl px-4 py-8">
-        <h1 className="mb-1 text-3xl font-bold">Kant-en-klare programma&apos;s</h1>
-        <p className="mb-6 text-muted">
-          Kies een bewezen schema en voeg het met één klik toe aan je eigen
-          schema&apos;s. Daarna kun je het naar wens aanpassen.
-        </p>
+        <h1 className="mb-1 text-3xl font-bold">{t("tpl.title")}</h1>
+        <p className="mb-6 text-muted">{t("tpl.subtitle")}</p>
 
         <div className="space-y-4">
           {ROUTINE_TEMPLATES.map((tpl) => (
@@ -42,7 +41,7 @@ export default async function TemplatesPage() {
                     key={i}
                     className={`rounded-full px-2 py-0.5 text-xs font-medium ring-1 ${DAY_TYPE_COLORS[d.dayType]}`}
                   >
-                    {d.name} · {d.exercises.length} oef.
+                    {d.name} · {d.exercises.length} {t("tpl.exShort")}
                   </span>
                 ))}
               </div>
@@ -51,20 +50,16 @@ export default async function TemplatesPage() {
                 <input type="hidden" name="template_id" value={tpl.id} />
                 <button
                   type="submit"
-                  className="rounded-xl bg-primary px-5 py-2.5 font-semibold text-white transition hover:opacity-90"
+                  className="rounded-xl bg-primary px-5 py-2.5 font-semibold text-primary-fg transition hover:brightness-110"
                 >
-                  Toevoegen aan mijn schema&apos;s
+                  {t("tpl.add")}
                 </button>
               </form>
             </div>
           ))}
         </div>
 
-        <p className="mt-4 text-xs text-faint">
-          Tip: deze schema&apos;s gebruiken oefeningen uit de bibliotheek. Werkt
-          een oefening niet? Dan staat die nog niet in je database — draai dan de
-          volledige oefeningen-seed.
-        </p>
+        <p className="mt-4 text-xs text-faint">{t("tpl.tip")}</p>
       </main>
     </>
   );

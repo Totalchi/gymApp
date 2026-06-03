@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { Header } from "@/components/Header";
 import { LineChart, type ChartPoint } from "@/components/LineChart";
 import { estimateOneRepMax } from "@/lib/rir";
+import { getT } from "@/lib/serverLang";
 
 interface RawSet {
   exercise_id: string;
@@ -18,6 +19,7 @@ export default async function ProgressPage() {
   const {
     data: { user },
   } = await supabase.auth.getUser();
+  const { t } = await getT();
 
   const { data } = await supabase
     .from("workout_sets")
@@ -68,21 +70,19 @@ export default async function ProgressPage() {
       <Header email={user?.email} />
       <main className="mx-auto max-w-3xl px-4 py-8">
         <div className="mb-2 flex items-center justify-between">
-          <h1 className="text-3xl font-bold">Voortgang</h1>
+          <h1 className="text-3xl font-bold">{t("prog.title")}</h1>
           <Link
             href="/history"
             className="rounded-lg border border-line px-3 py-1.5 text-sm text-fg transition hover:border-primary hover:text-primary"
           >
-            Geschiedenis
+            {t("nav.history")}
           </Link>
         </div>
-        <p className="mb-6 text-muted">
-          Geschat 1RM per oefening over tijd, berekend uit je gelogde sets.
-        </p>
+        <p className="mb-6 text-muted">{t("prog.subtitle")}</p>
 
         {charts.length === 0 ? (
           <div className="rounded-2xl border border-dashed border-line py-16 text-center text-faint">
-            Log minstens 2 workouts met dezelfde oefening om je voortgang te zien.
+            {t("prog.empty")}
           </div>
         ) : (
           <div className="space-y-5">

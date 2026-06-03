@@ -40,7 +40,7 @@ export async function startWorkout(formData: FormData) {
   // Geplande oefeningen ophalen en omzetten naar gelogde sets.
   const { data: planned } = await supabase
     .from("routine_exercises")
-    .select("exercise_id, sets, reps, weight, one_rep_max, position, exercise:exercises(name)")
+    .select("exercise_id, sets, reps, weight, one_rep_max, rir, position, exercise:exercises(name)")
     .eq("day_id", dayId)
     .order("position");
 
@@ -50,13 +50,15 @@ export async function startWorkout(formData: FormData) {
     const setCount = Math.max(1, pe.sets ?? 1);
     for (let i = 1; i <= setCount; i++) {
       const rir =
-        pe.weight && pe.reps && pe.one_rep_max
-          ? (computeRir({
-              weight: pe.weight,
-              reps: pe.reps,
-              oneRepMax: pe.one_rep_max,
-            })?.rir ?? null)
-          : null;
+        pe.rir != null
+          ? pe.rir
+          : pe.weight && pe.reps && pe.one_rep_max
+            ? (computeRir({
+                weight: pe.weight,
+                reps: pe.reps,
+                oneRepMax: pe.one_rep_max,
+              })?.rir ?? null)
+            : null;
       rows.push({
         session_id: session.id,
         exercise_id: pe.exercise_id,
@@ -86,6 +88,7 @@ interface SetInput {
   reps: number | null;
   weight: number | null;
   one_rep_max: number | null;
+  rir?: number | null;
   set_type?: string;
   completed?: boolean;
 }
@@ -115,14 +118,17 @@ export async function saveWorkout(
   await supabase.from("workout_sets").delete().eq("session_id", sessionId);
 
   const rows = sets.map((s) => {
+    // Handmatige RIR heeft voorrang; anders automatisch berekenen.
     const rir =
-      s.weight && s.reps && s.one_rep_max
-        ? (computeRir({
-            weight: s.weight,
-            reps: s.reps,
-            oneRepMax: s.one_rep_max,
-          })?.rir ?? null)
-        : null;
+      s.rir != null
+        ? s.rir
+        : s.weight && s.reps && s.one_rep_max
+          ? (computeRir({
+              weight: s.weight,
+              reps: s.reps,
+              oneRepMax: s.one_rep_max,
+            })?.rir ?? null)
+          : null;
     return {
       session_id: sessionId,
       exercise_id: s.exercise_id,

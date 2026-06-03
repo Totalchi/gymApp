@@ -23,6 +23,7 @@ import { ExercisePicker } from "@/components/ExercisePicker";
 import { DragHandle } from "@/components/DragHandle";
 import { deleteDay, reorderExercises } from "@/app/routines/actions";
 import { startWorkout } from "@/app/workout/actions";
+import { useT } from "@/components/LangProvider";
 import {
   DAY_TYPE_COLORS,
   DAY_TYPE_LABELS,
@@ -40,6 +41,7 @@ export function DayCard({
 }) {
   const [pickerOpen, setPickerOpen] = useState(false);
   const [exercises, setExercises] = useState(day.exercises);
+  const t = useT();
 
   useEffect(() => setExercises(day.exercises), [day.exercises]);
 
@@ -92,7 +94,7 @@ export function DayCard({
           <h2 className="truncate text-lg font-semibold">{day.name}</h2>
           <span className="hidden text-sm text-faint sm:inline">
             {exercises.length}{" "}
-            {exercises.length === 1 ? "oefening" : "oefeningen"}
+            {exercises.length === 1 ? t("routine.exercise") : t("routine.exercises")}
           </span>
         </div>
         <div className="flex shrink-0 items-center gap-3">
@@ -105,7 +107,7 @@ export function DayCard({
                 type="submit"
                 className="rounded-lg bg-emerald-500/90 px-3 py-1.5 text-sm font-semibold text-white transition hover:bg-emerald-500"
               >
-                ▶ Start
+                ▶ {t("routine.start")}
               </button>
             </form>
           )}
@@ -114,9 +116,9 @@ export function DayCard({
             <input type="hidden" name="routine_id" value={routineId} />
             <button
               type="submit"
-              className="text-xs text-faint transition hover:text-primary"
+              className="text-xs text-faint transition hover:text-danger"
             >
-              Verwijderen
+              {t("routine.deleteDay")}
             </button>
           </form>
         </div>
@@ -125,7 +127,7 @@ export function DayCard({
       <div>
         {exercises.length === 0 ? (
           <p className="px-5 py-6 text-center text-sm text-faint">
-            Nog geen oefeningen op deze dag.
+            {t("routine.noExercises")}
           </p>
         ) : (
           <DndContext
@@ -152,7 +154,7 @@ export function DayCard({
           onClick={() => setPickerOpen(true)}
           className="rounded-xl border border-line px-4 py-2 text-sm font-medium text-fg transition hover:border-primary hover:text-primary"
         >
-          + Oefening toevoegen
+          {t("routine.addExercise")}
         </button>
       </div>
 

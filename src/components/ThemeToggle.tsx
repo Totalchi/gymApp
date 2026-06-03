@@ -13,7 +13,11 @@ export function ThemeToggle() {
   function toggle() {
     const next = !light;
     setLight(next);
-    document.documentElement.classList.toggle("light", next);
+    const root = document.documentElement;
+    // Korte transitie alleen tijdens het wisselen (blijft snappy).
+    root.classList.add("theming");
+    root.classList.toggle("light", next);
+    window.setTimeout(() => root.classList.remove("theming"), 200);
     try {
       localStorage.setItem("theme", next ? "light" : "dark");
     } catch {}
@@ -23,7 +27,7 @@ export function ThemeToggle() {
     <button
       type="button"
       onClick={toggle}
-      aria-label="Wissel thema"
+      aria-label="Toggle theme"
       className="flex h-9 w-9 items-center justify-center rounded-lg border border-line text-muted transition hover:bg-surface2 hover:text-fg"
     >
       {light ? <IconMoon className="h-5 w-5" /> : <IconSun className="h-5 w-5" />}

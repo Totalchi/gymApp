@@ -5,6 +5,7 @@ import {
   createCustomExercise,
   type CustomExerciseState,
 } from "@/app/exercises/actions";
+import { useT } from "@/components/LangProvider";
 import { MUSCLE_GROUPS } from "@/lib/types";
 
 export function CustomExerciseForm({
@@ -12,6 +13,7 @@ export function CustomExerciseForm({
 }: {
   onCreated?: () => void;
 }) {
+  const t = useT();
   const [open, setOpen] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
   const [state, formAction, pending] = useActionState<
@@ -34,7 +36,7 @@ export function CustomExerciseForm({
         onClick={() => setOpen(true)}
         className="mb-5 rounded-xl border border-line px-4 py-2.5 text-sm font-medium text-fg transition hover:border-primary hover:text-primary"
       >
-        + Eigen oefening maken
+        {t("ex.makeCustom")}
       </button>
     );
   }
@@ -46,19 +48,19 @@ export function CustomExerciseForm({
       className="mb-6 space-y-3 rounded-2xl border border-line bg-surface p-5"
     >
       <div className="flex items-center justify-between">
-        <h2 className="font-semibold">Eigen oefening</h2>
+        <h2 className="font-semibold">{t("ex.customTitle")}</h2>
         <button
           type="button"
           onClick={() => setOpen(false)}
           className="text-sm text-muted hover:text-fg"
         >
-          Annuleren
+          {t("common.cancel")}
         </button>
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2">
         <label className="block">
-          <span className="mb-1 block text-sm text-muted">Naam *</span>
+          <span className="mb-1 block text-sm text-muted">{t("ex.nameReq")}</span>
           <input
             name="name"
             required
@@ -67,7 +69,7 @@ export function CustomExerciseForm({
           />
         </label>
         <label className="block">
-          <span className="mb-1 block text-sm text-muted">Spiergroep</span>
+          <span className="mb-1 block text-sm text-muted">{t("ex.muscle")}</span>
           <select
             name="primary_muscle"
             className="w-full rounded-xl border border-line bg-canvas px-3.5 py-2.5 capitalize focus:border-primary focus:outline-none"
@@ -83,18 +85,16 @@ export function CustomExerciseForm({
       </div>
 
       <label className="block">
-        <span className="mb-1 block text-sm text-muted">Materiaal</span>
+        <span className="mb-1 block text-sm text-muted">{t("ex.equipment")}</span>
         <input
           name="equipment"
-          placeholder="Bijv. kabel, dumbbell, machine"
+          placeholder={t("ex.equipmentPh")}
           className="w-full rounded-xl border border-line bg-canvas px-3.5 py-2.5 focus:border-primary focus:outline-none"
         />
       </label>
 
       <label className="block">
-        <span className="mb-1 block text-sm text-muted">
-          Uitleg (één stap per regel)
-        </span>
+        <span className="mb-1 block text-sm text-muted">{t("ex.instructions")}</span>
         <textarea
           name="instructions"
           rows={3}
@@ -104,9 +104,7 @@ export function CustomExerciseForm({
       </label>
 
       <label className="block">
-        <span className="mb-1 block text-sm text-muted">
-          Foto (optioneel, max 5 MB)
-        </span>
+        <span className="mb-1 block text-sm text-muted">{t("ex.photo")}</span>
         <input
           name="image"
           type="file"
@@ -124,9 +122,9 @@ export function CustomExerciseForm({
       <button
         type="submit"
         disabled={pending}
-        className="rounded-xl bg-primary px-5 py-2.5 font-semibold text-white transition hover:opacity-90 disabled:opacity-50"
+        className="rounded-xl bg-primary px-5 py-2.5 font-semibold text-primary-fg transition hover:brightness-110 disabled:opacity-50"
       >
-        {pending ? "Opslaan..." : "Oefening opslaan"}
+        {pending ? t("ex.saving") : t("ex.saveExercise")}
       </button>
     </form>
   );

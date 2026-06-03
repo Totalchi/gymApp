@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import Image from "next/image";
 import { saveWorkout } from "@/app/workout/actions";
 import { useUnit } from "@/components/UnitProvider";
+import { useT } from "@/components/LangProvider";
 import { PlateCalculator } from "@/components/PlateCalculator";
 import { computeRir } from "@/lib/rir";
 import { SET_TYPES, SET_TYPE_COLORS, type SetType } from "@/lib/types";
@@ -12,6 +13,7 @@ interface SetRow {
   reps: string;
   weight: string;
   oneRm: string;
+  rir: string;
   setType: SetType;
   completed: boolean;
 }
@@ -33,6 +35,7 @@ export interface LoggerInitialGroup {
     reps: number | null;
     weight: number | null;
     oneRm: number | null;
+    rir: number | null;
     setType: SetType;
     completed: boolean;
   }[];
@@ -72,6 +75,7 @@ export function WorkoutLogger({
         reps: s.reps != null ? String(s.reps) : "",
         weight: s.weight != null ? String(s.weight) : "",
         oneRm: s.oneRm != null ? String(s.oneRm) : "",
+        rir: s.rir != null ? String(s.rir) : "",
         setType: s.setType ?? "normal",
         completed: s.completed ?? false,
       })),
@@ -81,6 +85,7 @@ export function WorkoutLogger({
   const [pending, startTransition] = useTransition();
   const [showPlates, setShowPlates] = useState(false);
   const unit = useUnit();
+  const t = useT();
 
   // Workout-duur (loopt vanaf de starttijd van de sessie).
   const startMs = useMemo(() => new Date(startedAt).getTime(), [startedAt]);
@@ -157,7 +162,7 @@ export function WorkoutLogger({
             ...g.sets,
             last
               ? { ...last, completed: false }
-              : { reps: "", weight: "", oneRm: "", setType: "normal", completed: false },
+              : { reps: "", weight: "", oneRm: "", rir: "", setType: "normal", completed: false },
           ],
         };
       }),
@@ -181,6 +186,7 @@ export function WorkoutLogger({
         reps: num(s.reps),
         weight: num(s.weight),
         one_rep_max: num(s.oneRm),
+        rir: num(s.rir),
         set_type: s.setType,
         completed: s.completed,
       })),
@@ -199,7 +205,7 @@ export function WorkoutLogger({
     <div className="space-y-5 pb-40">
       {groups.length === 0 && (
         <p className="rounded-2xl border border-dashed border-line py-12 text-center text-faint">
-          Deze sessie heeft geen oefeningen.
+          {t("wk.noExercises")}
         </p>
       )}
 
@@ -218,9 +224,9 @@ export function WorkoutLogger({
 
           <div className="space-y-1.5 p-3 sm:p-4">
             <div className="grid grid-cols-[1.75rem_4rem_1fr_1fr_2.75rem_2rem_2rem] items-center gap-1.5 px-1 text-[10px] font-medium uppercase tracking-wide text-faint">
-              <span>Set</span>
-              <span>Vorige</span>
-              <span>Reps</span>
+              <span>{t("wk.set")}</span>
+              <span>{t("wk.previous")}</span>
+              <span>{t("wk.reps")}</span>
               <span>{unit}</span>
               <span className="text-center">1RM</span>
               <span className="text-center">RIR</span>
@@ -267,9 +273,17 @@ export function WorkoutLogger({
                   <NumInput value={s.reps} onChange={(v) => updateSet(gi, si, "reps", v)} />
                   <NumInput value={s.weight} step="0.5" onChange={(v) => updateSet(gi, si, "weight", v)} />
                   <NumInput value={s.oneRm} step="0.5" small onChange={(v) => updateSet(gi, si, "oneRm", v)} />
-                  <span className="text-center text-sm font-bold tabular-nums text-muted">
-                    {rir ? rir.rir : "–"}
-                  </span>
+                  <input
+                    type="number"
+                    inputMode="decimal"
+                    step="0.5"
+                    min="0"
+                    value={s.rir}
+                    onChange={(e) => updateSet(gi, si, "rir", e.target.value)}
+                    placeholder={rir ? String(rir.rir) : "–"}
+                    title="Laat leeg voor automatische RIR, of vul zelf in"
+                    className="w-full rounded-md border border-line bg-canvas px-0.5 py-1.5 text-center text-sm font-bold tabular-nums focus:border-primary focus:outline-none"
+                  />
                   <div className="flex items-center justify-end gap-1">
                     <button
                       type="button"
@@ -313,7 +327,7 @@ export function WorkoutLogger({
       <textarea
         value={notes}
         onChange={(e) => setNotes(e.target.value)}
-        placeholder="Notities over deze workout (optioneel)"
+        placeholder={t("wk.notesPh")}
         rows={3}
         className="w-full rounded-2xl border border-line bg-surface px-4 py-3 placeholder:text-faint focus:border-primary focus:outline-none"
       />
@@ -323,7 +337,7 @@ export function WorkoutLogger({
         <div className="fixed inset-x-0 bottom-[4.5rem] z-30 px-4">
           <div className="mx-auto flex max-w-3xl items-center justify-between gap-3 rounded-xl border border-sky-500/40 bg-sky-500/15 px-4 py-2.5 backdrop-blur">
             <span className="text-sm font-medium text-sky-200">
-              Rust: <span className="tabular-nums">{fmtTime(restLeft)}</span>
+              {t("wk.rest")}: <span className="tabular-nums">{fmtTime(restLeft)}</span>
             </span>
             <div className="flex items-center gap-2">
               <button type="button" onClick={() => setRestLeft((v) => (v ?? 0) + 15)} className="rounded-md bg-sky-500/20 px-2 py-1 text-xs text-sky-100">
@@ -333,7 +347,7 @@ export function WorkoutLogger({
                 −15s
               </button>
               <button type="button" onClick={stopRest} className="rounded-md bg-sky-500 px-3 py-1 text-xs font-semibold text-white">
-                Skip
+                {t("wk.skip")}
               </button>
             </div>
           </div>
@@ -346,7 +360,7 @@ export function WorkoutLogger({
           <div className="min-w-0">
             <p className="truncate text-sm font-medium">{dayName}</p>
             <p className="text-xs text-muted">
-              ⏱ <span className="tabular-nums">{fmtTime(elapsed)}</span> · {completedCount} sets gedaan
+              ⏱ <span className="tabular-nums">{fmtTime(elapsed)}</span> · {completedCount} {t("wk.setsDone")}
             </p>
           </div>
           <div className="flex items-center gap-2">
@@ -366,7 +380,7 @@ export function WorkoutLogger({
             >
               {[60, 90, 120, 150, 180, 240].map((s) => (
                 <option key={s} value={s}>
-                  rust {s}s
+                  {t("wk.restOpt")} {s}s
                 </option>
               ))}
             </select>
@@ -375,7 +389,7 @@ export function WorkoutLogger({
               disabled={pending}
               className="rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 px-5 py-2.5 font-semibold text-white transition hover:opacity-90 disabled:opacity-50"
             >
-              {pending ? "Opslaan..." : "Klaar"}
+              {pending ? t("wk.saving") : t("wk.finish")}
             </button>
           </div>
         </div>
