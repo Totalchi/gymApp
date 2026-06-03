@@ -114,11 +114,11 @@ export default async function WorkoutPage({
     <>
       <Header email={user?.email} />
       <main className="mx-auto max-w-3xl px-4 py-8">
-        <Link href="/dashboard" className="text-sm text-slate-400 hover:text-white">
+        <Link href="/dashboard" className="text-sm text-muted hover:text-fg">
           ← Dashboard
         </Link>
         <h1 className="mb-1 mt-2 text-3xl font-bold">Workout loggen</h1>
-        <p className="mb-6 text-slate-400">
+        <p className="mb-6 text-muted">
           Vink je sets af, RIR wordt automatisch berekend, en de rusttimer start
           vanzelf.
         </p>

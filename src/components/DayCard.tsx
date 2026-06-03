@@ -77,9 +77,9 @@ export function DayCard({
         transition,
         opacity: isDragging ? 0.6 : 1,
       }}
-      className="rounded-2xl border border-slate-800 bg-slate-900/50"
+      className="rounded-2xl border border-line bg-surface"
     >
-      <header className="flex items-center justify-between gap-3 border-b border-slate-800 px-4 py-4 sm:px-5">
+      <header className="flex items-center justify-between gap-3 border-b border-line px-4 py-4 sm:px-5">
         <div className="flex min-w-0 items-center gap-2 sm:gap-3">
           {sortable && (
             <DragHandle attributes={attributes} listeners={listeners} />
@@ -90,7 +90,7 @@ export function DayCard({
             {DAY_TYPE_LABELS[day.day_type]}
           </span>
           <h2 className="truncate text-lg font-semibold">{day.name}</h2>
-          <span className="hidden text-sm text-slate-500 sm:inline">
+          <span className="hidden text-sm text-faint sm:inline">
             {exercises.length}{" "}
             {exercises.length === 1 ? "oefening" : "oefeningen"}
           </span>
@@ -114,7 +114,7 @@ export function DayCard({
             <input type="hidden" name="routine_id" value={routineId} />
             <button
               type="submit"
-              className="text-xs text-slate-500 transition hover:text-rose-400"
+              className="text-xs text-faint transition hover:text-primary"
             >
               Verwijderen
             </button>
@@ -124,7 +124,7 @@ export function DayCard({
 
       <div>
         {exercises.length === 0 ? (
-          <p className="px-5 py-6 text-center text-sm text-slate-500">
+          <p className="px-5 py-6 text-center text-sm text-faint">
             Nog geen oefeningen op deze dag.
           </p>
         ) : (
@@ -137,7 +137,7 @@ export function DayCard({
               items={exercises.map((e) => e.id)}
               strategy={verticalListSortingStrategy}
             >
-              <div className="divide-y divide-slate-800">
+              <div className="divide-y divide-line">
                 {exercises.map((ex) => (
                   <ExerciseRow key={ex.id} item={ex} routineId={routineId} />
                 ))}
@@ -150,7 +150,7 @@ export function DayCard({
       <div className="px-5 py-4">
         <button
           onClick={() => setPickerOpen(true)}
-          className="rounded-xl border border-slate-700 px-4 py-2 text-sm font-medium text-slate-200 transition hover:border-rose-500 hover:text-rose-400"
+          className="rounded-xl border border-line px-4 py-2 text-sm font-medium text-fg transition hover:border-primary hover:text-primary"
         >
           + Oefening toevoegen
         </button>

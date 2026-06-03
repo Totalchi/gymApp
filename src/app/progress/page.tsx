@@ -71,17 +71,17 @@ export default async function ProgressPage() {
           <h1 className="text-3xl font-bold">Voortgang</h1>
           <Link
             href="/history"
-            className="rounded-lg border border-slate-700 px-3 py-1.5 text-sm text-slate-200 transition hover:border-rose-500 hover:text-rose-400"
+            className="rounded-lg border border-line px-3 py-1.5 text-sm text-fg transition hover:border-primary hover:text-primary"
           >
             Geschiedenis
           </Link>
         </div>
-        <p className="mb-6 text-slate-400">
+        <p className="mb-6 text-muted">
           Geschat 1RM per oefening over tijd, berekend uit je gelogde sets.
         </p>
 
         {charts.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-slate-800 py-16 text-center text-slate-500">
+          <div className="rounded-2xl border border-dashed border-line py-16 text-center text-faint">
             Log minstens 2 workouts met dezelfde oefening om je voortgang te zien.
           </div>
         ) : (
@@ -89,13 +89,13 @@ export default async function ProgressPage() {
             {charts.map((c) => (
               <section
                 key={c.name}
-                className="rounded-2xl border border-slate-800 bg-slate-900/50 p-5"
+                className="rounded-2xl border border-line bg-surface p-5"
               >
                 <div className="mb-2 flex items-baseline justify-between">
                   <h2 className="font-semibold">{c.name}</h2>
-                  <span className="text-sm text-slate-400">
+                  <span className="text-sm text-muted">
                     {c.points[c.points.length - 1].value} kg
-                    <span className="ml-1 text-xs text-slate-500">(e1RM)</span>
+                    <span className="ml-1 text-xs text-faint">(e1RM)</span>
                   </span>
                 </div>
                 <LineChart points={c.points} unit="" />

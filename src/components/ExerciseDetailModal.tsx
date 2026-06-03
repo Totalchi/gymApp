@@ -18,7 +18,7 @@ export function ExerciseDetailModal({
       onClick={onClose}
     >
       <div
-        className="max-h-[88vh] w-full max-w-lg overflow-y-auto rounded-2xl border border-slate-700 bg-slate-900"
+        className="max-h-[88vh] w-full max-w-lg overflow-y-auto rounded-2xl border border-line bg-surface"
         onClick={(e) => e.stopPropagation()}
       >
         {exercise.image_urls.length > 0 ? (
@@ -36,7 +36,7 @@ export function ExerciseDetailModal({
             ))}
           </div>
         ) : (
-          <div className="flex h-32 items-center justify-center bg-slate-800 text-4xl">
+          <div className="flex h-32 items-center justify-center bg-surface2 text-4xl">
             🏋️
           </div>
         )}
@@ -47,7 +47,7 @@ export function ExerciseDetailModal({
             <button
               type="button"
               onClick={onClose}
-              className="shrink-0 rounded-lg px-3 py-1 text-sm text-slate-400 hover:bg-slate-800"
+              className="shrink-0 rounded-lg px-3 py-1 text-sm text-muted hover:bg-surface2"
             >
               Sluiten
             </button>
@@ -64,7 +64,7 @@ export function ExerciseDetailModal({
               .map((tag) => (
                 <span
                   key={tag}
-                  className="rounded-full bg-slate-800 px-2.5 py-1 capitalize text-slate-300"
+                  className="rounded-full bg-surface2 px-2.5 py-1 capitalize text-muted"
                 >
                   {tag}
                 </span>
@@ -72,13 +72,13 @@ export function ExerciseDetailModal({
           </div>
 
           {exercise.instructions.length > 0 ? (
-            <ol className="list-decimal space-y-2 pl-5 text-sm text-slate-300">
+            <ol className="list-decimal space-y-2 pl-5 text-sm text-muted">
               {exercise.instructions.map((step, i) => (
                 <li key={i}>{step}</li>
               ))}
             </ol>
           ) : (
-            <p className="text-sm text-slate-500">
+            <p className="text-sm text-faint">
               Geen uitleg beschikbaar voor deze oefening.
             </p>
           )}

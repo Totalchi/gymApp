@@ -13,7 +13,7 @@ export default async function ExercisesPage() {
       <Header email={user?.email} />
       <main className="mx-auto max-w-5xl px-4 py-8">
         <h1 className="mb-1 text-3xl font-bold">Oefeningen</h1>
-        <p className="mb-6 text-slate-400">
+        <p className="mb-6 text-muted">
           Blader door de oefeningen-bibliotheek met afbeeldingen en uitleg, of
           maak je eigen oefening met foto.
         </p>

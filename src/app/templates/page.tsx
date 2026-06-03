@@ -15,7 +15,7 @@ export default async function TemplatesPage() {
       <Header email={user?.email} />
       <main className="mx-auto max-w-3xl px-4 py-8">
         <h1 className="mb-1 text-3xl font-bold">Kant-en-klare programma&apos;s</h1>
-        <p className="mb-6 text-slate-400">
+        <p className="mb-6 text-muted">
           Kies een bewezen schema en voeg het met één klik toe aan je eigen
           schema&apos;s. Daarna kun je het naar wens aanpassen.
         </p>
@@ -24,14 +24,14 @@ export default async function TemplatesPage() {
           {ROUTINE_TEMPLATES.map((tpl) => (
             <div
               key={tpl.id}
-              className="rounded-2xl border border-slate-800 bg-slate-900/50 p-5"
+              className="rounded-2xl border border-line bg-surface p-5"
             >
               <div className="flex items-start justify-between gap-3">
                 <div>
                   <h2 className="text-lg font-semibold">{tpl.name}</h2>
-                  <p className="mt-0.5 text-sm text-slate-400">{tpl.description}</p>
+                  <p className="mt-0.5 text-sm text-muted">{tpl.description}</p>
                 </div>
-                <span className="shrink-0 rounded-full bg-slate-800 px-2.5 py-1 text-xs text-slate-300">
+                <span className="shrink-0 rounded-full bg-surface2 px-2.5 py-1 text-xs text-muted">
                   {tpl.level}
                 </span>
               </div>
@@ -51,7 +51,7 @@ export default async function TemplatesPage() {
                 <input type="hidden" name="template_id" value={tpl.id} />
                 <button
                   type="submit"
-                  className="rounded-xl bg-gradient-to-r from-rose-500 to-orange-500 px-5 py-2.5 font-semibold text-white transition hover:opacity-90"
+                  className="rounded-xl bg-primary px-5 py-2.5 font-semibold text-white transition hover:opacity-90"
                 >
                   Toevoegen aan mijn schema&apos;s
                 </button>
@@ -60,7 +60,7 @@ export default async function TemplatesPage() {
           ))}
         </div>
 
-        <p className="mt-4 text-xs text-slate-600">
+        <p className="mt-4 text-xs text-faint">
           Tip: deze schema&apos;s gebruiken oefeningen uit de bibliotheek. Werkt
           een oefening niet? Dan staat die nog niet in je database — draai dan de
           volledige oefeningen-seed.

@@ -72,7 +72,7 @@ export function ExerciseRow({
       }}
       action={updateRoutineExercise}
       onSubmit={() => setDirty(false)}
-      className={`bg-slate-900/50 px-4 py-4 sm:px-5 ${
+      className={`bg-surface px-4 py-4 sm:px-5 ${
         item.superset_group != null ? "border-l-2 border-l-sky-500" : ""
       }`}
     >
@@ -89,7 +89,7 @@ export function ExerciseRow({
           type="button"
           onClick={() => setShowDetail(true)}
           title="Klik om de foto en uitleg te bekijken"
-          className="group relative h-14 w-14 shrink-0 overflow-hidden rounded-xl bg-white ring-1 ring-slate-700 transition hover:ring-rose-500"
+          className="group relative h-14 w-14 shrink-0 overflow-hidden rounded-xl bg-white ring-1 ring-line transition hover:ring-primary"
         >
           {img ? (
             <>
@@ -100,7 +100,7 @@ export function ExerciseRow({
                 sizes="56px"
                 className="object-cover"
               />
-              <span className="absolute inset-0 flex items-center justify-center bg-black/0 text-transparent transition group-hover:bg-black/40 group-hover:text-white">
+              <span className="absolute inset-0 flex items-center justify-center bg-black/0 text-transparent transition group-hover:bg-black/40 group-hover:text-fg">
                 🔍
               </span>
             </>
@@ -114,11 +114,11 @@ export function ExerciseRow({
           <button
             type="button"
             onClick={() => setShowDetail(true)}
-            className="truncate text-left font-medium hover:text-rose-400"
+            className="truncate text-left font-medium hover:text-primary"
           >
             {item.exercise.name}
           </button>
-          <p className="truncate text-xs text-slate-500">
+          <p className="truncate text-xs text-faint">
             {item.exercise.primary_muscles.join(", ")}
             {item.exercise.equipment ? ` · ${item.exercise.equipment}` : ""}
           </p>
@@ -134,7 +134,7 @@ export function ExerciseRow({
 
         {/* RIR badge */}
         <div className="col-span-4 flex flex-col items-center sm:col-span-1">
-          <span className="mb-1 text-[11px] font-medium uppercase tracking-wide text-slate-500">
+          <span className="mb-1 text-[11px] font-medium uppercase tracking-wide text-faint">
             RIR
           </span>
           {rir ? (
@@ -147,7 +147,7 @@ export function ExerciseRow({
             </span>
           ) : (
             <span
-              className="rounded-lg px-2.5 py-1.5 text-sm text-slate-500 ring-1 ring-slate-700"
+              className="rounded-lg px-2.5 py-1.5 text-sm text-faint ring-1 ring-line"
               title="Vul kg en 1RM in voor automatische RIR"
             >
               –
@@ -161,14 +161,18 @@ export function ExerciseRow({
         <button
           type="submit"
           disabled={!dirty}
-          className="rounded-lg bg-slate-100 px-3 py-1.5 text-sm font-semibold text-slate-900 transition hover:bg-white disabled:opacity-40"
+          className={`rounded-lg px-3 py-1.5 text-sm font-semibold transition disabled:opacity-40 ${
+            dirty
+              ? "bg-primary text-primary-fg hover:brightness-110"
+              : "border border-line text-faint"
+          }`}
         >
           {dirty ? "Opslaan" : "Opgeslagen"}
         </button>
         <button
           type="submit"
           formAction={deleteRoutineExercise}
-          className="text-xs text-slate-500 transition hover:text-rose-400"
+          className="text-xs text-faint transition hover:text-primary"
         >
           Verwijderen
         </button>
@@ -184,14 +188,14 @@ export function ExerciseRow({
           setDirty(true);
         }}
         placeholder="📝 Notitie (bijv. tempo, vorm, blessure)…"
-        className="mt-3 w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm placeholder:text-slate-600 focus:border-rose-500 focus:outline-none"
+        className="mt-3 w-full rounded-lg border border-line bg-canvas px-3 py-2 text-sm placeholder:text-faint focus:border-primary focus:outline-none"
       />
 
       <button
         type="submit"
         formAction={toggleSuperset}
         className={`mt-2 text-xs transition hover:text-sky-300 ${
-          item.superset_group != null ? "text-sky-400" : "text-slate-500"
+          item.superset_group != null ? "text-sky-400" : "text-faint"
         }`}
         title="Koppel deze oefening als superset met de oefening erboven"
       >
@@ -225,7 +229,7 @@ function NumField({
 }) {
   return (
     <label className="flex flex-col">
-      <span className="mb-1 text-[11px] font-medium uppercase tracking-wide text-slate-500">
+      <span className="mb-1 text-[11px] font-medium uppercase tracking-wide text-faint">
         {label}
       </span>
       <input
@@ -238,7 +242,7 @@ function NumField({
         onChange={(e) => onChange(e.target.value)}
         onDoubleClick={onDouble}
         title={onDouble ? "Dubbelklik om 1RM te schatten uit kg × reps" : undefined}
-        className="w-16 rounded-lg border border-slate-700 bg-slate-950 px-2 py-1.5 text-center tabular-nums focus:border-rose-500 focus:outline-none"
+        className="w-16 rounded-lg border border-line bg-canvas px-2 py-1.5 text-center tabular-nums focus:border-primary focus:outline-none"
       />
     </label>
   );

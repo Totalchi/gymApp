@@ -28,7 +28,7 @@ export function PlateCalculator({ onClose }: { onClose: () => void }) {
       onClick={onClose}
     >
       <div
-        className="w-full max-w-sm rounded-2xl border border-slate-700 bg-slate-900 p-5"
+        className="w-full max-w-sm rounded-2xl border border-line bg-surface p-5"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="mb-4 flex items-center justify-between">
@@ -36,7 +36,7 @@ export function PlateCalculator({ onClose }: { onClose: () => void }) {
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg px-3 py-1 text-sm text-slate-400 hover:bg-slate-800"
+            className="rounded-lg px-3 py-1 text-sm text-muted hover:bg-surface2"
           >
             Sluiten
           </button>
@@ -44,7 +44,7 @@ export function PlateCalculator({ onClose }: { onClose: () => void }) {
 
         <div className="mb-4 flex gap-2">
           <label className="flex-1">
-            <span className="mb-1 block text-xs text-slate-400">
+            <span className="mb-1 block text-xs text-muted">
               Doelgewicht ({unit})
             </span>
             <input
@@ -53,15 +53,15 @@ export function PlateCalculator({ onClose }: { onClose: () => void }) {
               step="0.5"
               value={weight}
               onChange={(e) => setWeight(e.target.value)}
-              className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-center tabular-nums focus:border-rose-500 focus:outline-none"
+              className="w-full rounded-lg border border-line bg-canvas px-3 py-2 text-center tabular-nums focus:border-primary focus:outline-none"
             />
           </label>
           <label className="w-24">
-            <span className="mb-1 block text-xs text-slate-400">Stang</span>
+            <span className="mb-1 block text-xs text-muted">Stang</span>
             <select
               value={bar}
               onChange={(e) => setBar(Number(e.target.value))}
-              className="w-full rounded-lg border border-slate-700 bg-slate-950 px-2 py-2 text-center focus:outline-none"
+              className="w-full rounded-lg border border-line bg-canvas px-2 py-2 text-center focus:outline-none"
             >
               {[20, 15, 10, 7, 0].map((b) => (
                 <option key={b} value={b}>
@@ -72,9 +72,9 @@ export function PlateCalculator({ onClose }: { onClose: () => void }) {
           </label>
         </div>
 
-        <p className="mb-2 text-sm text-slate-400">Per kant:</p>
+        <p className="mb-2 text-sm text-muted">Per kant:</p>
         {result.perSide.length === 0 ? (
-          <p className="rounded-lg bg-slate-800 px-3 py-4 text-center text-sm text-slate-500">
+          <p className="rounded-lg bg-surface2 px-3 py-4 text-center text-sm text-faint">
             Alleen de stang ({bar} {unit}).
           </p>
         ) : (

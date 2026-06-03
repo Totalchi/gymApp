@@ -1,63 +1,48 @@
 import Link from "next/link";
 import { signout } from "@/app/login/actions";
+import { ThemeToggle } from "@/components/ThemeToggle";
+import { IconDumbbell } from "@/components/Icons";
 
-export function Header({ email }: { email?: string | null }) {
+const NAV = [
+  { href: "/dashboard", label: "Schema's" },
+  { href: "/exercises", label: "Oefeningen" },
+  { href: "/templates", label: "Programma's" },
+  { href: "/history", label: "Historie" },
+  { href: "/stats", label: "Stats" },
+  { href: "/progress", label: "Voortgang" },
+  { href: "/body", label: "Lichaam" },
+  { href: "/settings", label: "Instellingen" },
+];
+
+export function Header({ email: _email }: { email?: string | null }) {
   return (
-    <header className="sticky top-0 z-20 border-b border-slate-800 bg-slate-950/80 backdrop-blur">
-      <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3">
+    <header className="sticky top-0 z-30 border-b border-line bg-canvas/85 backdrop-blur">
+      <div className="mx-auto flex h-14 max-w-5xl items-center justify-between gap-3 px-4">
         <Link href="/dashboard" className="flex items-center gap-2 font-bold">
-          <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-rose-500 to-orange-500">
-            🏋️
+          <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-fg">
+            <IconDumbbell className="h-5 w-5" />
           </span>
-          GymApp
+          <span>GymApp</span>
         </Link>
-        <div className="flex items-center gap-3">
-          <Link
-            href="/exercises"
-            className="text-sm text-slate-300 hover:text-white"
-          >
-            Oefeningen
-          </Link>
-          <Link
-            href="/templates"
-            className="hidden text-sm text-slate-300 hover:text-white sm:inline"
-          >
-            Programma&apos;s
-          </Link>
-          <Link
-            href="/history"
-            className="hidden text-sm text-slate-300 hover:text-white sm:inline"
-          >
-            Geschiedenis
-          </Link>
-          <Link
-            href="/stats"
-            className="hidden text-sm text-slate-300 hover:text-white sm:inline"
-          >
-            Stats
-          </Link>
-          <Link
-            href="/progress"
-            className="hidden text-sm text-slate-300 hover:text-white lg:inline"
-          >
-            Voortgang
-          </Link>
-          <Link
-            href="/body"
-            className="hidden text-sm text-slate-300 hover:text-white lg:inline"
-          >
-            Lichaam
-          </Link>
-          <Link
-            href="/settings"
-            className="hidden text-sm text-slate-300 hover:text-white lg:inline"
-          >
-            Instellingen
-          </Link>
+
+        <nav className="hidden items-center gap-0.5 md:flex">
+          {NAV.map((n) => (
+            <Link
+              key={n.href}
+              href={n.href}
+              className="rounded-lg px-2.5 py-1.5 text-sm text-muted transition hover:bg-surface2 hover:text-fg"
+            >
+              {n.label}
+            </Link>
+          ))}
+        </nav>
+
+        <div className="flex items-center gap-2">
+          <ThemeToggle />
           <form action={signout}>
             <button
               type="submit"
-              className="rounded-lg border border-slate-700 px-3 py-1.5 text-sm text-slate-300 transition hover:bg-slate-800"
+              className="rounded-lg border border-line px-3 py-1.5 text-sm text-muted transition hover:bg-surface2 hover:text-fg"
             >
               Uitloggen
             </button>
