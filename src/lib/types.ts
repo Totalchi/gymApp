@@ -98,6 +98,22 @@ export interface RoutineDay {
 /** Weekdagen, 0 = maandag ... 6 = zondag. */
 export const WEEKDAY_KEYS = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"] as const;
 
+export interface Profile {
+  id: string;
+  display_name: string | null;
+  username: string | null;
+  bio: string | null;
+  weight_unit?: string | null;
+}
+
+export interface Comment {
+  id: string;
+  session_id: string;
+  user_id: string;
+  body: string;
+  created_at: string;
+}
+
 export interface Goal {
   id: string;
   user_id: string;

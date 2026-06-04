@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import {
   IconHome,
   IconDumbbell,
-  IconChart,
+  IconUsers,
   IconClock,
   IconCog,
 } from "@/components/Icons";
@@ -17,7 +17,7 @@ export function BottomNav() {
   const TABS = [
     { href: "/dashboard", label: t("nav.routines"), Icon: IconHome },
     { href: "/exercises", label: t("nav.exercises"), Icon: IconDumbbell },
-    { href: "/stats", label: t("nav.stats"), Icon: IconChart },
+    { href: "/feed", label: t("nav.feed"), Icon: IconUsers },
     { href: "/history", label: t("nav.history"), Icon: IconClock },
     { href: "/settings", label: t("nav.more"), Icon: IconCog },
   ];

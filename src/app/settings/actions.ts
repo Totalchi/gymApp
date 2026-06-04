@@ -15,12 +15,25 @@ export async function updateProfile(formData: FormData) {
   if (!user) redirect("/login");
 
   const displayName = String(formData.get("display_name") ?? "").trim() || null;
+  const bio = String(formData.get("bio") ?? "").trim() || null;
   const weightUnit =
     String(formData.get("weight_unit") ?? "kg") === "lb" ? "lb" : "kg";
 
   await supabase
     .from("profiles")
-    .upsert({ id: user.id, display_name: displayName, weight_unit: weightUnit });
+    .upsert({ id: user.id, display_name: displayName, weight_unit: weightUnit, bio });
+
+  // Gebruikersnaam apart (uniek): fouten negeren zodat de rest wel opslaat.
+  const usernameRaw = String(formData.get("username") ?? "")
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9_.]/g, "");
+  if (formData.has("username")) {
+    await supabase
+      .from("profiles")
+      .update({ username: usernameRaw || null })
+      .eq("id", user.id);
+  }
 
   // Cookie zodat de layout het snel kan lezen (zonder DB).
   const store = await cookies();

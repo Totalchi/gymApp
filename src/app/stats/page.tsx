@@ -4,13 +4,28 @@ import { Header } from "@/components/Header";
 import { LineChart, type ChartPoint } from "@/components/LineChart";
 import { getT } from "@/lib/serverLang";
 
-export default async function StatsPage() {
+const RANGES: { key: string; days: number | null }[] = [
+  { key: "30d", days: 30 },
+  { key: "3m", days: 90 },
+  { key: "1y", days: 365 },
+  { key: "all", days: null },
+];
+
+export default async function StatsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ range?: string }>;
+}) {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
   const { t, lang } = await getT();
   const loc = lang === "en" ? "en-US" : "nl-NL";
+
+  const { range = "all" } = await searchParams;
+  const rangeDays = (RANGES.find((r) => r.key === range) ?? RANGES[3]).days;
+  const cutoff = rangeDays != null ? new Date(Date.now() - rangeDays * 864e5).toISOString() : null;
 
   // Sessies + sets voor kalender en volume.
   const { data: sessions } = await supabase
@@ -67,16 +82,18 @@ export default async function StatsPage() {
   const maxWeekCount = Math.max(1, ...weeks.map((w) => w.count));
   const hasWeekData = weeks.some((w) => w.count > 0);
 
-  // Spiergroep-verdeling op basis van set-volume.
+  // Spiergroep-verdeling op basis van set-volume (binnen gekozen periode).
   const { data: setRows } = await supabase
     .from("workout_sets")
-    .select("weight, reps, exercise:exercises(primary_muscles)");
+    .select("weight, reps, exercise:exercises(primary_muscles), session:workout_sessions(performed_at)");
   const muscleVolume: Record<string, number> = {};
   for (const r of (setRows ?? []) as unknown as {
     weight: number | null;
     reps: number | null;
     exercise: { primary_muscles: string[] } | null;
+    session: { performed_at: string } | null;
   }[]) {
+    if (cutoff && (!r.session || r.session.performed_at < cutoff)) continue;
     const v = (r.weight ?? 0) * (r.reps ?? 0);
     if (!v || !r.exercise) continue;
     for (const m of r.exercise.primary_muscles ?? []) {
@@ -186,7 +203,24 @@ export default async function StatsPage() {
 
         {/* Spiergroep-verdeling */}
         <section className="rounded-2xl border border-line bg-surface p-5">
-          <h2 className="mb-3 font-semibold">{t("stats.volumePerMuscle")}</h2>
+          <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+            <h2 className="font-semibold">{t("stats.volumePerMuscle")}</h2>
+            <div className="flex flex-wrap gap-1.5">
+              {RANGES.map((r) => (
+                <Link
+                  key={r.key}
+                  href={`/stats?range=${r.key}`}
+                  className={`rounded-full px-2.5 py-1 text-xs font-medium ring-1 transition ${
+                    range === r.key
+                      ? "bg-primary text-primary-fg ring-primary"
+                      : "text-muted ring-line hover:bg-surface2"
+                  }`}
+                >
+                  {t(`range.${r.key}`)}
+                </Link>
+              ))}
+            </div>
+          </div>
           {muscles.length === 0 ? (
             <p className="text-sm text-faint">
               {t("stats.noSets")}{" "}

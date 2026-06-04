@@ -359,6 +359,25 @@ export function WorkoutLogger({
     );
   }
 
+  // Voeg een warmup-set toe bovenaan (telt niet mee in records/1RM).
+  function addWarmup(gi: number) {
+    setGroups((prev) =>
+      prev.map((g, i) => {
+        if (i !== gi) return g;
+        const firstWorking = g.sets.find((s) => num(s.weight));
+        const w = firstWorking ? num(firstWorking.weight) : null;
+        const warm = w ? String(Math.round(w * 0.5 * 2) / 2) : "";
+        return {
+          ...g,
+          sets: [
+            { reps: "", weight: warm, oneRm: "", rir: "", setType: "warmup", completed: false },
+            ...g.sets,
+          ],
+        };
+      }),
+    );
+  }
+
   function stopWorkout() {
     const secs =
       startMs != null
@@ -507,7 +526,7 @@ export function WorkoutLogger({
               );
             })}
 
-            <div className="flex items-center justify-between pt-1">
+            <div className="flex items-center gap-4 pt-1">
               <button
                 type="button"
                 onClick={() => addSet(gi)}
@@ -515,11 +534,18 @@ export function WorkoutLogger({
               >
                 + Set
               </button>
+              <button
+                type="button"
+                onClick={() => addWarmup(gi)}
+                className="text-sm font-medium text-amber-400 hover:underline"
+              >
+                + {t("wk.warmup")}
+              </button>
               {g.sets.length > 0 && (
                 <button
                   type="button"
                   onClick={() => removeSet(gi, g.sets.length - 1)}
-                  className="text-xs text-faint hover:text-primary"
+                  className="ml-auto text-xs text-faint hover:text-primary"
                 >
                   − Set
                 </button>
