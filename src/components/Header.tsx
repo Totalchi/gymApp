@@ -19,7 +19,10 @@ export function Header({ email: _email }: { email?: string | null }) {
   ];
 
   return (
-    <header className="sticky top-0 z-30 border-b border-line bg-canvas/85 backdrop-blur">
+    <header
+      className="sticky top-0 z-30 border-b border-line bg-canvas/85 backdrop-blur"
+      style={{ paddingTop: "env(safe-area-inset-top)" }}
+    >
       <div className="mx-auto flex h-14 max-w-5xl items-center justify-between gap-3 px-4">
         <Link href="/dashboard" className="flex items-center gap-2 font-bold">
           <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-fg">
