@@ -92,6 +92,19 @@ export interface RoutineDay {
   name: string;
   day_type: DayType;
   day_order: number;
+  weekday: number | null;
+}
+
+/** Weekdagen, 0 = maandag ... 6 = zondag. */
+export const WEEKDAY_KEYS = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"] as const;
+
+export interface Goal {
+  id: string;
+  user_id: string;
+  kind: "bodyweight" | "lift";
+  exercise_id: string | null;
+  target: number;
+  created_at: string;
 }
 
 export interface RoutineExercise {

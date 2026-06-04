@@ -16,6 +16,7 @@ export function Header({ email: _email }: { email?: string | null }) {
     { href: "/stats", label: t("nav.stats") },
     { href: "/progress", label: t("nav.progress") },
     { href: "/body", label: t("nav.body") },
+    { href: "/goals", label: t("nav.goals") },
     { href: "/settings", label: t("nav.settings") },
   ];
 
