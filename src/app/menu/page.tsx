@@ -95,6 +95,7 @@ export default async function MenuPage() {
               {t("menu.account")}
             </h2>
             <div className="divide-y divide-line overflow-hidden rounded-2xl border border-line bg-surface">
+              <Row href="/notifications" label={t("notif.title")} icon="🔔" />
               <Row href="/settings" label={t("nav.settings")} icon="⚙️" />
               <form action={signout}>
                 <button

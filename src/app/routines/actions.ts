@@ -13,6 +13,49 @@ async function requireUser() {
   return { supabase, user };
 }
 
+type DB = Awaited<ReturnType<typeof createClient>>;
+
+async function exerciseName(supabase: DB, id?: string | null): Promise<string | undefined> {
+  if (!id) return undefined;
+  const { data } = await supabase.from("exercises").select("name").eq("id", id).maybeSingle();
+  return data?.name ?? undefined;
+}
+
+/**
+ * Stuur de cliënt een notificatie wanneer zijn coach een TOEGEWEZEN schema
+ * aanpast. Doet niets als de bewerker de eigenaar is of het schema niet door
+ * hem werd toegewezen.
+ */
+async function notifyAssignedRoutineChange(
+  supabase: DB,
+  actorId: string,
+  routineId: string,
+  type: "coach_swap" | "coach_add" | "coach_remove",
+  extra: { from?: string; to?: string },
+) {
+  const { data: r } = await supabase
+    .from("routines")
+    .select("user_id, assigned_by, name")
+    .eq("id", routineId)
+    .maybeSingle();
+  if (!r || r.assigned_by !== actorId || r.user_id === actorId) return;
+
+  const { data: coach } = await supabase
+    .from("profiles")
+    .select("display_name, username")
+    .eq("id", actorId)
+    .maybeSingle();
+  const coachName =
+    coach?.display_name || (coach?.username ? `@${coach.username}` : "Coach");
+
+  await supabase.from("notifications").insert({
+    user_id: r.user_id,
+    actor_id: actorId,
+    type,
+    data: { ...extra, coach: coachName, routine: r.name, routineId },
+  });
+}
+
 // ---------------------------------------------------------------------------
 // Routines (schema's)
 // ---------------------------------------------------------------------------
@@ -259,7 +302,7 @@ export async function deleteDay(formData: FormData) {
 // Oefeningen binnen een dag
 // ---------------------------------------------------------------------------
 export async function addExerciseToDay(formData: FormData) {
-  const { supabase } = await requireUser();
+  const { supabase, user } = await requireUser();
   const dayId = String(formData.get("day_id"));
   const exerciseId = String(formData.get("exercise_id"));
   const routineId = String(formData.get("routine_id"));
@@ -275,6 +318,39 @@ export async function addExerciseToDay(formData: FormData) {
     position: count ?? 0,
     sets: 3,
     reps: 10,
+  });
+
+  await notifyAssignedRoutineChange(supabase, user.id, routineId, "coach_add", {
+    to: await exerciseName(supabase, exerciseId),
+  });
+
+  revalidatePath(`/routines/${routineId}`);
+}
+
+/** Vervang één oefening door een andere (behoudt sets/reps/positie). */
+export async function swapRoutineExercise(formData: FormData) {
+  const { supabase, user } = await requireUser();
+  const id = String(formData.get("id"));
+  const routineId = String(formData.get("routine_id"));
+  const newExerciseId = String(formData.get("exercise_id"));
+  if (!id || !newExerciseId) return;
+
+  const { data: row } = await supabase
+    .from("routine_exercises")
+    .select("exercise_id")
+    .eq("id", id)
+    .maybeSingle();
+  const oldExerciseId = row?.exercise_id as string | undefined;
+  if (oldExerciseId === newExerciseId) return;
+
+  await supabase
+    .from("routine_exercises")
+    .update({ exercise_id: newExerciseId })
+    .eq("id", id);
+
+  await notifyAssignedRoutineChange(supabase, user.id, routineId, "coach_swap", {
+    from: await exerciseName(supabase, oldExerciseId),
+    to: await exerciseName(supabase, newExerciseId),
   });
 
   revalidatePath(`/routines/${routineId}`);
@@ -326,10 +402,22 @@ export async function updateRoutineExercise(formData: FormData) {
 }
 
 export async function deleteRoutineExercise(formData: FormData) {
-  const { supabase } = await requireUser();
+  const { supabase, user } = await requireUser();
   const id = String(formData.get("id"));
   const routineId = String(formData.get("routine_id"));
+
+  const { data: row } = await supabase
+    .from("routine_exercises")
+    .select("exercise_id")
+    .eq("id", id)
+    .maybeSingle();
+
   await supabase.from("routine_exercises").delete().eq("id", id);
+
+  await notifyAssignedRoutineChange(supabase, user.id, routineId, "coach_remove", {
+    from: await exerciseName(supabase, row?.exercise_id as string | undefined),
+  });
+
   revalidatePath(`/routines/${routineId}`);
 }
 

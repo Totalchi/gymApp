@@ -4,6 +4,7 @@ import Link from "next/link";
 import { signout } from "@/app/login/actions";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { LanguageToggle } from "@/components/LanguageToggle";
+import { NotificationBell } from "@/components/NotificationBell";
 import { IconDumbbell } from "@/components/Icons";
 import { useT } from "@/components/LangProvider";
 
@@ -44,6 +45,7 @@ export function Header({ email: _email }: { email?: string | null }) {
         </nav>
 
         <div className="flex items-center gap-2">
+          <NotificationBell />
           <LanguageToggle />
           <ThemeToggle />
           <form action={signout} className="hidden sm:block">
