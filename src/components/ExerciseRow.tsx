@@ -136,7 +136,7 @@ export function ExerciseRow({
             onChange={(e) => { setReps(e.target.value); setDirty(true); }}
             placeholder="6-8"
             title="Eén getal of een bereik, bv. 6-8"
-            className="w-16 rounded-lg border border-line bg-canvas px-2 py-1.5 text-center tabular-nums focus:border-primary focus:outline-none"
+            className="h-11 w-16 rounded-lg border border-line bg-canvas px-2 text-center text-base tabular-nums focus:border-primary focus:outline-none"
           />
         </label>
         <NumField label={unit} name="weight" value={weight} onChange={(v) => { setWeight(v); setDirty(true); }} step="0.5" />
@@ -153,7 +153,7 @@ export function ExerciseRow({
             onChange={(e) => { setRestStr(e.target.value); setDirty(true); }}
             placeholder={t("routine.restPh")}
             title={t("routine.restPh")}
-            className="w-24 rounded-lg border border-line bg-canvas px-2 py-1.5 text-center focus:border-primary focus:outline-none"
+            className="h-11 w-28 rounded-lg border border-line bg-canvas px-2 text-center text-base focus:border-primary focus:outline-none"
           />
         </label>
 
@@ -170,17 +170,17 @@ export function ExerciseRow({
             placeholder="2-3"
             title="Eén getal of een bereik, bv. 2-3"
             style={shownRir != null && !Number.isNaN(shownRir) ? rirStyle(shownRir) : undefined}
-            className="w-16 rounded-lg border border-line bg-canvas px-2 py-1.5 text-center font-semibold tabular-nums focus:border-primary focus:outline-none"
+            className="h-11 w-16 rounded-lg border border-line bg-canvas px-2 text-center text-base font-semibold tabular-nums focus:border-primary focus:outline-none"
           />
         </label>
       </div>
 
       {/* Acties */}
-      <div className="flex items-center gap-2 sm:flex-col">
+      <div className="flex items-center gap-3 sm:flex-col">
         <button
           type="submit"
           disabled={!dirty}
-          className={`rounded-lg px-3 py-1.5 text-sm font-semibold transition disabled:opacity-40 ${
+          className={`h-11 rounded-lg px-4 text-sm font-semibold transition disabled:opacity-40 ${
             dirty
               ? "bg-primary text-primary-fg hover:brightness-110"
               : "border border-line text-faint"
@@ -191,7 +191,7 @@ export function ExerciseRow({
         <button
           type="submit"
           formAction={deleteRoutineExercise}
-          className="text-xs text-faint transition hover:text-danger"
+          className="px-1 py-1 text-sm text-faint transition hover:text-danger"
         >
           {t("common.delete")}
         </button>
@@ -261,7 +261,7 @@ function NumField({
         onChange={(e) => onChange(e.target.value)}
         onDoubleClick={onDouble}
         title={onDouble ? "Dubbelklik om 1RM te schatten uit kg × reps" : undefined}
-        className="w-14 rounded-lg border border-line bg-canvas px-1 py-1.5 text-center tabular-nums focus:border-primary focus:outline-none sm:w-16 sm:px-2"
+        className="h-11 w-16 rounded-lg border border-line bg-canvas px-2 text-center text-base tabular-nums focus:border-primary focus:outline-none"
       />
     </label>
   );
