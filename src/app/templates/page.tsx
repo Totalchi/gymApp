@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import Link from "next/link";
 import { Header } from "@/components/Header";
 import { addTemplate } from "@/app/routines/actions";
 import { ROUTINE_TEMPLATES } from "@/lib/templates";
@@ -57,6 +58,16 @@ export default async function TemplatesPage() {
               </form>
             </div>
           ))}
+        </div>
+
+        <div className="mt-6 rounded-2xl border border-dashed border-line p-5 text-center">
+          <p className="mb-3 text-sm text-muted">{t("tpl.ownIntro")}</p>
+          <Link
+            href="/dashboard"
+            className="inline-block rounded-xl border border-line px-5 py-2.5 font-semibold text-fg transition hover:border-primary hover:text-primary"
+          >
+            + {t("tpl.makeOwn")}
+          </Link>
         </div>
 
         <p className="mt-4 text-xs text-faint">{t("tpl.tip")}</p>

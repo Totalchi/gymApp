@@ -266,6 +266,8 @@ const nl: Dict = {
     "Kies een bewezen schema en voeg het met één klik toe aan je eigen schema's. Daarna kun je het naar wens aanpassen.",
   "tpl.exShort": "oef.",
   "tpl.add": "Toevoegen aan mijn schema's",
+  "tpl.ownIntro": "Liever helemaal zelf samenstellen?",
+  "tpl.makeOwn": "Maak je eigen schema",
   "tpl.tip":
     "Tip: deze schema's gebruiken oefeningen uit de bibliotheek. Werkt een oefening niet? Dan staat die nog niet in je database — draai dan de volledige oefeningen-seed.",
   // settings
@@ -597,6 +599,8 @@ const en: Dict = {
     "Pick a proven routine and add it to your own with one tap. You can tweak it afterwards.",
   "tpl.exShort": "ex.",
   "tpl.add": "Add to my routines",
+  "tpl.ownIntro": "Prefer to build it entirely yourself?",
+  "tpl.makeOwn": "Build your own routine",
   "tpl.tip":
     "Tip: these routines use exercises from the library. An exercise not working? It isn't in your database yet — run the full exercise seed.",
   "set.title": "Settings",
