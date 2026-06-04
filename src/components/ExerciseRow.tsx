@@ -215,6 +215,9 @@ export function ExerciseRow({
         <button
           type="submit"
           formAction={deleteRoutineExercise}
+          onClick={(e) => {
+            if (!confirm(t("routine.confirmDeleteExercise"))) e.preventDefault();
+          }}
           className="px-1 py-1 text-sm text-faint transition hover:text-danger"
         >
           {t("common.delete")}

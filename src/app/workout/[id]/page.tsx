@@ -1,8 +1,6 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { Header } from "@/components/Header";
-import { getT } from "@/lib/serverLang";
 import { parseRestToSeconds } from "@/lib/rest";
 import {
   WorkoutLogger,
@@ -20,7 +18,6 @@ export default async function WorkoutPage({
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  const { t } = await getT();
 
   const { data: session } = await supabase
     .from("workout_sessions")
@@ -129,21 +126,14 @@ export default async function WorkoutPage({
   }
 
   return (
-    <>
+    <div className="fixed inset-0 z-10 flex flex-col bg-canvas">
       <Header email={user?.email} />
-      <main className="mx-auto max-w-3xl px-4 py-8">
-        <Link href="/dashboard" className="text-sm text-muted hover:text-fg">
-          ← Dashboard
-        </Link>
-        <h1 className="mb-1 mt-2 text-3xl font-bold">{t("wk.title")}</h1>
-        <p className="mb-6 text-muted">{t("wk.subtitle")}</p>
-        <WorkoutLogger
-          sessionId={session.id}
-          dayName={session.day_name ?? "Workout"}
-          initialGroups={groups}
-          initialNotes={session.notes ?? ""}
-        />
-      </main>
-    </>
+      <WorkoutLogger
+        sessionId={session.id}
+        dayName={session.day_name ?? "Workout"}
+        initialGroups={groups}
+        initialNotes={session.notes ?? ""}
+      />
+    </div>
   );
 }
