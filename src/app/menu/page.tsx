@@ -38,6 +38,7 @@ export default async function MenuPage() {
       items: [
         { href: "/feed", label: t("feed.title"), icon: "👥" },
         { href: "/people", label: t("social.findTitle"), icon: "🔍" },
+        { href: "/coach", label: t("coach.title"), icon: "🧑‍🏫" },
       ],
     },
     {

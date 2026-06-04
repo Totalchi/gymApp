@@ -1,0 +1,131 @@
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import { createClient } from "@/lib/supabase/server";
+import { Header } from "@/components/Header";
+import { getT } from "@/lib/serverLang";
+import { assignRoutine } from "@/app/coach/actions";
+
+function nameOf(p?: { display_name: string | null; username: string | null }) {
+  return p?.display_name || (p?.username ? `@${p.username}` : "Atleet");
+}
+
+export default async function CoachClientPage({
+  params,
+}: {
+  params: Promise<{ clientId: string }>;
+}) {
+  const { clientId } = await params;
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const { t, lang } = await getT();
+  const loc = lang === "en" ? "en-US" : "nl-NL";
+
+  // Actieve coach-relatie vereist.
+  const { data: rel } = await supabase
+    .from("coach_clients")
+    .select("id")
+    .eq("coach_id", user?.id ?? "")
+    .eq("client_id", clientId)
+    .eq("status", "active")
+    .maybeSingle();
+  if (!rel) notFound();
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("display_name, username")
+    .eq("id", clientId)
+    .maybeSingle();
+
+  // Recente workouts van de cliënt (zichtbaar dankzij coach-leesrecht).
+  const { data: sessions } = await supabase
+    .from("workout_sessions")
+    .select("id, day_name, performed_at, workout_sets(weight, reps)")
+    .eq("user_id", clientId)
+    .order("performed_at", { ascending: false })
+    .limit(15);
+
+  // Eigen schema's om toe te wijzen.
+  const { data: myRoutines } = await supabase
+    .from("routines")
+    .select("id, name")
+    .eq("user_id", user?.id ?? "")
+    .order("created_at", { ascending: false });
+
+  return (
+    <>
+      <Header email={user?.email} />
+      <main className="mx-auto max-w-xl px-4 py-8">
+        <Link href="/coach" className="text-sm text-muted hover:text-fg">
+          ← {t("coach.title")}
+        </Link>
+
+        <div className="mb-6 mt-2 flex items-center gap-3">
+          <span className="flex h-12 w-12 items-center justify-center rounded-full bg-primary text-lg font-bold text-primary-fg">
+            {nameOf(profile ?? undefined).replace("@", "").charAt(0).toUpperCase()}
+          </span>
+          <h1 className="text-2xl font-bold">{nameOf(profile ?? undefined)}</h1>
+        </div>
+
+        {/* Schema toewijzen */}
+        <section className="mb-6 rounded-2xl border border-line bg-surface p-5">
+          <h2 className="mb-3 font-semibold">{t("coach.assign")}</h2>
+          {!myRoutines || myRoutines.length === 0 ? (
+            <p className="text-sm text-faint">{t("coach.noOwnRoutines")}</p>
+          ) : (
+            <form action={assignRoutine} className="flex gap-2">
+              <input type="hidden" name="client_id" value={clientId} />
+              <select
+                name="routine_id"
+                className="flex-1 rounded-xl border border-line bg-canvas px-3 py-2.5 focus:border-primary focus:outline-none"
+              >
+                {myRoutines.map((r) => (
+                  <option key={r.id} value={r.id}>
+                    {r.name}
+                  </option>
+                ))}
+              </select>
+              <button className="rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-fg transition hover:brightness-110">
+                {t("coach.assignBtn")}
+              </button>
+            </form>
+          )}
+          <p className="mt-2 text-xs text-faint">{t("coach.assignHint")}</p>
+        </section>
+
+        {/* Recente workouts */}
+        <h2 className="mb-2 font-semibold">{t("coach.recentWorkouts")}</h2>
+        {!sessions || sessions.length === 0 ? (
+          <p className="rounded-2xl border border-dashed border-line py-10 text-center text-sm text-faint">
+            {t("coach.noClientWorkouts")}
+          </p>
+        ) : (
+          <div className="space-y-2">
+            {sessions.map((s) => {
+              const sets = (s.workout_sets ?? []) as { weight: number | null; reps: number | null }[];
+              const vol = sets.reduce((n, x) => n + (x.weight ?? 0) * (x.reps ?? 0), 0);
+              return (
+                <Link
+                  key={s.id}
+                  href={`/w/${s.id}`}
+                  className="block rounded-xl border border-line bg-surface px-4 py-3 transition hover:border-primary/40"
+                >
+                  <p className="font-medium">{s.day_name ?? "Workout"}</p>
+                  <p className="text-xs text-faint">
+                    {new Date(s.performed_at).toLocaleDateString(loc, {
+                      day: "numeric",
+                      month: "short",
+                      year: "numeric",
+                    })}{" "}
+                    · {sets.length} {t("hist.sets")} · {Math.round(vol).toLocaleString()} kg
+                  </p>
+                </Link>
+              );
+            })}
+          </div>
+        )}
+      </main>
+    </>
+  );
+}
