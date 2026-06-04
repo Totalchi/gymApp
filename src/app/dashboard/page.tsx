@@ -18,6 +18,7 @@ interface RoutineRow {
   name: string;
   description: string | null;
   folder_id: string | null;
+  assigned_by: string | null;
   routine_days: { day_type: DayType }[];
 }
 
@@ -34,6 +35,11 @@ function RoutineCard({
   return (
     <div className="group relative flex flex-col rounded-2xl border border-line bg-surface p-5 transition hover:border-primary/40">
       <Link href={`/routines/${r.id}`} className="flex-1">
+        {r.assigned_by && (
+          <span className="mb-1 inline-block rounded-full bg-primary/15 px-2 py-0.5 text-[11px] font-medium text-primary ring-1 ring-primary/30">
+            🧑‍🏫 {t("dash.fromCoach")}
+          </span>
+        )}
         <h3 className="text-lg font-semibold group-hover:text-primary">{r.name}</h3>
         {r.description && (
           <p className="mt-1 line-clamp-2 text-sm text-muted">{r.description}</p>
@@ -101,7 +107,7 @@ export default async function DashboardPage() {
 
   const { data: routines } = await supabase
     .from("routines")
-    .select("id, name, description, created_at, folder_id, routine_days(day_type)")
+    .select("id, name, description, created_at, folder_id, assigned_by, routine_days(day_type)")
     .order("created_at", { ascending: false });
 
   const { data: folders } = await supabase
