@@ -11,6 +11,7 @@ export function Header({ email: _email }: { email?: string | null }) {
   const nav = [
     { href: "/dashboard", label: t("nav.routines") },
     { href: "/exercises", label: t("nav.exercises") },
+    { href: "/feed", label: t("nav.feed") },
     { href: "/templates", label: t("nav.programs") },
     { href: "/history", label: t("nav.history") },
     { href: "/stats", label: t("nav.stats") },

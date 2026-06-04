@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { Header } from "@/components/Header";
 import { getT } from "@/lib/serverLang";
 import { deleteSession, repeatWorkout } from "@/app/workout/actions";
+import { toggleShared } from "@/app/social/actions";
 
 export default async function HistoryPage() {
   const supabase = await createClient();
@@ -14,7 +15,7 @@ export default async function HistoryPage() {
 
   const { data: sessions } = await supabase
     .from("workout_sessions")
-    .select("id, day_name, performed_at, notes, duration_seconds, workout_sets(reps, weight)")
+    .select("id, day_name, performed_at, notes, duration_seconds, shared, workout_sets(reps, weight)")
     .order("performed_at", { ascending: false });
 
   return (
@@ -75,6 +76,16 @@ export default async function HistoryPage() {
                         className="rounded-lg border border-line px-3 py-1.5 text-xs font-medium text-fg transition hover:border-primary hover:text-primary"
                       >
                         ↻ {t("hist.repeat")}
+                      </button>
+                    </form>
+                    <form action={toggleShared}>
+                      <input type="hidden" name="id" value={s.id} />
+                      <button
+                        type="submit"
+                        title={t("hist.sharedHint")}
+                        className="text-xs text-faint transition hover:text-fg"
+                      >
+                        {s.shared ? `🌐 ${t("hist.shared")}` : `🔒 ${t("hist.private")}`}
                       </button>
                     </form>
                     <form action={deleteSession}>

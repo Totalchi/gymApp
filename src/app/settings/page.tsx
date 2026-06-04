@@ -14,13 +14,16 @@ export default async function SettingsPage() {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("display_name, weight_unit")
+    .select("display_name, weight_unit, username, bio")
     .eq("id", user?.id ?? "")
     .single();
 
   const unit = profile?.weight_unit === "lb" ? "lb" : "kg";
 
   const moreLinks = [
+    { href: "/feed", label: t("feed.title"), desc: t("social.feedDesc") },
+    { href: "/people", label: t("social.findTitle"), desc: t("social.findSub") },
+    { href: user ? `/u/${user.id}` : "/feed", label: t("social.myProfile"), desc: t("social.myProfileDesc") },
     { href: "/templates", label: t("nav.programs"), desc: t("set.tplDesc") },
     { href: "/goals", label: t("nav.goals"), desc: t("goals.subtitle") },
     { href: "/progress", label: t("nav.progress"), desc: t("set.progDesc") },
@@ -46,6 +49,31 @@ export default async function SettingsPage() {
               name="display_name"
               defaultValue={profile?.display_name ?? ""}
               placeholder={t("set.namePh")}
+              className="w-full rounded-xl border border-line bg-canvas px-3.5 py-2.5 focus:border-primary focus:outline-none"
+            />
+          </label>
+
+          <label className="block">
+            <span className="mb-1.5 block text-sm font-medium text-muted">
+              {t("set.username")}
+            </span>
+            <input
+              name="username"
+              defaultValue={profile?.username ?? ""}
+              placeholder={t("set.usernamePh")}
+              className="w-full rounded-xl border border-line bg-canvas px-3.5 py-2.5 focus:border-primary focus:outline-none"
+            />
+          </label>
+
+          <label className="block">
+            <span className="mb-1.5 block text-sm font-medium text-muted">
+              {t("set.bio")}
+            </span>
+            <textarea
+              name="bio"
+              defaultValue={profile?.bio ?? ""}
+              rows={2}
+              placeholder={t("set.bioPh")}
               className="w-full rounded-xl border border-line bg-canvas px-3.5 py-2.5 focus:border-primary focus:outline-none"
             />
           </label>

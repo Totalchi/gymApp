@@ -75,6 +75,17 @@ export function IconMoon(p: P) {
   );
 }
 
+export function IconUsers(p: P) {
+  return (
+    <svg {...base} {...p}>
+      <circle cx="9" cy="8" r="3.2" />
+      <path d="M3.5 19a5.5 5.5 0 0 1 11 0" />
+      <path d="M16 5.5a3 3 0 0 1 0 5.5" />
+      <path d="M17.5 19a5.5 5.5 0 0 0-3-4.9" />
+    </svg>
+  );
+}
+
 export function IconList(p: P) {
   return (
     <svg {...base} {...p}>
