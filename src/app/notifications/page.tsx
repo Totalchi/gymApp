@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { Header } from "@/components/Header";
+import { EnablePushButton } from "@/components/EnablePushButton";
 import { getT } from "@/lib/serverLang";
 import {
   notificationIcon,
@@ -54,6 +55,8 @@ export default async function NotificationsPage() {
       <Header email={user?.email} />
       <main className="mx-auto max-w-lg px-4 py-8">
         <h1 className="mb-6 text-3xl font-bold">{t("notif.title")}</h1>
+
+        <EnablePushButton />
 
         {items.length === 0 ? (
           <p className="rounded-2xl border border-dashed border-line py-16 text-center text-sm text-faint">

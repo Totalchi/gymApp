@@ -3,6 +3,9 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { sendPush, type PushSub } from "@/lib/push";
+import { renderNotification } from "@/lib/notifications";
+import { DEFAULT_LANG } from "@/lib/i18n";
 
 async function requireUser() {
   const supabase = await createClient();
@@ -48,11 +51,23 @@ async function notifyAssignedRoutineChange(
   const coachName =
     coach?.display_name || (coach?.username ? `@${coach.username}` : "Coach");
 
+  const data = { ...extra, coach: coachName, routine: r.name, routineId };
+
   await supabase.from("notifications").insert({
     user_id: r.user_id,
     actor_id: actorId,
     type,
-    data: { ...extra, coach: coachName, routine: r.name, routineId },
+    data,
+  });
+
+  // Echte telefoonmelding (web push) naar de cliënt, indien ingeschakeld.
+  const { data: subs } = await supabase.rpc("coach_client_push_subs", {
+    p_client_id: r.user_id,
+  });
+  await sendPush((subs ?? []) as PushSub[], {
+    title: "GymApp",
+    body: renderNotification(DEFAULT_LANG, type, data),
+    url: `/routines/${routineId}`,
   });
 }
 

@@ -97,6 +97,12 @@ const nl: Dict = {
   "notif.title": "Notificaties",
   "notif.empty": "Nog geen notificaties.",
   "notif.bell": "Notificaties",
+  "notif.enable": "Telefoonmeldingen inschakelen",
+  "notif.enabled": "Telefoonmeldingen staan aan",
+  "notif.disable": "Uitschakelen",
+  "notif.denied": "Meldingen zijn geblokkeerd. Zet ze aan in je telefooninstellingen.",
+  "notif.iosHint":
+    "Telefoonmeldingen werken enkel wanneer je de app aan je beginscherm toevoegt (installeert).",
   // exercise picker / browser
   "ex.chooseExercise": "Oefening kiezen",
   "ex.search": "Zoek een oefening...",
@@ -432,6 +438,12 @@ const en: Dict = {
   "notif.title": "Notifications",
   "notif.empty": "No notifications yet.",
   "notif.bell": "Notifications",
+  "notif.enable": "Enable phone notifications",
+  "notif.enabled": "Phone notifications are on",
+  "notif.disable": "Disable",
+  "notif.denied": "Notifications are blocked. Enable them in your phone settings.",
+  "notif.iosHint":
+    "Phone notifications only work when you add the app to your home screen (install it).",
   "ex.chooseExercise": "Choose exercise",
   "ex.search": "Search an exercise...",
   "ex.all": "All",
