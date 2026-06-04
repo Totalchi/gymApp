@@ -147,11 +147,11 @@ export default async function DashboardPage() {
   }
 
   const stats = [
-    { label: t("dash.workouts"), value: totalWorkouts },
-    { label: t("dash.thisWeek"), value: thisWeek },
-    { label: t("dash.streak"), value: `${streak}🔥` },
-    { label: t("dash.setsLogged"), value: totalSets },
-    { label: t("dash.totalVolume"), value: `${Math.round(totalVolume).toLocaleString()} kg` },
+    { label: t("dash.workouts"), value: totalWorkouts, href: "/history" },
+    { label: t("dash.thisWeek"), value: thisWeek, href: "/history" },
+    { label: t("dash.streak"), value: `${streak}🔥`, href: "/achievements" },
+    { label: t("dash.setsLogged"), value: totalSets, href: "/history" },
+    { label: t("dash.totalVolume"), value: `${Math.round(totalVolume).toLocaleString()} kg`, href: "/stats" },
   ];
 
   const all = (routines as RoutineRow[]) ?? [];
@@ -221,13 +221,14 @@ export default async function DashboardPage() {
 
         <div className="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-5">
           {stats.map((s) => (
-            <div
+            <Link
               key={s.label}
-              className="rounded-2xl border border-line bg-surface p-4 text-center"
+              href={s.href}
+              className="rounded-2xl border border-line bg-surface p-4 text-center transition hover:border-primary/50"
             >
               <p className="text-xl font-bold tabular-nums">{s.value}</p>
               <p className="mt-0.5 text-xs text-faint">{s.label}</p>
-            </div>
+            </Link>
           ))}
         </div>
 

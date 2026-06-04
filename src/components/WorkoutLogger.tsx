@@ -87,6 +87,25 @@ export function WorkoutLogger({
   const [pending, startTransition] = useTransition();
   const [showPlates, setShowPlates] = useState(false);
   const [showAdd, setShowAdd] = useState(false);
+  const [swapIdx, setSwapIdx] = useState<number | null>(null);
+
+  function swapExercise(ex: Exercise) {
+    setGroups((prev) =>
+      prev.map((g, i) =>
+        i !== swapIdx
+          ? g
+          : {
+              ...g,
+              exerciseId: ex.id,
+              name: ex.name,
+              image: ex.image_urls?.[0] ?? null,
+              restSeconds: null,
+              previous: [],
+            },
+      ),
+    );
+    setSwapIdx(null);
+  }
 
   function addExercise(ex: Exercise) {
     setGroups((prev) => [
@@ -392,6 +411,14 @@ export function WorkoutLogger({
             <h2 className="min-w-0 flex-1 truncate font-semibold">{g.name}</h2>
             <button
               type="button"
+              onClick={() => setSwapIdx(gi)}
+              title={t("wk.swap")}
+              className="shrink-0 rounded-lg border border-line px-2 py-1.5 text-xs text-muted transition hover:border-primary hover:text-primary"
+            >
+              ↔
+            </button>
+            <button
+              type="button"
               onClick={() => startRest(g.restSeconds ?? restDuration)}
               title={t("wk.startRest")}
               className="flex shrink-0 items-center gap-1 rounded-lg border border-line px-2.5 py-1.5 text-xs font-medium text-muted transition hover:border-primary hover:text-primary"
@@ -612,6 +639,12 @@ export function WorkoutLogger({
         <ExercisePicker
           onPick={addExercise}
           onClose={() => setShowAdd(false)}
+        />
+      )}
+      {swapIdx !== null && (
+        <ExercisePicker
+          onPick={swapExercise}
+          onClose={() => setSwapIdx(null)}
         />
       )}
     </div>

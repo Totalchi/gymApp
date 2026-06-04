@@ -134,6 +134,7 @@ const nl: Dict = {
   "wk.addSet": "+ Set",
   "wk.removeSet": "− Set",
   "wk.addExercise": "+ Oefening toevoegen",
+  "wk.swap": "Oefening wisselen",
   "wk.notesPh": "Notities over deze workout (optioneel)",
   "wk.rest": "Rust",
   "wk.skip": "Skip",
@@ -160,6 +161,14 @@ const nl: Dict = {
   "plan.noDay": "—",
   "plan.weekdayHint": "Koppel deze dag aan een weekdag",
   "plan.today": "Vandaag op het programma",
+  // achievements
+  "ach.title": "Prestaties",
+  "ach.subtitle": "Verdien badges door consistent te trainen.",
+  "ach.earned": "behaald",
+  "ach.workouts": "{n} workouts",
+  "ach.streak": "{n}-dagen streak",
+  "ach.volume": "{n} kg getild",
+  "ach.sets": "{n} sets",
   // doelen
   "goals.title": "Doelen",
   "goals.subtitle": "Stel een streefgewicht of doel-1RM in en volg je voortgang.",
@@ -192,6 +201,7 @@ const nl: Dict = {
   "hist.sets": "sets",
   "hist.volume": "volume",
   "hist.min": "min",
+  "hist.repeat": "Herhaal",
   // stats
   "stats.title": "Statistieken",
   "stats.export": "⬇ Export CSV",
@@ -204,6 +214,10 @@ const nl: Dict = {
   "stats.noSets": "Nog geen gelogde sets.",
   "stats.startWorkout": "Start een workout",
   // progress
+  "range.30d": "30 dagen",
+  "range.3m": "3 maanden",
+  "range.1y": "1 jaar",
+  "range.all": "Alles",
   "prog.title": "Voortgang",
   "prog.subtitle":
     "Geschat 1RM per oefening over tijd, berekend uit je gelogde sets.",
@@ -373,6 +387,7 @@ const en: Dict = {
   "wk.addSet": "+ Set",
   "wk.removeSet": "− Set",
   "wk.addExercise": "+ Add exercise",
+  "wk.swap": "Swap exercise",
   "wk.notesPh": "Notes about this workout (optional)",
   "wk.rest": "Rest",
   "wk.skip": "Skip",
@@ -399,6 +414,14 @@ const en: Dict = {
   "plan.noDay": "—",
   "plan.weekdayHint": "Link this day to a weekday",
   "plan.today": "On the schedule today",
+  // achievements
+  "ach.title": "Achievements",
+  "ach.subtitle": "Earn badges by training consistently.",
+  "ach.earned": "earned",
+  "ach.workouts": "{n} workouts",
+  "ach.streak": "{n}-day streak",
+  "ach.volume": "{n} kg lifted",
+  "ach.sets": "{n} sets",
   // goals
   "goals.title": "Goals",
   "goals.subtitle": "Set a target bodyweight or goal 1RM and track your progress.",
@@ -428,6 +451,7 @@ const en: Dict = {
   "hist.sets": "sets",
   "hist.volume": "volume",
   "hist.min": "min",
+  "hist.repeat": "Repeat",
   "stats.title": "Statistics",
   "stats.export": "⬇ Export CSV",
   "stats.calendar": "Training calendar",
@@ -438,6 +462,10 @@ const en: Dict = {
   "stats.workoutsPerWeek": "Workouts per week",
   "stats.noSets": "No logged sets yet.",
   "stats.startWorkout": "Start a workout",
+  "range.30d": "30 days",
+  "range.3m": "3 months",
+  "range.1y": "1 year",
+  "range.all": "All",
   "prog.title": "Progress",
   "prog.subtitle":
     "Estimated 1RM per exercise over time, calculated from your logged sets.",
