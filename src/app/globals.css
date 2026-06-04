@@ -53,6 +53,14 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+/* Verberg het standaard driehoekje van <details>/<summary> (ook op iOS Safari). */
+summary::-webkit-details-marker {
+  display: none;
+}
+summary {
+  list-style: none;
+}
+
 /* Alleen expliciete thema-vlakken animeren bij het wisselen (snappy). */
 html.theming,
 html.theming * {

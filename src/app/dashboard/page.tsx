@@ -232,12 +232,13 @@ export default async function DashboardPage() {
           ))}
         </div>
 
-        <form
-          action={createRoutine}
-          className="mb-6 rounded-2xl border border-line bg-surface p-5"
-        >
-          <h2 className="mb-3 font-semibold">{t("dash.newSchema")}</h2>
-          <div className="flex flex-col gap-3 sm:flex-row">
+        {/* Nieuw schema (inklapbaar zodat het dashboard rustig blijft) */}
+        <details className="group mb-6 overflow-hidden rounded-2xl border border-line bg-surface">
+          <summary className="flex cursor-pointer list-none items-center justify-between px-5 py-4 font-semibold">
+            <span>➕ {t("dash.newSchema")}</span>
+            <span className="text-faint transition group-open:rotate-180">⌄</span>
+          </summary>
+          <form action={createRoutine} className="flex flex-col gap-3 px-5 pb-5 sm:flex-row">
             <input
               name="name"
               required
@@ -255,28 +256,49 @@ export default async function DashboardPage() {
             >
               {t("dash.create")}
             </button>
-          </div>
-        </form>
-
-        <form action={createFolder} className="mb-6 flex gap-2">
-          <input
-            name="name"
-            placeholder={t("dash.folderPh")}
-            className="flex-1 rounded-xl border border-line bg-canvas px-3.5 py-2 text-sm placeholder:text-faint focus:border-primary focus:outline-none"
-          />
-          <button
-            type="submit"
-            className="rounded-xl border border-line px-4 py-2 text-sm text-fg transition hover:border-primary hover:text-primary"
-          >
-            {t("dash.addFolder")}
-          </button>
-        </form>
+          </form>
+        </details>
 
         {all.length === 0 ? (
           <div className="rounded-2xl border border-dashed border-line py-16 text-center text-faint">
             {t("dash.empty")}
           </div>
+        ) : folderList.length === 0 ? (
+          /* Geen mappen: gewoon een nette lijst */
+          <>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {all.map((r) => (
+                <RoutineCard key={r.id} r={r} folders={folderList} t={t} />
+              ))}
+            </div>
+            {all.length >= 2 && (
+              <details className="group mt-6 rounded-2xl border border-line bg-surface">
+                <summary className="flex cursor-pointer list-none items-center justify-between px-4 py-3 text-sm text-muted">
+                  <span>🗂 {t("dash.addFolder")}</span>
+                  <span className="text-faint transition group-open:rotate-180">⌄</span>
+                </summary>
+                <div className="px-4 pb-4">
+                  <p className="mb-2 text-xs text-faint">{t("dash.foldersHint")}</p>
+                  <form action={createFolder} className="flex gap-2">
+                    <input
+                      name="name"
+                      required
+                      placeholder={t("dash.folderPh")}
+                      className="flex-1 rounded-xl border border-line bg-canvas px-3.5 py-2 text-sm placeholder:text-faint focus:border-primary focus:outline-none"
+                    />
+                    <button
+                      type="submit"
+                      className="rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-fg transition hover:brightness-110"
+                    >
+                      {t("dash.addFolder")}
+                    </button>
+                  </form>
+                </div>
+              </details>
+            )}
+          </>
         ) : (
+          /* Met mappen: groepeer netjes */
           <div className="space-y-8">
             {sections.map((section) => (
               <div key={section.id ?? "none"}>
@@ -309,6 +331,29 @@ export default async function DashboardPage() {
                 )}
               </div>
             ))}
+
+            <details className="group rounded-2xl border border-line bg-surface">
+              <summary className="flex cursor-pointer list-none items-center justify-between px-4 py-3 text-sm text-muted">
+                <span>🗂 {t("dash.addFolder")}</span>
+                <span className="text-faint transition group-open:rotate-180">⌄</span>
+              </summary>
+              <div className="px-4 pb-4">
+                <form action={createFolder} className="flex gap-2">
+                  <input
+                    name="name"
+                    required
+                    placeholder={t("dash.folderPh")}
+                    className="flex-1 rounded-xl border border-line bg-canvas px-3.5 py-2 text-sm placeholder:text-faint focus:border-primary focus:outline-none"
+                  />
+                  <button
+                    type="submit"
+                    className="rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-fg transition hover:brightness-110"
+                  >
+                    {t("dash.addFolder")}
+                  </button>
+                </form>
+              </div>
+            </details>
           </div>
         )}
       </main>
