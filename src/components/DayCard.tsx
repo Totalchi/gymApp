@@ -42,9 +42,25 @@ export function DayCard({
 }) {
   const [pickerOpen, setPickerOpen] = useState(false);
   const [exercises, setExercises] = useState(day.exercises);
+  const [collapsed, setCollapsed] = useState(false);
   const t = useT();
 
   useEffect(() => setExercises(day.exercises), [day.exercises]);
+  useEffect(() => {
+    try {
+      setCollapsed(localStorage.getItem(`daycollapse-${day.id}`) === "1");
+    } catch {}
+  }, [day.id]);
+
+  function toggleCollapse() {
+    setCollapsed((c) => {
+      const n = !c;
+      try {
+        localStorage.setItem(`daycollapse-${day.id}`, n ? "1" : "0");
+      } catch {}
+      return n;
+    });
+  }
 
   const {
     attributes,
@@ -87,12 +103,38 @@ export function DayCard({
           {sortable && (
             <DragHandle attributes={attributes} listeners={listeners} />
           )}
+          <button
+            type="button"
+            onClick={toggleCollapse}
+            aria-label={collapsed ? "Uitklappen" : "Inklappen"}
+            className="shrink-0 text-faint transition hover:text-fg"
+          >
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className={`transition-transform ${collapsed ? "-rotate-90" : ""}`}
+            >
+              <path d="M6 9l6 6 6-6" />
+            </svg>
+          </button>
           <span
             className={`shrink-0 rounded-full px-2.5 py-0.5 text-xs font-medium ring-1 ${DAY_TYPE_COLORS[day.day_type]}`}
           >
             {DAY_TYPE_LABELS[day.day_type]}
           </span>
-          <h2 className="truncate text-lg font-semibold">{day.name}</h2>
+          <button
+            type="button"
+            onClick={toggleCollapse}
+            className="truncate text-left text-lg font-semibold"
+          >
+            {day.name}
+          </button>
           <span className="hidden text-sm text-faint sm:inline">
             {exercises.length}{" "}
             {exercises.length === 1 ? t("routine.exercise") : t("routine.exercises")}
@@ -143,6 +185,8 @@ export function DayCard({
         </div>
       </header>
 
+      {!collapsed && (
+      <>
       <div>
         {exercises.length === 0 ? (
           <p className="px-5 py-6 text-center text-sm text-faint">
@@ -176,6 +220,8 @@ export function DayCard({
           {t("routine.addExercise")}
         </button>
       </div>
+      </>
+      )}
 
       {pickerOpen && (
         <ExercisePicker

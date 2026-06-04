@@ -14,12 +14,28 @@ interface RawSet {
   session: { performed_at: string } | null;
 }
 
-export default async function ProgressPage() {
+const RANGES: { key: string; days: number | null }[] = [
+  { key: "30d", days: 30 },
+  { key: "3m", days: 90 },
+  { key: "1y", days: 365 },
+  { key: "all", days: null },
+];
+
+export default async function ProgressPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ range?: string }>;
+}) {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  const { t } = await getT();
+  const { t, lang } = await getT();
+  const loc = lang === "en" ? "en-US" : "nl-NL";
+
+  const { range = "3m" } = await searchParams;
+  const days = (RANGES.find((r) => r.key === range) ?? RANGES[1]).days;
+  const cutoff = days != null ? new Date(Date.now() - days * 864e5).toISOString() : null;
 
   const { data } = await supabase
     .from("workout_sets")
@@ -37,6 +53,7 @@ export default async function ProgressPage() {
 
   for (const s of sets) {
     if (!s.weight || !s.reps || !s.session) continue;
+    if (cutoff && s.session.performed_at < cutoff) continue;
     const e1rm = estimateOneRepMax(s.weight, s.reps, s.rir ?? 0);
     if (!e1rm) continue;
     const day = s.session.performed_at.slice(0, 10);
@@ -56,7 +73,7 @@ export default async function ProgressPage() {
       const points: ChartPoint[] = [...e.perDay.entries()]
         .sort(([a], [b]) => a.localeCompare(b))
         .map(([day, val]) => ({
-          label: new Date(day).toLocaleDateString("nl-NL", {
+          label: new Date(day).toLocaleDateString(loc, {
             day: "numeric",
             month: "short",
           }),
@@ -78,7 +95,24 @@ export default async function ProgressPage() {
             {t("nav.history")}
           </Link>
         </div>
-        <p className="mb-6 text-muted">{t("prog.subtitle")}</p>
+        <p className="mb-4 text-muted">{t("prog.subtitle")}</p>
+
+        {/* Tijdsbereik-filter */}
+        <div className="mb-6 flex flex-wrap gap-2">
+          {RANGES.map((r) => (
+            <Link
+              key={r.key}
+              href={`/progress?range=${r.key}`}
+              className={`rounded-full px-3 py-1.5 text-xs font-medium ring-1 transition ${
+                range === r.key
+                  ? "bg-primary text-primary-fg ring-primary"
+                  : "text-muted ring-line hover:bg-surface2"
+              }`}
+            >
+              {t(`range.${r.key}`)}
+            </Link>
+          ))}
+        </div>
 
         {charts.length === 0 ? (
           <div className="rounded-2xl border border-dashed border-line py-16 text-center text-faint">

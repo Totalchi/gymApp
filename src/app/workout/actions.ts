@@ -15,6 +15,56 @@ async function requireUser() {
 }
 
 /**
+ * Herhaal een eerdere workout: maak een nieuwe sessie met dezelfde oefeningen
+ * en sets (als doel; nog niet afgevinkt).
+ */
+export async function repeatWorkout(formData: FormData) {
+  const { supabase, user } = await requireUser();
+  const sourceId = String(formData.get("id"));
+
+  const { data: src } = await supabase
+    .from("workout_sessions")
+    .select("routine_id, day_id, day_name")
+    .eq("id", sourceId)
+    .single();
+  if (!src) return;
+
+  const { data: srcSets } = await supabase
+    .from("workout_sets")
+    .select("exercise_id, exercise_name, set_number, reps, weight, one_rep_max, rir, set_type")
+    .eq("session_id", sourceId)
+    .order("set_number");
+
+  const { data: session } = await supabase
+    .from("workout_sessions")
+    .insert({
+      user_id: user.id,
+      routine_id: src.routine_id,
+      day_id: src.day_id,
+      day_name: src.day_name,
+    })
+    .select("id")
+    .single();
+  if (!session) return;
+
+  const rows = (srcSets ?? []).map((s) => ({
+    session_id: session.id,
+    exercise_id: s.exercise_id,
+    exercise_name: s.exercise_name,
+    set_number: s.set_number,
+    reps: s.reps,
+    weight: s.weight,
+    one_rep_max: s.one_rep_max,
+    rir: s.rir,
+    set_type: s.set_type ?? "normal",
+    completed: false,
+  }));
+  if (rows.length) await supabase.from("workout_sets").insert(rows);
+
+  redirect(`/workout/${session.id}`);
+}
+
+/**
  * Start een workout vanuit een dag: maakt een sessie aan en vult alvast de
  * geplande sets in (vanuit het schema). Daarna kun je de echte waarden loggen.
  */

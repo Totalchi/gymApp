@@ -2,7 +2,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { Header } from "@/components/Header";
 import { getT } from "@/lib/serverLang";
-import { deleteSession } from "@/app/workout/actions";
+import { deleteSession, repeatWorkout } from "@/app/workout/actions";
 
 export default async function HistoryPage() {
   const supabase = await createClient();
@@ -67,15 +67,26 @@ export default async function HistoryPage() {
                         : ""}
                     </p>
                   </Link>
-                  <form action={deleteSession}>
-                    <input type="hidden" name="id" value={s.id} />
-                    <button
-                      type="submit"
-                      className="text-xs text-faint transition hover:text-danger"
-                    >
-                      {t("common.delete")}
-                    </button>
-                  </form>
+                  <div className="flex shrink-0 flex-col items-end gap-1.5">
+                    <form action={repeatWorkout}>
+                      <input type="hidden" name="id" value={s.id} />
+                      <button
+                        type="submit"
+                        className="rounded-lg border border-line px-3 py-1.5 text-xs font-medium text-fg transition hover:border-primary hover:text-primary"
+                      >
+                        ↻ {t("hist.repeat")}
+                      </button>
+                    </form>
+                    <form action={deleteSession}>
+                      <input type="hidden" name="id" value={s.id} />
+                      <button
+                        type="submit"
+                        className="text-xs text-faint transition hover:text-danger"
+                      >
+                        {t("common.delete")}
+                      </button>
+                    </form>
+                  </div>
                 </div>
               );
             })}
