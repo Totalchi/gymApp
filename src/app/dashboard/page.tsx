@@ -260,8 +260,29 @@ export default async function DashboardPage() {
         </details>
 
         {all.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-line py-16 text-center text-faint">
-            {t("dash.empty")}
+          <div className="rounded-2xl border border-line bg-surface p-6 text-center">
+            <div className="text-4xl">👋</div>
+            <h2 className="mt-2 text-xl font-bold">{t("onb.title")}</h2>
+            <p className="mt-1 text-sm text-muted">{t("onb.sub")}</p>
+            <div className="mt-4 grid gap-3 text-left sm:grid-cols-3">
+              {[t("onb.step1"), t("onb.step2"), t("onb.step3")].map((step, i) => (
+                <div key={i} className="rounded-xl border border-line bg-canvas p-3">
+                  <div className="mb-1 flex h-6 w-6 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-fg">
+                    {i + 1}
+                  </div>
+                  <p className="text-sm text-muted">{step}</p>
+                </div>
+              ))}
+            </div>
+            <div className="mt-5">
+              <Link
+                href="/templates"
+                className="inline-block rounded-xl bg-primary px-6 py-3 font-semibold text-primary-fg transition hover:brightness-110"
+              >
+                {t("onb.useTemplate")}
+              </Link>
+              <p className="mt-2 text-xs text-faint">{t("onb.or")}</p>
+            </div>
           </div>
         ) : folderList.length === 0 ? (
           /* Geen mappen: gewoon een nette lijst */
