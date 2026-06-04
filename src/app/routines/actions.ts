@@ -233,6 +233,20 @@ export async function addDay(formData: FormData) {
   revalidatePath(`/routines/${routineId}`);
 }
 
+export async function setDayWeekday(formData: FormData) {
+  const { supabase } = await requireUser();
+  const id = String(formData.get("id"));
+  const routineId = String(formData.get("routine_id"));
+  const raw = String(formData.get("weekday") ?? "");
+  const weekday = raw === "" ? null : parseInt(raw, 10);
+  await supabase
+    .from("routine_days")
+    .update({ weekday: weekday != null && weekday >= 0 && weekday <= 6 ? weekday : null })
+    .eq("id", id);
+  revalidatePath(`/routines/${routineId}`);
+  revalidatePath("/dashboard");
+}
+
 export async function deleteDay(formData: FormData) {
   const { supabase } = await requireUser();
   const id = String(formData.get("id"));

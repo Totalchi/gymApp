@@ -10,6 +10,7 @@ import {
   deleteFolder,
   setRoutineFolder,
 } from "@/app/routines/actions";
+import { startWorkout } from "@/app/workout/actions";
 import { DAY_TYPE_COLORS, DAY_TYPE_LABELS, type DayType } from "@/lib/types";
 
 interface RoutineRow {
@@ -109,6 +110,13 @@ export default async function DashboardPage() {
     .order("position")
     .order("name");
 
+  // Vandaag op het programma (dagen gekoppeld aan de huidige weekdag).
+  const todayIdx = (new Date().getDay() + 6) % 7; // 0 = maandag
+  const { data: todayDays } = await supabase
+    .from("routine_days")
+    .select("id, name, day_type, routine_id")
+    .eq("weekday", todayIdx);
+
   const { data: sessions } = await supabase
     .from("workout_sessions")
     .select("performed_at, workout_sets(weight, reps)");
@@ -171,6 +179,45 @@ export default async function DashboardPage() {
           <h1 className="text-3xl font-bold">{t("dash.title")}</h1>
           <p className="mt-1 text-muted">{t("dash.subtitle")}</p>
         </div>
+
+        {/* Vandaag op het programma */}
+        {todayDays && todayDays.length > 0 && (
+          <div className="mb-8">
+            <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-faint">
+              {t("plan.today")}
+            </h2>
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {(todayDays as { id: string; name: string; day_type: DayType; routine_id: string }[]).map(
+                (d) => (
+                  <div
+                    key={d.id}
+                    className="flex items-center justify-between gap-3 rounded-2xl border border-primary/40 bg-primary/5 p-4"
+                  >
+                    <div className="min-w-0">
+                      <span
+                        className={`mb-1 inline-block rounded-full px-2 py-0.5 text-xs font-medium ring-1 ${DAY_TYPE_COLORS[d.day_type]}`}
+                      >
+                        {DAY_TYPE_LABELS[d.day_type]}
+                      </span>
+                      <p className="truncate font-semibold">{d.name}</p>
+                    </div>
+                    <form action={startWorkout}>
+                      <input type="hidden" name="routine_id" value={d.routine_id} />
+                      <input type="hidden" name="day_id" value={d.id} />
+                      <input type="hidden" name="day_name" value={d.name} />
+                      <button
+                        type="submit"
+                        className="shrink-0 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 px-4 py-2 text-sm font-semibold text-white transition hover:opacity-90"
+                      >
+                        ▶ {t("routine.start")}
+                      </button>
+                    </form>
+                  </div>
+                ),
+              )}
+            </div>
+          </div>
+        )}
 
         <div className="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-5">
           {stats.map((s) => (

@@ -21,12 +21,13 @@ import { CSS } from "@dnd-kit/utilities";
 import { ExerciseRow } from "@/components/ExerciseRow";
 import { ExercisePicker } from "@/components/ExercisePicker";
 import { DragHandle } from "@/components/DragHandle";
-import { deleteDay, reorderExercises } from "@/app/routines/actions";
+import { deleteDay, reorderExercises, setDayWeekday } from "@/app/routines/actions";
 import { startWorkout } from "@/app/workout/actions";
 import { useT } from "@/components/LangProvider";
 import {
   DAY_TYPE_COLORS,
   DAY_TYPE_LABELS,
+  WEEKDAY_KEYS,
   type RoutineDayWithExercises,
 } from "@/lib/types";
 
@@ -97,7 +98,25 @@ export function DayCard({
             {exercises.length === 1 ? t("routine.exercise") : t("routine.exercises")}
           </span>
         </div>
-        <div className="flex shrink-0 items-center gap-3">
+        <div className="flex shrink-0 items-center gap-2 sm:gap-3">
+          <form action={setDayWeekday}>
+            <input type="hidden" name="id" value={day.id} />
+            <input type="hidden" name="routine_id" value={routineId} />
+            <select
+              name="weekday"
+              defaultValue={day.weekday ?? ""}
+              onChange={(e) => e.currentTarget.form?.requestSubmit()}
+              title={t("plan.weekdayHint")}
+              className="rounded-lg border border-line bg-canvas px-1.5 py-1 text-xs text-muted focus:outline-none"
+            >
+              <option value="">{t("plan.noDay")}</option>
+              {WEEKDAY_KEYS.map((k, i) => (
+                <option key={k} value={i}>
+                  {t(`wd.${k}`)}
+                </option>
+              ))}
+            </select>
+          </form>
           {exercises.length > 0 && (
             <form action={startWorkout}>
               <input type="hidden" name="routine_id" value={routineId} />

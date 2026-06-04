@@ -22,6 +22,7 @@ export default async function SettingsPage() {
 
   const moreLinks = [
     { href: "/templates", label: t("nav.programs"), desc: t("set.tplDesc") },
+    { href: "/goals", label: t("nav.goals"), desc: t("goals.subtitle") },
     { href: "/progress", label: t("nav.progress"), desc: t("set.progDesc") },
     { href: "/body", label: t("nav.body"), desc: t("set.bodyDesc") },
     { href: "/stats", label: t("nav.stats"), desc: t("set.statsDesc") },
