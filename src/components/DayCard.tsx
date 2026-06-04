@@ -177,6 +177,9 @@ export function DayCard({
             <input type="hidden" name="routine_id" value={routineId} />
             <button
               type="submit"
+              onClick={(e) => {
+                if (!confirm(t("routine.confirmDeleteDay"))) e.preventDefault();
+              }}
               className="text-xs text-faint transition hover:text-danger"
             >
               {t("routine.deleteDay")}

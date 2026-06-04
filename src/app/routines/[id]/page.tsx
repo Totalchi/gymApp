@@ -21,11 +21,26 @@ export default async function RoutinePage({
 
   const { data: routine } = await supabase
     .from("routines")
-    .select("id, name, description")
+    .select("id, name, description, user_id")
     .eq("id", id)
     .single();
 
   if (!routine) notFound();
+
+  // Bewerkt de coach hier het schema van een cliënt? (niet de eigenaar)
+  const isCoachEditing = !!user && routine.user_id !== user.id;
+  let clientName: string | null = null;
+  if (isCoachEditing) {
+    const { data: clientProfile } = await supabase
+      .from("profiles")
+      .select("display_name, username")
+      .eq("id", routine.user_id)
+      .maybeSingle();
+    clientName =
+      clientProfile?.display_name ||
+      (clientProfile?.username ? `@${clientProfile.username}` : t("coach.theClient"));
+  }
+  const backHref = isCoachEditing ? `/coach/${routine.user_id}` : "/dashboard";
 
   const { data: daysRaw } = await supabase
     .from("routine_days")
@@ -47,11 +62,17 @@ export default async function RoutinePage({
       <Header email={user?.email} />
       <main className="mx-auto max-w-5xl px-4 py-8">
         <Link
-          href="/dashboard"
+          href={backHref}
           className="text-sm text-muted hover:text-fg"
         >
-          {t("routine.backToSchemas")}
+          {isCoachEditing ? `← ${t("coach.title")}` : t("routine.backToSchemas")}
         </Link>
+        {isCoachEditing && (
+          <div className="mt-3 rounded-xl border border-primary/40 bg-primary/5 px-4 py-3 text-sm">
+            🧑‍🏫 {t("coach.editingFor")}{" "}
+            <strong>{clientName}</strong> — {t("coach.editingHint")}
+          </div>
+        )}
         <div className="mb-6 mt-2">
           <h1 className="text-3xl font-bold">{routine.name}</h1>
           {routine.description && (

@@ -2,11 +2,14 @@
 
 import { useEffect, useRef, useState, useTransition } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { saveWorkout } from "@/app/workout/actions";
+import { createClient } from "@/lib/supabase/client";
 import { useUnit } from "@/components/UnitProvider";
 import { useT } from "@/components/LangProvider";
 import { PlateCalculator } from "@/components/PlateCalculator";
 import { ExercisePicker } from "@/components/ExercisePicker";
+import { ExerciseDetailModal } from "@/components/ExerciseDetailModal";
 import { computeRir } from "@/lib/rir";
 import { SET_TYPES, SET_TYPE_COLORS, type SetType, type Exercise } from "@/lib/types";
 
@@ -88,6 +91,18 @@ export function WorkoutLogger({
   const [showPlates, setShowPlates] = useState(false);
   const [showAdd, setShowAdd] = useState(false);
   const [swapIdx, setSwapIdx] = useState<number | null>(null);
+  const [detailEx, setDetailEx] = useState<Exercise | null>(null);
+
+  // Haal de volledige oefening op (foto's + uitleg) en toon de popup.
+  async function openDetail(exerciseId: string) {
+    const supabase = createClient();
+    const { data } = await supabase
+      .from("exercises")
+      .select("*")
+      .eq("id", exerciseId)
+      .maybeSingle();
+    if (data) setDetailEx(data as Exercise);
+  }
 
   function swapExercise(ex: Exercise) {
     setGroups((prev) =>
@@ -410,8 +425,17 @@ export function WorkoutLogger({
   );
 
   return (
-    <div className="space-y-5 pb-40">
-      {groups.length === 0 && (
+    <div className="flex min-h-0 flex-1 flex-col">
+      {/* Enkel dit gedeelte scrollt — de onderbalk blijft altijd staan. */}
+      <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
+        <div className="mx-auto max-w-3xl space-y-5 px-4 py-5">
+          <div className="flex items-center justify-between">
+            <Link href="/dashboard" className="text-sm text-muted hover:text-fg">
+              ← {t("nav.routines")}
+            </Link>
+          </div>
+
+          {groups.length === 0 && (
         <p className="rounded-2xl border border-dashed border-line py-12 text-center text-faint">
           {t("wk.noExercises")}
         </p>
@@ -420,14 +444,30 @@ export function WorkoutLogger({
       {groups.map((g, gi) => (
         <section key={g.exerciseId + gi} className="rounded-2xl border border-line bg-surface">
           <header className="flex items-center gap-3 border-b border-line px-4 py-3">
-            <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-lg bg-white ring-1 ring-line">
+            <button
+              type="button"
+              onClick={() => openDetail(g.exerciseId)}
+              title={t("wk.viewExercise")}
+              className="group relative h-10 w-10 shrink-0 overflow-hidden rounded-lg bg-white ring-1 ring-line transition hover:ring-primary"
+            >
               {g.image ? (
-                <Image src={g.image} alt={g.name} fill sizes="40px" className="object-cover" />
+                <>
+                  <Image src={g.image} alt={g.name} fill sizes="40px" className="object-cover" />
+                  <span className="absolute inset-0 flex items-center justify-center bg-black/0 text-transparent transition group-hover:bg-black/40 group-hover:text-white">
+                    🔍
+                  </span>
+                </>
               ) : (
                 <div className="flex h-full w-full items-center justify-center">🏋️</div>
               )}
-            </div>
-            <h2 className="min-w-0 flex-1 truncate font-semibold">{g.name}</h2>
+            </button>
+            <button
+              type="button"
+              onClick={() => openDetail(g.exerciseId)}
+              className="min-w-0 flex-1 truncate text-left font-semibold hover:text-primary"
+            >
+              {g.name}
+            </button>
             <button
               type="button"
               onClick={() => setSwapIdx(gi)}
@@ -570,11 +610,13 @@ export function WorkoutLogger({
         rows={3}
         className="w-full rounded-2xl border border-line bg-surface px-4 py-3 placeholder:text-faint focus:border-primary focus:outline-none"
       />
+        </div>
+      </div>
 
-      {/* Rusttimer-balk */}
+      {/* Rusttimer-balk (boven de onderbalk, altijd zichtbaar) */}
       {restLeft !== null && (
-        <div className="fixed inset-x-0 bottom-[4.5rem] z-30 px-4">
-          <div className="mx-auto flex max-w-3xl items-center gap-2 rounded-xl border border-sky-500/40 bg-sky-500/15 px-3 py-2.5 backdrop-blur sm:gap-3 sm:px-4">
+        <div className="border-t border-sky-500/30 bg-sky-500/15 px-4 py-2.5">
+          <div className="mx-auto flex max-w-3xl items-center gap-2 sm:gap-3">
             <span className="mr-auto text-sm font-medium text-sky-200">
               {t("wk.rest")}:{" "}
               <span className="tabular-nums text-base font-bold">{fmtTime(restLeft)}</span>
@@ -602,9 +644,9 @@ export function WorkoutLogger({
         </div>
       )}
 
-      {/* Vaste onderbalk: start/stop workout */}
+      {/* Onderbalk: start/stop workout (blijft altijd onderaan staan) */}
       <div
-        className="fixed inset-x-0 bottom-0 z-30 border-t border-line bg-canvas/90 backdrop-blur"
+        className="border-t border-line bg-canvas"
         style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
       >
         <div className="mx-auto flex max-w-3xl items-center justify-between gap-3 px-4 py-3">
@@ -675,6 +717,9 @@ export function WorkoutLogger({
           onPick={swapExercise}
           onClose={() => setSwapIdx(null)}
         />
+      )}
+      {detailEx && (
+        <ExerciseDetailModal exercise={detailEx} onClose={() => setDetailEx(null)} />
       )}
     </div>
   );

@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import Image from "next/image";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
@@ -8,12 +9,14 @@ import {
   updateRoutineExercise,
   deleteRoutineExercise,
   toggleSuperset,
+  swapRoutineExercise,
 } from "@/app/routines/actions";
 import { DragHandle } from "@/components/DragHandle";
 import { ExerciseDetailModal } from "@/components/ExerciseDetailModal";
+import { ExercisePicker } from "@/components/ExercisePicker";
 import { useUnit } from "@/components/UnitProvider";
 import { useT } from "@/components/LangProvider";
-import type { RoutineExerciseWithExercise } from "@/lib/types";
+import type { Exercise, RoutineExerciseWithExercise } from "@/lib/types";
 
 export function ExerciseRow({
   item,
@@ -50,8 +53,21 @@ export function ExerciseRow({
   const [notes, setNotes] = useState(item.notes ?? "");
   const [dirty, setDirty] = useState(false);
   const [showDetail, setShowDetail] = useState(false);
+  const [swapOpen, setSwapOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const unit = useUnit();
   const t = useT();
+
+  useEffect(() => setMounted(true), []);
+
+  function onSwap(ex: Exercise) {
+    const fd = new FormData();
+    fd.set("id", item.id);
+    fd.set("routine_id", routineId);
+    fd.set("exercise_id", ex.id);
+    void swapRoutineExercise(fd);
+    setSwapOpen(false);
+  }
 
   const img = item.exercise.image_urls?.[0];
 
@@ -189,8 +205,19 @@ export function ExerciseRow({
           {dirty ? t("common.save") : t("common.saved")}
         </button>
         <button
+          type="button"
+          onClick={() => setSwapOpen(true)}
+          title={t("routine.swapHint")}
+          className="px-1 py-1 text-sm text-faint transition hover:text-primary"
+        >
+          {t("routine.swap")}
+        </button>
+        <button
           type="submit"
           formAction={deleteRoutineExercise}
+          onClick={(e) => {
+            if (!confirm(t("routine.confirmDeleteExercise"))) e.preventDefault();
+          }}
           className="px-1 py-1 text-sm text-faint transition hover:text-danger"
         >
           {t("common.delete")}
@@ -227,6 +254,14 @@ export function ExerciseRow({
           onClose={() => setShowDetail(false)}
         />
       )}
+
+      {/* Picker via portal: buiten dit <form> zodat zoeken niet de rij opslaat. */}
+      {swapOpen &&
+        mounted &&
+        createPortal(
+          <ExercisePicker onPick={onSwap} onClose={() => setSwapOpen(false)} />,
+          document.body,
+        )}
     </form>
   );
 }

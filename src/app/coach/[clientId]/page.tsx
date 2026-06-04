@@ -53,6 +53,14 @@ export default async function CoachClientPage({
     .eq("user_id", user?.id ?? "")
     .order("created_at", { ascending: false });
 
+  // Schema's die deze coach al aan de cliënt heeft toegewezen (bewerkbaar).
+  const { data: assignedRoutines } = await supabase
+    .from("routines")
+    .select("id, name")
+    .eq("user_id", clientId)
+    .eq("assigned_by", user?.id ?? "")
+    .order("created_at", { ascending: false });
+
   return (
     <>
       <Header email={user?.email} />
@@ -93,6 +101,30 @@ export default async function CoachClientPage({
           )}
           <p className="mt-2 text-xs text-faint">{t("coach.assignHint")}</p>
         </section>
+
+        {/* Toegewezen schema's — bewerkbaar door de coach */}
+        {assignedRoutines && assignedRoutines.length > 0 && (
+          <section className="mb-6">
+            <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-faint">
+              {t("coach.assignedRoutines")}
+            </h2>
+            <div className="space-y-2">
+              {assignedRoutines.map((r) => (
+                <Link
+                  key={r.id}
+                  href={`/routines/${r.id}`}
+                  className="flex items-center gap-3 rounded-xl border border-line bg-surface px-4 py-3 transition hover:border-primary/40"
+                >
+                  <span className="text-lg">📋</span>
+                  <span className="flex-1 font-medium">{r.name}</span>
+                  <span className="text-sm text-primary">{t("coach.editRoutine")}</span>
+                  <span className="text-faint">›</span>
+                </Link>
+              ))}
+            </div>
+            <p className="mt-2 text-xs text-faint">{t("coach.assignedHint")}</p>
+          </section>
+        )}
 
         {/* Recente workouts */}
         <h2 className="mb-2 font-semibold">{t("coach.recentWorkouts")}</h2>
