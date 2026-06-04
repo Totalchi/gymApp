@@ -48,12 +48,25 @@ export function Header({ email: _email }: { email?: string | null }) {
           <NotificationBell />
           <LanguageToggle />
           <ThemeToggle />
-          <form action={signout} className="hidden sm:block">
+          <Link
+            href="/menu"
+            aria-label={t("nav.more")}
+            title={t("nav.more")}
+            className="flex h-9 w-9 items-center justify-center rounded-lg text-muted transition hover:bg-surface2 hover:text-fg"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+              <circle cx="12" cy="5" r="1.6" />
+              <circle cx="12" cy="12" r="1.6" />
+              <circle cx="12" cy="19" r="1.6" />
+            </svg>
+          </Link>
+          <form action={signout}>
             <button
               type="submit"
               className="rounded-lg border border-line px-3 py-1.5 text-sm text-muted transition hover:bg-surface2 hover:text-fg"
             >
-              {t("nav.logout")}
+              <span className="sm:hidden">⎋</span>
+              <span className="hidden sm:inline">{t("nav.logout")}</span>
             </button>
           </form>
         </div>
