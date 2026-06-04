@@ -7,7 +7,7 @@ import {
   IconDumbbell,
   IconUsers,
   IconClock,
-  IconCog,
+  IconList,
 } from "@/components/Icons";
 import { useT } from "@/components/LangProvider";
 
@@ -19,7 +19,7 @@ export function BottomNav() {
     { href: "/exercises", label: t("nav.exercises"), Icon: IconDumbbell },
     { href: "/feed", label: t("nav.feed"), Icon: IconUsers },
     { href: "/history", label: t("nav.history"), Icon: IconClock },
-    { href: "/settings", label: t("nav.more"), Icon: IconCog },
+    { href: "/menu", label: t("nav.more"), Icon: IconList },
   ];
 
   // Verberg de tab-bar tijdens een actieve workout (eigen onderbalk).

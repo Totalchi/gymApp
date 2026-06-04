@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { signout } from "@/app/login/actions";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { LanguageToggle } from "@/components/LanguageToggle";
 import { IconDumbbell } from "@/components/Icons";
 import { useT } from "@/components/LangProvider";
 
@@ -12,13 +13,9 @@ export function Header({ email: _email }: { email?: string | null }) {
     { href: "/dashboard", label: t("nav.routines") },
     { href: "/exercises", label: t("nav.exercises") },
     { href: "/feed", label: t("nav.feed") },
-    { href: "/templates", label: t("nav.programs") },
     { href: "/history", label: t("nav.history") },
     { href: "/stats", label: t("nav.stats") },
-    { href: "/progress", label: t("nav.progress") },
-    { href: "/body", label: t("nav.body") },
-    { href: "/goals", label: t("nav.goals") },
-    { href: "/settings", label: t("nav.settings") },
+    { href: "/menu", label: t("nav.more") },
   ];
 
   return (
@@ -44,8 +41,9 @@ export function Header({ email: _email }: { email?: string | null }) {
         </nav>
 
         <div className="flex items-center gap-2">
+          <LanguageToggle />
           <ThemeToggle />
-          <form action={signout}>
+          <form action={signout} className="hidden sm:block">
             <button
               type="submit"
               className="rounded-lg border border-line px-3 py-1.5 text-sm text-muted transition hover:bg-surface2 hover:text-fg"

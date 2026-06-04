@@ -294,6 +294,10 @@ const nl: Dict = {
   "hist.shared": "Gedeeld",
   "hist.private": "Privé",
   "hist.sharedHint": "Klik om te wisselen tussen gedeeld en privé",
+  "menu.social": "Sociaal",
+  "menu.training": "Training & voortgang",
+  "menu.account": "Account",
+  "set.langInHeader": "Taal wissel je rechtsboven (NL/EN), naast het thema.",
 };
 
 const en: Dict = {
@@ -569,6 +573,10 @@ const en: Dict = {
   "hist.shared": "Shared",
   "hist.private": "Private",
   "hist.sharedHint": "Tap to toggle shared/private",
+  "menu.social": "Social",
+  "menu.training": "Training & progress",
+  "menu.account": "Account",
+  "set.langInHeader": "Switch language top-right (NL/EN), next to the theme.",
 };
 
 const DICTS: Record<Lang, Dict> = { nl, en };
