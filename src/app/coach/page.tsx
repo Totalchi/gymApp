@@ -103,6 +103,12 @@ export default async function CoachPage({
                   <Link href={`/u/${r.coach_id}`} className="flex-1 font-medium hover:text-primary">
                     {nameOf(profById.get(r.coach_id))}
                   </Link>
+                  <Link
+                    href={`/messages/${r.coach_id}`}
+                    className="rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-primary-fg"
+                  >
+                    💬 {t("coach.message")}
+                  </Link>
                   <form action={removeRelation}>
                     <input type="hidden" name="id" value={r.id} />
                     <button className="text-xs text-faint hover:text-danger">{t("coach.stop")}</button>

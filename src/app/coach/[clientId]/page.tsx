@@ -73,7 +73,15 @@ export default async function CoachClientPage({
           <span className="flex h-12 w-12 items-center justify-center rounded-full bg-primary text-lg font-bold text-primary-fg">
             {nameOf(profile ?? undefined).replace("@", "").charAt(0).toUpperCase()}
           </span>
-          <h1 className="text-2xl font-bold">{nameOf(profile ?? undefined)}</h1>
+          <h1 className="flex-1 truncate text-2xl font-bold">
+            {nameOf(profile ?? undefined)}
+          </h1>
+          <Link
+            href={`/messages/${clientId}`}
+            className="shrink-0 rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-fg transition hover:brightness-110"
+          >
+            💬 {t("coach.message")}
+          </Link>
         </div>
 
         {/* Schema toewijzen */}
