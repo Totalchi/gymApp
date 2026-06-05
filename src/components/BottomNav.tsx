@@ -22,8 +22,15 @@ export function BottomNav() {
     { href: "/menu", label: t("nav.more"), Icon: IconList },
   ];
 
-  // Verberg de tab-bar tijdens een actieve workout (eigen onderbalk).
-  if (pathname.startsWith("/workout/")) return null;
+  // Verberg de tab-bar op publieke routes en tijdens een actieve workout.
+  if (
+    pathname === "/" ||
+    pathname.startsWith("/login") ||
+    pathname.startsWith("/register") ||
+    pathname.startsWith("/workout/")
+  ) {
+    return null;
+  }
 
   return (
     <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-canvas/95 backdrop-blur md:hidden">

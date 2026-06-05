@@ -49,6 +49,7 @@ export default async function MenuPage() {
         { href: "/progress", label: t("nav.progress"), icon: "📈" },
         { href: "/stats", label: t("nav.stats"), icon: "📊" },
         { href: "/body", label: t("nav.body"), icon: "⚖️" },
+        { href: "/nutrition", label: t("nutri.title"), icon: "🥗" },
         { href: "/achievements", label: t("ach.title"), icon: "🏅" },
       ],
     },

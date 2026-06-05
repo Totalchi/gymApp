@@ -100,32 +100,37 @@ function RoutineCard({
 
 export default async function DashboardPage() {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
   const { t } = await getT();
-
-  const { data: routines } = await supabase
-    .from("routines")
-    .select("id, name, description, created_at, folder_id, assigned_by, routine_days(day_type)")
-    .order("created_at", { ascending: false });
-
-  const { data: folders } = await supabase
-    .from("routine_folders")
-    .select("id, name")
-    .order("position")
-    .order("name");
 
   // Vandaag op het programma (dagen gekoppeld aan de huidige weekdag).
   const todayIdx = (new Date().getDay() + 6) % 7; // 0 = maandag
-  const { data: todayDays } = await supabase
-    .from("routine_days")
-    .select("id, name, day_type, routine_id")
-    .eq("weekday", todayIdx);
 
-  const { data: sessions } = await supabase
-    .from("workout_sessions")
-    .select("performed_at, workout_sets(weight, reps)");
+  // Alle queries parallel (ze leunen op RLS, niet op user.id) — sneller.
+  const [
+    {
+      data: { user },
+    },
+    { data: routines },
+    { data: folders },
+    { data: todayDays },
+    { data: sessions },
+  ] = await Promise.all([
+    supabase.auth.getUser(),
+    supabase
+      .from("routines")
+      .select("id, name, description, created_at, folder_id, assigned_by, routine_days(day_type)")
+      .order("created_at", { ascending: false }),
+    supabase
+      .from("routine_folders")
+      .select("id, name")
+      .order("position")
+      .order("name"),
+    supabase
+      .from("routine_days")
+      .select("id, name, day_type, routine_id")
+      .eq("weekday", todayIdx),
+    supabase.from("workout_sessions").select("performed_at, workout_sets(weight, reps)"),
+  ]);
   const allSessions = sessions ?? [];
   const totalWorkouts = allSessions.length;
   let totalVolume = 0;

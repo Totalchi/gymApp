@@ -1,6 +1,5 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
-import { createClient } from "@/lib/supabase/server";
 import { UnitProvider } from "@/components/UnitProvider";
 import { LangProvider } from "@/components/LangProvider";
 import { BottomNav } from "@/components/BottomNav";
@@ -36,14 +35,10 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  // Snel: lees voorkeuren uit cookies (geen DB-round-trip per pagina).
+  // Snel: lees voorkeuren uit cookies (geen DB-/auth-round-trip per pagina).
+  // De BottomNav verbergt zichzelf op publieke routes, dus we hoeven hier
+  // geen auth-call te doen (scheelt een netwerk-round-trip per navigatie).
   const [lang, unit] = await Promise.all([getLang(), getUnit()]);
-
-  // Lichte auth-check (gecachet door Supabase) om navigatie te bepalen.
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
 
   return (
     <html lang={lang}>
@@ -53,14 +48,8 @@ export default async function RootLayout({
       <body className="min-h-screen">
         <LangProvider lang={lang}>
           <UnitProvider unit={unit}>
-            {user ? (
-              <>
-                <div className="pb-20 md:pb-0">{children}</div>
-                <BottomNav />
-              </>
-            ) : (
-              children
-            )}
+            <div className="pb-20 md:pb-0">{children}</div>
+            <BottomNav />
           </UnitProvider>
         </LangProvider>
       </body>
