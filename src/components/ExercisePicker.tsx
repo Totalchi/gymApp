@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
 import { addExerciseToDay } from "@/app/routines/actions";
+import { expandSearchTerms } from "@/lib/exerciseSearch";
 import { useT } from "@/components/LangProvider";
 import { MUSCLE_GROUPS, type Exercise } from "@/lib/types";
 
@@ -38,7 +39,15 @@ export function ExercisePicker({
         .order("name")
         .limit(60);
 
-      if (query.trim()) q = q.ilike("name", `%${query.trim()}%`);
+      if (query.trim()) {
+        // Zoek op de term + synoniemen (bv. "pec deck" -> "Butterfly").
+        const terms = expandSearchTerms(query);
+        if (terms.length > 1) {
+          q = q.or(terms.map((t) => `name.ilike.%${t}%`).join(","));
+        } else {
+          q = q.ilike("name", `%${terms[0]}%`);
+        }
+      }
       if (muscle) q = q.contains("primary_muscles", [muscle]);
 
       const { data } = await q;
