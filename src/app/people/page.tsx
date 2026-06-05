@@ -31,12 +31,14 @@ export default async function PeoplePage({
     people = (data ?? []).filter((p) => p.id !== user?.id);
   }
 
-  // Wie volg ik al?
+  // Wie volg ik al (of heb ik aangevraagd)?
   const { data: myFollows } = await supabase
     .from("follows")
-    .select("following_id")
+    .select("following_id, status")
     .eq("follower_id", user?.id ?? "");
-  const followingSet = new Set((myFollows ?? []).map((f) => f.following_id));
+  const followStatus = new Map(
+    (myFollows ?? []).map((f) => [f.following_id, f.status as string]),
+  );
 
   return (
     <>
@@ -83,12 +85,16 @@ export default async function PeoplePage({
                   <button
                     type="submit"
                     className={`rounded-lg px-3 py-1.5 text-sm font-semibold transition ${
-                      followingSet.has(p.id)
+                      followStatus.has(p.id)
                         ? "border border-line text-fg hover:bg-surface2"
                         : "bg-primary text-primary-fg hover:brightness-110"
                     }`}
                   >
-                    {followingSet.has(p.id) ? t("social.unfollow") : t("social.follow")}
+                    {followStatus.get(p.id) === "accepted"
+                      ? t("social.unfollow")
+                      : followStatus.get(p.id) === "pending"
+                        ? t("social.requested")
+                        : t("social.follow")}
                   </button>
                 </form>
               </div>

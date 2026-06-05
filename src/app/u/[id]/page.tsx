@@ -30,16 +30,25 @@ export default async function ProfilePage({
   const isSelf = user?.id === id;
 
   const [{ count: followers }, { count: following }, { data: amF }] = await Promise.all([
-    supabase.from("follows").select("*", { count: "exact", head: true }).eq("following_id", id),
-    supabase.from("follows").select("*", { count: "exact", head: true }).eq("follower_id", id),
     supabase
       .from("follows")
-      .select("follower_id")
+      .select("*", { count: "exact", head: true })
+      .eq("following_id", id)
+      .eq("status", "accepted"),
+    supabase
+      .from("follows")
+      .select("*", { count: "exact", head: true })
+      .eq("follower_id", id)
+      .eq("status", "accepted"),
+    supabase
+      .from("follows")
+      .select("status")
       .eq("follower_id", user?.id ?? "")
       .eq("following_id", id)
       .maybeSingle(),
   ]);
-  const amFollowing = !!amF;
+  const followState: "none" | "pending" | "accepted" =
+    amF?.status === "accepted" ? "accepted" : amF ? "pending" : "none";
 
   const { data: sessions } = await supabase
     .from("workout_sessions")
@@ -69,12 +78,16 @@ export default async function ProfilePage({
               <button
                 type="submit"
                 className={`rounded-xl px-4 py-2 text-sm font-semibold transition ${
-                  amFollowing
-                    ? "border border-line text-fg hover:bg-surface2"
-                    : "bg-primary text-primary-fg hover:brightness-110"
+                  followState === "none"
+                    ? "bg-primary text-primary-fg hover:brightness-110"
+                    : "border border-line text-fg hover:bg-surface2"
                 }`}
               >
-                {amFollowing ? t("social.unfollow") : t("social.follow")}
+                {followState === "accepted"
+                  ? t("social.unfollow")
+                  : followState === "pending"
+                    ? t("social.requested")
+                    : t("social.follow")}
               </button>
             </form>
           )}
@@ -83,14 +96,14 @@ export default async function ProfilePage({
         {profile?.bio && <p className="mb-4 text-sm text-muted">{profile.bio}</p>}
 
         <div className="mb-6 flex gap-6 text-sm">
-          <span>
+          <Link href={`/u/${id}/followers`} className="transition hover:text-primary">
             <strong>{followers ?? 0}</strong>{" "}
             <span className="text-faint">{t("social.followers")}</span>
-          </span>
-          <span>
+          </Link>
+          <Link href={`/u/${id}/following`} className="transition hover:text-primary">
             <strong>{following ?? 0}</strong>{" "}
             <span className="text-faint">{t("social.following")}</span>
-          </span>
+          </Link>
         </div>
 
         {!sessions || sessions.length === 0 ? (

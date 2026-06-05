@@ -13,6 +13,35 @@ async function requireUser() {
   return { supabase, user };
 }
 
+type DB = Awaited<ReturnType<typeof createClient>>;
+
+/** Stuur een notificatie i.v.m. een volg-actie. */
+async function notifyFollow(
+  supabase: DB,
+  actorId: string,
+  recipientId: string,
+  type: "follow_request" | "follow_accepted",
+) {
+  const { data: actor } = await supabase
+    .from("profiles")
+    .select("display_name, username")
+    .eq("id", actorId)
+    .maybeSingle();
+  const name =
+    actor?.display_name || (actor?.username ? `@${actor.username}` : "Iemand");
+  await supabase.from("notifications").insert({
+    user_id: recipientId,
+    actor_id: actorId,
+    type,
+    data: { actor: name, actorId },
+  });
+}
+
+/**
+ * Volgen is nu een verzoek: maakt een 'pending' volgrelatie + notificatie.
+ * Bestaat er al een relatie (pending of accepted), dan wordt die verwijderd
+ * (verzoek annuleren / ontvolgen).
+ */
 export async function toggleFollow(formData: FormData) {
   const { supabase, user } = await requireUser();
   const target = String(formData.get("target_id"));
@@ -20,7 +49,7 @@ export async function toggleFollow(formData: FormData) {
 
   const { data: existing } = await supabase
     .from("follows")
-    .select("follower_id")
+    .select("status")
     .eq("follower_id", user.id)
     .eq("following_id", target)
     .maybeSingle();
@@ -31,14 +60,64 @@ export async function toggleFollow(formData: FormData) {
       .delete()
       .eq("follower_id", user.id)
       .eq("following_id", target);
+    // Eventueel openstaand verzoek-notificatie opruimen.
+    await supabase
+      .from("notifications")
+      .delete()
+      .eq("user_id", target)
+      .eq("actor_id", user.id)
+      .eq("type", "follow_request");
   } else {
     await supabase
       .from("follows")
-      .insert({ follower_id: user.id, following_id: target });
+      .insert({ follower_id: user.id, following_id: target, status: "pending" });
+    await notifyFollow(supabase, user.id, target, "follow_request");
   }
   revalidatePath(`/u/${target}`);
   revalidatePath("/people");
   revalidatePath("/feed");
+}
+
+/** Ontvanger accepteert een volgverzoek. */
+export async function acceptFollow(formData: FormData) {
+  const { supabase, user } = await requireUser();
+  const follower = String(formData.get("follower_id"));
+  if (!follower) return;
+  await supabase
+    .from("follows")
+    .update({ status: "accepted" })
+    .eq("follower_id", follower)
+    .eq("following_id", user.id);
+  await supabase
+    .from("notifications")
+    .delete()
+    .eq("user_id", user.id)
+    .eq("actor_id", follower)
+    .eq("type", "follow_request");
+  await notifyFollow(supabase, user.id, follower, "follow_accepted");
+  revalidatePath("/notifications");
+  revalidatePath(`/u/${user.id}`);
+  revalidatePath("/feed");
+}
+
+/** Ontvanger weigert een volgverzoek. */
+export async function declineFollow(formData: FormData) {
+  const { supabase, user } = await requireUser();
+  const follower = String(formData.get("follower_id"));
+  if (!follower) return;
+  await supabase
+    .from("follows")
+    .delete()
+    .eq("follower_id", follower)
+    .eq("following_id", user.id)
+    .eq("status", "pending");
+  await supabase
+    .from("notifications")
+    .delete()
+    .eq("user_id", user.id)
+    .eq("actor_id", follower)
+    .eq("type", "follow_request");
+  revalidatePath("/notifications");
 }
 
 export async function toggleLike(formData: FormData) {
