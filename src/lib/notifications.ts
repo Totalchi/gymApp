@@ -5,7 +5,8 @@ export type NotificationType =
   | "coach_add"
   | "coach_remove"
   | "follow_request"
-  | "follow_accepted";
+  | "follow_accepted"
+  | "coach_message";
 
 export interface NotificationRow {
   id: string;
@@ -29,6 +30,8 @@ export function notificationIcon(type: string): string {
       return "👋";
     case "follow_accepted":
       return "✅";
+    case "coach_message":
+      return "💬";
     default:
       return "🔔";
   }
@@ -41,6 +44,7 @@ const TEMPLATES: Record<Lang, Record<string, string>> = {
     coach_remove: "{coach} verwijderde {from} uit {routine}",
     follow_request: "{actor} wil je volgen",
     follow_accepted: "{actor} heeft je volgverzoek geaccepteerd",
+    coach_message: "{actor}: {preview}",
   },
   en: {
     coach_swap: "{coach} replaced {from} with {to} in {routine}",
@@ -48,6 +52,7 @@ const TEMPLATES: Record<Lang, Record<string, string>> = {
     coach_remove: "{coach} removed {from} from {routine}",
     follow_request: "{actor} wants to follow you",
     follow_accepted: "{actor} accepted your follow request",
+    coach_message: "{actor}: {preview}",
   },
 };
 
@@ -68,6 +73,9 @@ export function notificationLink(
 ): string | null {
   if (type.startsWith("coach_") && data.routineId) {
     return `/routines/${data.routineId}`;
+  }
+  if (type === "coach_message" && data.actorId) {
+    return `/messages/${data.actorId}`;
   }
   if (type.startsWith("follow_") && data.actorId) {
     return `/u/${data.actorId}`;
