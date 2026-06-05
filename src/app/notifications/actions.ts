@@ -1,6 +1,18 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+
+export async function setReminders(formData: FormData) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return;
+  const on = String(formData.get("enabled")) === "true";
+  await supabase.from("profiles").update({ reminders_enabled: on }).eq("id", user.id);
+  revalidatePath("/notifications");
+}
 
 export async function savePushSubscription(sub: {
   endpoint: string;

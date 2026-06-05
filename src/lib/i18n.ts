@@ -103,6 +103,9 @@ const nl: Dict = {
   "notif.denied": "Meldingen zijn geblokkeerd. Zet ze aan in je telefooninstellingen.",
   "notif.iosHint":
     "Telefoonmeldingen werken enkel wanneer je de app aan je beginscherm toevoegt (installeert).",
+  "notif.reminders": "Slimme herinneringen",
+  "notif.on": "Aan",
+  "notif.off": "Uit",
   // exercise picker / browser
   "ex.chooseExercise": "Oefening kiezen",
   "ex.search": "Zoek een oefening...",
@@ -456,6 +459,9 @@ const en: Dict = {
   "notif.denied": "Notifications are blocked. Enable them in your phone settings.",
   "notif.iosHint":
     "Phone notifications only work when you add the app to your home screen (install it).",
+  "notif.reminders": "Smart reminders",
+  "notif.on": "On",
+  "notif.off": "Off",
   "ex.chooseExercise": "Choose exercise",
   "ex.search": "Search an exercise...",
   "ex.all": "All",

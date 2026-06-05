@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { computeRir } from "@/lib/rir";
+import { computeRir, epleyOneRepMax } from "@/lib/rir";
 
 async function requireUser() {
   const supabase = await createClient();
@@ -251,6 +251,55 @@ export async function saveWorkout(
       duration_seconds: durationSeconds ?? null,
     })
     .eq("id", sessionId);
+
+  // PR-detectie: een nieuw geschat 1RM-record op een oefening → 🏆 melding.
+  try {
+    const e1 = (w: number | null, r: number | null) =>
+      w && r && w > 0 && r > 0 ? epleyOneRepMax(w, r) : 0;
+    const sessionBest: Record<string, number> = {};
+    const nameById: Record<string, string | null> = {};
+    for (const s of sets) {
+      if (s.set_type === "warmup") continue;
+      const e = e1(s.weight, s.reps);
+      if (e > (sessionBest[s.exercise_id] ?? 0)) sessionBest[s.exercise_id] = e;
+      nameById[s.exercise_id] = s.exercise_name;
+    }
+    const exIds = Object.keys(sessionBest);
+    if (exIds.length) {
+      const { data: prevSets } = await supabase
+        .from("workout_sets")
+        .select("exercise_id, weight, reps, set_type, session:workout_sessions!inner(user_id)")
+        .in("exercise_id", exIds)
+        .neq("session_id", sessionId);
+      type PR = {
+        exercise_id: string;
+        weight: number | null;
+        reps: number | null;
+        set_type: string | null;
+        session: { user_id: string } | null;
+      };
+      const prevBest: Record<string, number> = {};
+      for (const r of (prevSets ?? []) as unknown as PR[]) {
+        if (!r.session || r.session.user_id !== user.id) continue;
+        if (r.set_type === "warmup") continue;
+        const e = e1(r.weight, r.reps);
+        if (e > (prevBest[r.exercise_id] ?? 0)) prevBest[r.exercise_id] = e;
+      }
+      const prNotifs = exIds
+        .filter((id) => sessionBest[id] > 0 && (prevBest[id] ?? 0) > 0 && sessionBest[id] > prevBest[id] + 0.01)
+        .map((id) => ({
+          user_id: user.id,
+          actor_id: user.id,
+          type: "pr",
+          data: {
+            exercise: nameById[id] ?? "oefening",
+            e1rm: String(Math.round(sessionBest[id])),
+            exerciseId: id,
+          },
+        }));
+      if (prNotifs.length) await supabase.from("notifications").insert(prNotifs);
+    }
+  } catch {}
 
   revalidatePath("/history");
   revalidatePath("/progress");

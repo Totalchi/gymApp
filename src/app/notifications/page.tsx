@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { Header } from "@/components/Header";
 import { EnablePushButton } from "@/components/EnablePushButton";
 import { acceptFollow, declineFollow } from "@/app/social/actions";
+import { setReminders } from "@/app/notifications/actions";
 import { getT } from "@/lib/serverLang";
 import {
   notificationIcon,
@@ -42,6 +43,13 @@ export default async function NotificationsPage() {
     .limit(50);
   const items = (data ?? []) as NotificationRow[];
 
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("reminders_enabled")
+    .eq("id", user?.id ?? "")
+    .maybeSingle();
+  const remindersOn = profile?.reminders_enabled !== false;
+
   // Markeer ongelezen als gelezen (bij het openen van deze pagina).
   if (user && items.some((n) => !n.read_at)) {
     await supabase
@@ -58,6 +66,23 @@ export default async function NotificationsPage() {
         <h1 className="mb-6 text-3xl font-bold">{t("notif.title")}</h1>
 
         <EnablePushButton />
+
+        <form
+          action={setReminders}
+          className="mb-4 flex items-center justify-between rounded-xl border border-line bg-surface px-4 py-3"
+        >
+          <span className="text-sm">{t("notif.reminders")}</span>
+          <input type="hidden" name="enabled" value={remindersOn ? "false" : "true"} />
+          <button
+            className={`rounded-full px-3 py-1 text-xs font-semibold transition ${
+              remindersOn
+                ? "bg-emerald-500/15 text-emerald-300 ring-1 ring-emerald-500/30"
+                : "bg-surface2 text-faint ring-1 ring-line"
+            }`}
+          >
+            {remindersOn ? t("notif.on") : t("notif.off")}
+          </button>
+        </form>
 
         {items.length === 0 ? (
           <p className="rounded-2xl border border-dashed border-line py-16 text-center text-sm text-faint">
