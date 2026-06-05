@@ -2,6 +2,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { Header } from "@/components/Header";
 import { EnablePushButton } from "@/components/EnablePushButton";
+import { acceptFollow, declineFollow } from "@/app/social/actions";
 import { getT } from "@/lib/serverLang";
 import {
   notificationIcon,
@@ -67,6 +68,33 @@ export default async function NotificationsPage() {
             {items.map((n) => {
               const msg = renderNotification(lang, n.type, n.data);
               const href = notificationLink(n.type, n.data);
+              // Volgverzoek: toon accepteren/weigeren-knoppen i.p.v. een link.
+              if (n.type === "follow_request" && n.actor_id) {
+                return (
+                  <div key={n.id} className="flex items-start gap-3 px-4 py-3.5">
+                    <span className="text-xl leading-none">{notificationIcon(n.type)}</span>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm">{msg}</p>
+                      <p className="mt-0.5 text-xs text-faint">{timeAgo(n.created_at, lang)}</p>
+                      <div className="mt-2 flex gap-2">
+                        <form action={acceptFollow}>
+                          <input type="hidden" name="follower_id" value={n.actor_id} />
+                          <button className="rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-primary-fg">
+                            {t("social.accept")}
+                          </button>
+                        </form>
+                        <form action={declineFollow}>
+                          <input type="hidden" name="follower_id" value={n.actor_id} />
+                          <button className="rounded-lg border border-line px-3 py-1.5 text-xs text-muted hover:text-danger">
+                            {t("social.decline")}
+                          </button>
+                        </form>
+                      </div>
+                    </div>
+                  </div>
+                );
+              }
+
               const body = (
                 <div className="flex items-start gap-3 px-4 py-3.5">
                   <span className="text-xl leading-none">
