@@ -6,7 +6,10 @@ export type NotificationType =
   | "coach_remove"
   | "follow_request"
   | "follow_accepted"
-  | "coach_message";
+  | "coach_message"
+  | "pr"
+  | "reminder_trainingday"
+  | "reminder_inactive";
 
 export interface NotificationRow {
   id: string;
@@ -32,6 +35,12 @@ export function notificationIcon(type: string): string {
       return "✅";
     case "coach_message":
       return "💬";
+    case "pr":
+      return "🏆";
+    case "reminder_trainingday":
+      return "📅";
+    case "reminder_inactive":
+      return "👀";
     default:
       return "🔔";
   }
@@ -45,6 +54,9 @@ const TEMPLATES: Record<Lang, Record<string, string>> = {
     follow_request: "{actor} wil je volgen",
     follow_accepted: "{actor} heeft je volgverzoek geaccepteerd",
     coach_message: "{actor}: {preview}",
+    pr: "🏆 Nieuw record op {exercise}: {e1rm} kg (geschat 1RM)",
+    reminder_trainingday: "Vandaag staat {day} op het programma 💪",
+    reminder_inactive: "Je trainde al {days} dagen niet — tijd voor een sessie?",
   },
   en: {
     coach_swap: "{coach} replaced {from} with {to} in {routine}",
@@ -53,6 +65,9 @@ const TEMPLATES: Record<Lang, Record<string, string>> = {
     follow_request: "{actor} wants to follow you",
     follow_accepted: "{actor} accepted your follow request",
     coach_message: "{actor}: {preview}",
+    pr: "🏆 New record on {exercise}: {e1rm} kg (estimated 1RM)",
+    reminder_trainingday: "{day} is on today's program 💪",
+    reminder_inactive: "You haven't trained in {days} days — time for a session?",
   },
 };
 
@@ -79,6 +94,12 @@ export function notificationLink(
   }
   if (type.startsWith("follow_") && data.actorId) {
     return `/u/${data.actorId}`;
+  }
+  if (type === "pr" && data.exerciseId) {
+    return `/exercises/${data.exerciseId}`;
+  }
+  if (type === "reminder_trainingday" || type === "reminder_inactive") {
+    return "/dashboard";
   }
   return null;
 }
