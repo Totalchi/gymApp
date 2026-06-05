@@ -51,6 +51,14 @@ async function notifyAssignedRoutineChange(
   const coachName =
     coach?.display_name || (coach?.username ? `@${coach.username}` : "Coach");
 
+  // Taalvoorkeur van de ONTVANGER (de cliënt) voor de pushtekst.
+  const { data: client } = await supabase
+    .from("profiles")
+    .select("lang")
+    .eq("id", r.user_id)
+    .maybeSingle();
+  const clientLang = client?.lang === "en" ? "en" : DEFAULT_LANG;
+
   const data = { ...extra, coach: coachName, routine: r.name, routineId };
 
   await supabase.from("notifications").insert({
@@ -66,7 +74,7 @@ async function notifyAssignedRoutineChange(
   });
   await sendPush((subs ?? []) as PushSub[], {
     title: "GymApp",
-    body: renderNotification(DEFAULT_LANG, type, data),
+    body: renderNotification(clientLang, type, data),
     url: `/routines/${routineId}`,
   });
 }

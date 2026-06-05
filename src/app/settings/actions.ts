@@ -46,5 +46,13 @@ export async function setLanguage(formData: FormData) {
   const lang = String(formData.get("lang") ?? "nl") === "en" ? "en" : "nl";
   const store = await cookies();
   store.set("lang", lang, { path: "/", maxAge: YEAR });
+
+  // Bewaar ook op het profiel zodat push-meldingen in de juiste taal komen.
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (user) await supabase.from("profiles").update({ lang }).eq("id", user.id);
+
   revalidatePath("/", "layout");
 }
