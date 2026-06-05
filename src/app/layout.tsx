@@ -3,6 +3,7 @@ import "./globals.css";
 import { UnitProvider } from "@/components/UnitProvider";
 import { LangProvider } from "@/components/LangProvider";
 import { BottomNav } from "@/components/BottomNav";
+import { AppUpdater } from "@/components/AppUpdater";
 import { getLang, getUnit } from "@/lib/serverLang";
 
 export const metadata: Metadata = {
@@ -50,6 +51,7 @@ export default async function RootLayout({
           <UnitProvider unit={unit}>
             <div className="pb-20 md:pb-0">{children}</div>
             <BottomNav />
+            <AppUpdater />
           </UnitProvider>
         </LangProvider>
       </body>

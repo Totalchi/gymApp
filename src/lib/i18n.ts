@@ -106,6 +106,7 @@ const nl: Dict = {
   "notif.reminders": "Slimme herinneringen",
   "notif.on": "Aan",
   "notif.off": "Uit",
+  "update.available": "Nieuwe versie — tik om te verversen",
   // exercise picker / browser
   "ex.chooseExercise": "Oefening kiezen",
   "ex.search": "Zoek een oefening...",
@@ -476,6 +477,7 @@ const en: Dict = {
   "notif.reminders": "Smart reminders",
   "notif.on": "On",
   "notif.off": "Off",
+  "update.available": "New version — tap to refresh",
   "ex.chooseExercise": "Choose exercise",
   "ex.search": "Search an exercise...",
   "ex.all": "All",
