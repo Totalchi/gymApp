@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
 import { deleteCustomExercise } from "@/app/exercises/actions";
+import { expandSearchTerms } from "@/lib/exerciseSearch";
 import { useT } from "@/components/LangProvider";
 import { MUSCLE_GROUPS, type Exercise } from "@/lib/types";
 
@@ -27,7 +28,14 @@ export function ExerciseBrowser({ refreshKey = 0 }: { refreshKey?: number }) {
         .order("owner_id", { ascending: false, nullsFirst: false })
         .order("name")
         .limit(60);
-      if (query.trim()) q = q.ilike("name", `%${query.trim()}%`);
+      if (query.trim()) {
+        const terms = expandSearchTerms(query);
+        if (terms.length > 1) {
+          q = q.or(terms.map((t) => `name.ilike.%${t}%`).join(","));
+        } else {
+          q = q.ilike("name", `%${terms[0]}%`);
+        }
+      }
       if (muscle) q = q.contains("primary_muscles", [muscle]);
       const { data } = await q;
       if (active) {
