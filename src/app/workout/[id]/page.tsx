@@ -54,7 +54,7 @@ export default async function WorkoutPage({
   // Werksets (zonder warmup) van de vorige keer — voor de progressie-suggestie.
   const prevWorkingByExercise: Record<
     string,
-    { weight: number | null; reps: number | null; rir: number | null }[]
+    { weight: number | null; reps: number | null }[]
   > = {};
   if (exerciseIds.length) {
     const { data: prev } = await supabase
@@ -93,7 +93,6 @@ export default async function WorkoutPage({
         (prevWorkingByExercise[r.exercise_id] ??= []).push({
           weight: r.weight,
           reps: r.reps,
-          rir: r.rir,
         });
       }
     }
@@ -103,27 +102,22 @@ export default async function WorkoutPage({
   const restByExercise: Record<string, number> = {};
   const targetByExercise: Record<
     string,
-    { repLow: number | null; repHigh: number | null; rir: number | null }
+    { repLow: number | null; repHigh: number | null }
   > = {};
   if (session.day_id) {
     const { data: planned } = await supabase
       .from("routine_exercises")
-      .select("exercise_id, rest, reps, reps_max, rir")
+      .select("exercise_id, rest, reps, reps_max")
       .eq("day_id", session.day_id);
     for (const p of (planned ?? []) as {
       exercise_id: string;
       rest: string | null;
       reps: number | null;
       reps_max: number | null;
-      rir: number | null;
     }[]) {
       const secs = parseRestToSeconds(p.rest);
       if (secs) restByExercise[p.exercise_id] = secs;
-      targetByExercise[p.exercise_id] = {
-        repLow: p.reps,
-        repHigh: p.reps_max,
-        rir: p.rir,
-      };
+      targetByExercise[p.exercise_id] = { repLow: p.reps, repHigh: p.reps_max };
     }
   }
 
