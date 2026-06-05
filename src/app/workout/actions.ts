@@ -94,19 +94,66 @@ export async function startWorkout(formData: FormData) {
     .eq("day_id", dayId)
     .order("position");
 
+  // Wat deed je VORIGE keer per oefening? Die waarden vullen we vast in zodat
+  // je meteen weet waar te starten (jouw eigen meest recente sessie per oefening).
+  const exerciseIds = [...new Set((planned ?? []).map((p) => p.exercise_id))];
+  const prevByExSet: Record<
+    string,
+    Record<number, { weight: number | null; reps: number | null; one_rep_max: number | null }>
+  > = {};
+  if (exerciseIds.length) {
+    const { data: prev } = await supabase
+      .from("workout_sets")
+      .select(
+        "exercise_id, set_number, weight, reps, one_rep_max, session:workout_sessions!inner(user_id, performed_at)",
+      )
+      .in("exercise_id", exerciseIds)
+      .order("set_number");
+    type PrevRow = {
+      exercise_id: string;
+      set_number: number;
+      weight: number | null;
+      reps: number | null;
+      one_rep_max: number | null;
+      session: { user_id: string; performed_at: string } | null;
+    };
+    const latestTime: Record<string, string> = {};
+    for (const r of (prev ?? []) as unknown as PrevRow[]) {
+      if (!r.session || r.session.user_id !== user.id) continue;
+      const t = r.session.performed_at;
+      if (!latestTime[r.exercise_id] || t > latestTime[r.exercise_id]) {
+        latestTime[r.exercise_id] = t;
+      }
+    }
+    for (const r of (prev ?? []) as unknown as PrevRow[]) {
+      if (!r.session || r.session.user_id !== user.id) continue;
+      if (r.session.performed_at !== latestTime[r.exercise_id]) continue;
+      (prevByExSet[r.exercise_id] ??= {})[r.set_number] = {
+        weight: r.weight,
+        reps: r.reps,
+        one_rep_max: r.one_rep_max,
+      };
+    }
+  }
+
   const rows: Array<Record<string, unknown>> = [];
   for (const pe of planned ?? []) {
     const exercise = pe.exercise as unknown as { name?: string } | null;
     const setCount = Math.max(1, pe.sets ?? 1);
     for (let i = 1; i <= setCount; i++) {
+      // Vorige keer heeft voorrang; anders de geplande waarde uit het schema.
+      const prevSet = prevByExSet[pe.exercise_id]?.[i];
+      const weight = prevSet?.weight ?? pe.weight ?? null;
+      const reps = prevSet?.reps ?? pe.reps ?? null;
+      const oneRm = prevSet?.one_rep_max ?? pe.one_rep_max ?? null;
       const rir =
         pe.rir != null
           ? pe.rir
-          : pe.weight && pe.reps && pe.one_rep_max
+          : weight && reps && oneRm
             ? (computeRir({
-                weight: pe.weight,
-                reps: pe.reps,
-                oneRepMax: pe.one_rep_max,
+                weight,
+                reps,
+                oneRepMax: oneRm,
               })?.rir ?? null)
             : null;
       rows.push({
@@ -114,9 +161,9 @@ export async function startWorkout(formData: FormData) {
         exercise_id: pe.exercise_id,
         exercise_name: exercise?.name ?? null,
         set_number: i,
-        reps: pe.reps,
-        weight: pe.weight,
-        one_rep_max: pe.one_rep_max,
+        reps,
+        weight,
+        one_rep_max: oneRm,
         rir,
         set_type: "normal",
         completed: false,
