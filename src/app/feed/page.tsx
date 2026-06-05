@@ -10,32 +10,45 @@ function nameOf(p?: { display_name: string | null; username: string | null }) {
 
 export default async function FeedPage() {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
   const { t, lang } = await getT();
   const loc = lang === "en" ? "en-US" : "nl-NL";
 
-  const { data: sessionsData } = await supabase
-    .from("workout_sessions")
-    .select("id, user_id, day_name, performed_at, workout_sets(weight, reps, exercise_name)")
-    .eq("shared", true)
-    .order("performed_at", { ascending: false })
-    .limit(40);
+  // Gebruiker + feed-sessies parallel.
+  const [
+    {
+      data: { user },
+    },
+    { data: sessionsData },
+  ] = await Promise.all([
+    supabase.auth.getUser(),
+    supabase
+      .from("workout_sessions")
+      .select("id, user_id, day_name, performed_at, workout_sets(weight, reps, exercise_name)")
+      .eq("shared", true)
+      .order("performed_at", { ascending: false })
+      .limit(40),
+  ]);
   const sessions = sessionsData ?? [];
   const ids = sessions.map((s) => s.id);
   const userIds = [...new Set(sessions.map((s) => s.user_id))];
 
-  const { data: profs } = await supabase
-    .from("profiles")
-    .select("id, display_name, username")
-    .in("id", userIds.length ? userIds : ["__none__"]);
+  // Profielen, likes en reacties parallel (afhankelijk van de sessie-ids).
+  const [{ data: profs }, { data: likes }, { data: comments }] = await Promise.all([
+    supabase
+      .from("profiles")
+      .select("id, display_name, username")
+      .in("id", userIds.length ? userIds : ["__none__"]),
+    supabase
+      .from("likes")
+      .select("session_id, user_id")
+      .in("session_id", ids.length ? ids : ["__none__"]),
+    supabase
+      .from("comments")
+      .select("session_id")
+      .in("session_id", ids.length ? ids : ["__none__"]),
+  ]);
   const profById = new Map((profs ?? []).map((p) => [p.id, p]));
 
-  const { data: likes } = await supabase
-    .from("likes")
-    .select("session_id, user_id")
-    .in("session_id", ids.length ? ids : ["__none__"]);
   const likeCount: Record<string, number> = {};
   const likedByMe: Record<string, boolean> = {};
   for (const l of likes ?? []) {
@@ -43,10 +56,6 @@ export default async function FeedPage() {
     if (l.user_id === user?.id) likedByMe[l.session_id] = true;
   }
 
-  const { data: comments } = await supabase
-    .from("comments")
-    .select("session_id")
-    .in("session_id", ids.length ? ids : ["__none__"]);
   const commentCount: Record<string, number> = {};
   for (const c of comments ?? []) commentCount[c.session_id] = (commentCount[c.session_id] ?? 0) + 1;
 
