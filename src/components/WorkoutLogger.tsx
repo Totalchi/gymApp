@@ -11,6 +11,7 @@ import { PlateCalculator } from "@/components/PlateCalculator";
 import { ExercisePicker } from "@/components/ExercisePicker";
 import { ExerciseDetailModal } from "@/components/ExerciseDetailModal";
 import { computeRir } from "@/lib/rir";
+import type { ProgressionSuggestion } from "@/lib/progression";
 import { SET_TYPES, SET_TYPE_COLORS, type SetType, type Exercise } from "@/lib/types";
 
 interface SetRow {
@@ -28,6 +29,7 @@ interface Group {
   image: string | null;
   restSeconds: number | null;
   previous: { weight: number | null; reps: number | null }[];
+  suggestion: ProgressionSuggestion | null;
   sets: SetRow[];
 }
 
@@ -37,6 +39,7 @@ export interface LoggerInitialGroup {
   image: string | null;
   restSeconds: number | null;
   previous: { weight: number | null; reps: number | null }[];
+  suggestion?: ProgressionSuggestion | null;
   sets: {
     reps: number | null;
     weight: number | null;
@@ -76,6 +79,7 @@ export function WorkoutLogger({
       image: g.image,
       restSeconds: g.restSeconds ?? null,
       previous: g.previous,
+      suggestion: g.suggestion ?? null,
       sets: g.sets.map((s) => ({
         reps: s.reps != null ? String(s.reps) : "",
         weight: s.weight != null ? String(s.weight) : "",
@@ -116,6 +120,7 @@ export function WorkoutLogger({
               image: ex.image_urls?.[0] ?? null,
               restSeconds: null,
               previous: [],
+              suggestion: null,
             },
       ),
     );
@@ -131,6 +136,7 @@ export function WorkoutLogger({
         image: ex.image_urls?.[0] ?? null,
         restSeconds: null,
         previous: [],
+        suggestion: null,
         sets: [
           { reps: "", weight: "", oneRm: "", rir: "", setType: "normal", completed: false },
         ],
@@ -485,6 +491,16 @@ export function WorkoutLogger({
               ⏱ {fmtTime(g.restSeconds ?? restDuration)}
             </button>
           </header>
+
+          {g.suggestion && g.suggestion.kind === "up" && (
+            <div className="border-b border-line bg-emerald-500/10 px-4 py-2 text-xs font-medium text-emerald-300">
+              💡 {t("wk.progressHint")}{" "}
+              <span className="font-bold tabular-nums">
+                {g.suggestion.weight} {unit}
+              </span>{" "}
+              <span className="text-emerald-400/80">(+{g.suggestion.delta})</span>
+            </div>
+          )}
 
           <div className="space-y-1.5 p-3 sm:p-4">
             <div className="grid grid-cols-[1.75rem_4rem_1fr_1fr_2.75rem_2rem_2rem] items-center gap-1.5 px-1 text-[10px] font-medium uppercase tracking-wide text-faint">

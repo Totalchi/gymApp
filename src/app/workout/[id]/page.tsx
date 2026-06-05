@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { Header } from "@/components/Header";
 import { parseRestToSeconds } from "@/lib/rest";
+import { suggestProgression } from "@/lib/progression";
 import {
   WorkoutLogger,
   type LoggerInitialGroup,
@@ -50,10 +51,15 @@ export default async function WorkoutPage({
 
   // "Vorige keer": sets uit de meest recente eerdere sessie per oefening.
   const previousByExercise: Record<string, { weight: number | null; reps: number | null }[]> = {};
+  // Werksets (zonder warmup) van de vorige keer — voor de progressie-suggestie.
+  const prevWorkingByExercise: Record<
+    string,
+    { weight: number | null; reps: number | null; rir: number | null }[]
+  > = {};
   if (exerciseIds.length) {
     const { data: prev } = await supabase
       .from("workout_sets")
-      .select("exercise_id, set_number, weight, reps, session:workout_sessions!inner(id, performed_at)")
+      .select("exercise_id, set_number, weight, reps, rir, set_type, session:workout_sessions!inner(id, performed_at)")
       .in("exercise_id", exerciseIds)
       .neq("session_id", id)
       .order("set_number");
@@ -62,6 +68,8 @@ export default async function WorkoutPage({
       set_number: number;
       weight: number | null;
       reps: number | null;
+      rir: number | null;
+      set_type: string | null;
       session: { id: string; performed_at: string } | null;
     };
     const latestSessionByEx: Record<string, string> = {};
@@ -81,19 +89,41 @@ export default async function WorkoutPage({
         weight: r.weight,
         reps: r.reps,
       });
+      if (r.set_type !== "warmup") {
+        (prevWorkingByExercise[r.exercise_id] ??= []).push({
+          weight: r.weight,
+          reps: r.reps,
+          rir: r.rir,
+        });
+      }
     }
   }
 
-  // Rusttijd per oefening uit het schema (de dag van deze sessie).
+  // Schema-doelen per oefening (rusttijd + rep-bereik + doel-RIR).
   const restByExercise: Record<string, number> = {};
+  const targetByExercise: Record<
+    string,
+    { repLow: number | null; repHigh: number | null; rir: number | null }
+  > = {};
   if (session.day_id) {
     const { data: planned } = await supabase
       .from("routine_exercises")
-      .select("exercise_id, rest")
+      .select("exercise_id, rest, reps, reps_max, rir")
       .eq("day_id", session.day_id);
-    for (const p of (planned ?? []) as { exercise_id: string; rest: string | null }[]) {
+    for (const p of (planned ?? []) as {
+      exercise_id: string;
+      rest: string | null;
+      reps: number | null;
+      reps_max: number | null;
+      rir: number | null;
+    }[]) {
       const secs = parseRestToSeconds(p.rest);
       if (secs) restByExercise[p.exercise_id] = secs;
+      targetByExercise[p.exercise_id] = {
+        repLow: p.reps,
+        repHigh: p.reps_max,
+        rir: p.rir,
+      };
     }
   }
 
@@ -106,12 +136,17 @@ export default async function WorkoutPage({
       gi = groups.length;
       indexByExercise.set(s.exercise_id, gi);
       const meta = metaById.get(s.exercise_id);
+      const target = targetByExercise[s.exercise_id];
+      const suggestion = target
+        ? suggestProgression(prevWorkingByExercise[s.exercise_id] ?? [], target)
+        : null;
       groups.push({
         exerciseId: s.exercise_id,
         name: meta?.name ?? s.exercise_name ?? "Oefening",
         image: meta?.image ?? null,
         restSeconds: restByExercise[s.exercise_id] ?? null,
         previous: previousByExercise[s.exercise_id] ?? [],
+        suggestion: suggestion && suggestion.kind === "up" ? suggestion : null,
         sets: [],
       });
     }
