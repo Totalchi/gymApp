@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { Header } from "@/components/Header";
@@ -60,6 +61,15 @@ export default async function CoachClientPage({
     .eq("user_id", clientId)
     .eq("assigned_by", user?.id ?? "")
     .order("created_at", { ascending: false });
+
+  // Gedeelde progressiefoto's van de cliënt.
+  const { data: photos } = await supabase
+    .from("progress_photos")
+    .select("id, url, taken_on")
+    .eq("user_id", clientId)
+    .eq("shared_with_coach", true)
+    .order("taken_on", { ascending: false })
+    .limit(24);
 
   return (
     <>
@@ -131,6 +141,27 @@ export default async function CoachClientPage({
               ))}
             </div>
             <p className="mt-2 text-xs text-faint">{t("coach.assignedHint")}</p>
+          </section>
+        )}
+
+        {/* Gedeelde progressiefoto's */}
+        {photos && photos.length > 0 && (
+          <section className="mb-6">
+            <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-faint">
+              {t("photos.title")}
+            </h2>
+            <div className="grid grid-cols-3 gap-2">
+              {photos.map((p) => (
+                <div key={p.id} className="overflow-hidden rounded-xl border border-line bg-surface">
+                  <div className="relative aspect-square bg-canvas">
+                    <Image src={p.url} alt="" fill sizes="33vw" className="object-cover" />
+                  </div>
+                  <p className="px-2 py-1 text-[11px] text-faint">
+                    {new Date(p.taken_on).toLocaleDateString(loc, { day: "numeric", month: "short" })}
+                  </p>
+                </div>
+              ))}
+            </div>
           </section>
         )}
 
