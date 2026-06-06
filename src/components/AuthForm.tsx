@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import Link from "next/link";
 import { login, signup, type AuthState } from "@/app/login/actions";
 import { useT } from "@/components/LangProvider";
@@ -13,6 +13,7 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
     {},
   );
   const t = useT();
+  const [role, setRole] = useState<"athlete" | "coach">("athlete");
 
   return (
     <div className="w-full max-w-sm">
@@ -30,13 +31,43 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
 
       <form action={formAction} className="space-y-4">
         {mode === "register" && (
-          <Field
-            label={t("auth.name")}
-            name="display_name"
-            type="text"
-            placeholder={t("auth.namePh")}
-            autoComplete="name"
-          />
+          <>
+            <Field
+              label={t("auth.name")}
+              name="display_name"
+              type="text"
+              placeholder={t("auth.namePh")}
+              autoComplete="name"
+            />
+            <div>
+              <span className="mb-1.5 block text-sm font-medium text-muted">
+                {t("auth.roleLabel")}
+              </span>
+              <input type="hidden" name="role" value={role} />
+              <div className="grid grid-cols-2 gap-2">
+                {(
+                  [
+                    ["athlete", "🏋️", t("auth.roleAthlete")],
+                    ["coach", "🧑‍🏫", t("auth.roleCoach")],
+                  ] as const
+                ).map(([value, icon, label]) => (
+                  <button
+                    key={value}
+                    type="button"
+                    onClick={() => setRole(value)}
+                    className={`rounded-xl border px-3 py-2.5 text-sm font-medium transition ${
+                      role === value
+                        ? "border-primary bg-primary/10 text-primary"
+                        : "border-line text-muted hover:border-muted"
+                    }`}
+                  >
+                    {icon} {label}
+                  </button>
+                ))}
+              </div>
+              <p className="mt-1.5 text-xs text-faint">{t("auth.roleHint")}</p>
+            </div>
+          </>
         )}
         <Field
           label={t("auth.email")}

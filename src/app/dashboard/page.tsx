@@ -114,6 +114,7 @@ export default async function DashboardPage() {
     { data: folders },
     { data: todayDays },
     { data: sessions },
+    { data: profile },
   ] = await Promise.all([
     supabase.auth.getUser(),
     supabase
@@ -130,7 +131,9 @@ export default async function DashboardPage() {
       .select("id, name, day_type, routine_id")
       .eq("weekday", todayIdx),
     supabase.from("workout_sessions").select("performed_at, workout_sets(weight, reps)"),
+    supabase.from("profiles").select("role").maybeSingle(),
   ]);
+  const isCoach = profile?.role === "coach";
   const allSessions = sessions ?? [];
   const totalWorkouts = allSessions.length;
   let totalVolume = 0;
@@ -294,6 +297,18 @@ export default async function DashboardPage() {
               </Link>
               <p className="mt-2 text-xs text-faint">{t("onb.or")}</p>
             </div>
+            {isCoach && (
+              <div className="mt-5 rounded-xl border border-primary/40 bg-primary/5 p-4 text-left">
+                <p className="text-sm font-medium">🧑‍🏫 {t("onb.coachTitle")}</p>
+                <p className="mt-1 text-xs text-muted">{t("onb.coachSub")}</p>
+                <Link
+                  href="/coach"
+                  className="mt-3 inline-block rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-fg transition hover:brightness-110"
+                >
+                  {t("onb.coachCta")}
+                </Link>
+              </div>
+            )}
           </div>
         ) : folderList.length === 0 ? (
           /* Geen mappen: gewoon een nette lijst */

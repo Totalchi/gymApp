@@ -38,6 +38,7 @@ export async function signup(
   const email = String(formData.get("email") ?? "").trim();
   const password = String(formData.get("password") ?? "");
   const displayName = String(formData.get("display_name") ?? "").trim();
+  const role = String(formData.get("role") ?? "athlete") === "coach" ? "coach" : "athlete";
 
   if (!email || !password) {
     return { error: "Vul je e-mailadres en wachtwoord in." };
@@ -50,7 +51,7 @@ export async function signup(
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
-    options: { data: { display_name: displayName || undefined } },
+    options: { data: { display_name: displayName || undefined, role } },
   });
 
   if (error) {
