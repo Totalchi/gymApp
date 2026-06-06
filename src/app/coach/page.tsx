@@ -52,6 +52,21 @@ export default async function CoachPage({
     .in("id", ids.length ? [...new Set(ids)] : ["__none__"]);
   const profById = new Map((profs ?? []).map((p) => [p.id, p]));
 
+  // Wie van mijn cliënten trainde deze week? (sessies laatste 7 dagen)
+  const clientIds = clientsActive.map((r) => r.client_id);
+  const weekAgo = new Date(Date.now() - 7 * 864e5).toISOString();
+  const sessionsThisWeek: Record<string, number> = {};
+  if (clientIds.length) {
+    const { data: cs } = await supabase
+      .from("workout_sessions")
+      .select("user_id, performed_at")
+      .in("user_id", clientIds)
+      .gte("performed_at", weekAgo);
+    for (const s of cs ?? []) {
+      sessionsThisWeek[s.user_id] = (sessionsThisWeek[s.user_id] ?? 0) + 1;
+    }
+  }
+
   const relatedIds = new Set(
     all.flatMap((r) => [r.coach_id, r.client_id]).filter((id) => id !== user?.id),
   );
@@ -138,6 +153,15 @@ export default async function CoachPage({
                     {nameOf(profById.get(r.client_id)).replace("@", "").charAt(0).toUpperCase()}
                   </span>
                   <span className="flex-1 font-medium">{nameOf(profById.get(r.client_id))}</span>
+                  {sessionsThisWeek[r.client_id] ? (
+                    <span className="shrink-0 rounded-full bg-emerald-500/15 px-2 py-0.5 text-[11px] font-medium text-emerald-300 ring-1 ring-emerald-500/30">
+                      {sessionsThisWeek[r.client_id]}× {t("coach.thisWeek")}
+                    </span>
+                  ) : (
+                    <span className="shrink-0 rounded-full bg-surface2 px-2 py-0.5 text-[11px] text-faint ring-1 ring-line">
+                      {t("coach.restWeek")}
+                    </span>
+                  )}
                   <span className="text-faint">›</span>
                 </Link>
               ))}
