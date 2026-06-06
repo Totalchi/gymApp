@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { Header } from "@/components/Header";
 import { getT } from "@/lib/serverLang";
 import { toggleFollow } from "@/app/social/actions";
+import { sanitizeFilter } from "@/lib/text";
 
 function nameOf(p: { display_name: string | null; username: string | null }) {
   return p.display_name || (p.username ? `@${p.username}` : "Atleet");
@@ -23,10 +24,11 @@ export default async function PeoplePage({
 
   let people: { id: string; display_name: string | null; username: string | null }[] = [];
   if (query) {
+    const safe = sanitizeFilter(query);
     const { data } = await supabase
       .from("profiles")
       .select("id, display_name, username")
-      .or(`display_name.ilike.%${query}%,username.ilike.%${query}%`)
+      .or(`display_name.ilike.%${safe}%,username.ilike.%${safe}%`)
       .limit(30);
     people = (data ?? []).filter((p) => p.id !== user?.id);
   }
