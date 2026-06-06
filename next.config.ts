@@ -1,6 +1,10 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  experimental: {
+    // Foto-uploads via server actions kunnen groter zijn dan de standaard 1 MB.
+    serverActions: { bodySizeLimit: "8mb" },
+  },
   images: {
     remotePatterns: [
       {
