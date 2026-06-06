@@ -143,7 +143,9 @@ const SYNONYMS: Record<string, string[]> = {
 export function expandSearchTerms(query: string): string[] {
   const q = query.trim().toLowerCase();
   if (!q) return [];
-  const terms = new Set<string>([query.trim()]);
+  // Maak de ruwe term veilig voor PostgREST-filters (komma's/haakjes/wildcards).
+  const safe = query.replace(/[,()%*:\\]/g, " ").replace(/\s+/g, " ").trim();
+  const terms = new Set<string>(safe ? [safe] : []);
   for (const [key, vals] of Object.entries(SYNONYMS)) {
     // Exacte match altijd; "bevat"-match pas vanaf 3 tekens (voorkomt ruis).
     const fuzzy = q.length >= 3 && (q.includes(key) || key.includes(q));
