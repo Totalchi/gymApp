@@ -17,9 +17,6 @@ export default async function StatsPage({
   searchParams: Promise<{ range?: string }>;
 }) {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
   const { t, lang } = await getT();
   const loc = lang === "en" ? "en-US" : "nl-NL";
 
@@ -27,10 +24,20 @@ export default async function StatsPage({
   const rangeDays = (RANGES.find((r) => r.key === range) ?? RANGES[3]).days;
   const cutoff = rangeDays != null ? new Date(Date.now() - rangeDays * 864e5).toISOString() : null;
 
-  // Sessies + sets voor kalender en volume.
-  const { data: sessions } = await supabase
-    .from("workout_sessions")
-    .select("performed_at, workout_sets(weight, reps)");
+  // Alles parallel: gebruiker, sessies (kalender/volume) en sets (spiergroepen).
+  const [
+    {
+      data: { user },
+    },
+    { data: sessions },
+    { data: setRows },
+  ] = await Promise.all([
+    supabase.auth.getUser(),
+    supabase.from("workout_sessions").select("performed_at, workout_sets(weight, reps)"),
+    supabase
+      .from("workout_sets")
+      .select("weight, reps, exercise:exercises(primary_muscles), session:workout_sessions(performed_at)"),
+  ]);
 
   const dayVolume: Record<string, number> = {};
   for (const s of sessions ?? []) {
@@ -83,9 +90,6 @@ export default async function StatsPage({
   const hasWeekData = weeks.some((w) => w.count > 0);
 
   // Spiergroep-verdeling op basis van set-volume (binnen gekozen periode).
-  const { data: setRows } = await supabase
-    .from("workout_sets")
-    .select("weight, reps, exercise:exercises(primary_muscles), session:workout_sessions(performed_at)");
   const muscleVolume: Record<string, number> = {};
   for (const r of (setRows ?? []) as unknown as {
     weight: number | null;
