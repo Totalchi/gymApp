@@ -85,6 +85,13 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
           autoComplete={mode === "login" ? "current-password" : "new-password"}
           required
         />
+        {mode === "login" && (
+          <div className="-mt-2 text-right">
+            <Link href="/forgot" className="text-xs font-medium text-primary hover:underline">
+              {t("auth.forgot")}
+            </Link>
+          </div>
+        )}
 
         {state.error && (
           <p className="rounded-lg bg-danger/10 px-3 py-2 text-sm text-danger ring-1 ring-danger/30">
