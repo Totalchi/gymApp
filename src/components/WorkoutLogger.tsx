@@ -324,6 +324,8 @@ export function WorkoutLogger({
     }
     document.addEventListener("visibilitychange", onVisible);
     return () => document.removeEventListener("visibilitychange", onVisible);
+    // finishRest is bewust stabiel; opnieuw binden is niet nodig.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   useEffect(() => () => clearTick(), []);
 

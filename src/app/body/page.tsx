@@ -24,7 +24,8 @@ export default async function BodyPage() {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  const { t } = await getT();
+  const { t, lang } = await getT();
+  const loc = lang === "en" ? "en-US" : "nl-NL";
 
   const [{ data }, { data: photoData }] = await Promise.all([
     supabase.from("body_metrics").select("*").order("measured_at", { ascending: false }),
@@ -40,7 +41,7 @@ export default async function BodyPage() {
     .filter((m) => m.weight != null)
     .sort((a, b) => a.measured_at.localeCompare(b.measured_at))
     .map((m) => ({
-      label: new Date(m.measured_at).toLocaleDateString("nl-NL", {
+      label: new Date(m.measured_at).toLocaleDateString(loc, {
         day: "numeric",
         month: "short",
       }),
@@ -101,7 +102,7 @@ export default async function BodyPage() {
               >
                 <div className="min-w-0">
                   <p className="text-sm font-medium">
-                    {new Date(m.measured_at).toLocaleDateString("nl-NL", {
+                    {new Date(m.measured_at).toLocaleDateString(loc, {
                       day: "numeric",
                       month: "short",
                       year: "numeric",
@@ -183,7 +184,7 @@ export default async function BodyPage() {
                 </div>
                 <div className="p-2.5">
                   <p className="text-xs font-medium">
-                    {new Date(p.taken_on).toLocaleDateString("nl-NL", {
+                    {new Date(p.taken_on).toLocaleDateString(loc, {
                       day: "numeric",
                       month: "short",
                       year: "numeric",

@@ -9,3 +9,8 @@ export function sanitizeFilter(s: string): string {
     .replace(/\s+/g, " ")
     .trim();
 }
+
+/** Valideert dat een string een geldige UUID is (voor veilige route-params). */
+export function isUuid(s: string): boolean {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(s);
+}
