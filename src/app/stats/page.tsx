@@ -159,7 +159,7 @@ export default async function StatsPage({
                 {col.map((cell) => (
                   <div
                     key={cell.date}
-                    title={`${cell.date}: ${Math.round(cell.volume).toLocaleString("nl-NL")} kg`}
+                    title={`${cell.date}: ${Math.round(cell.volume).toLocaleString(loc)} kg`}
                     className={`h-3.5 w-3.5 rounded-sm ${cellColor(cell.volume)}`}
                   />
                 ))}

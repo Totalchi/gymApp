@@ -14,7 +14,7 @@ export default async function SettingsPage() {
     .from("profiles")
     .select("display_name, weight_unit, username, bio")
     .eq("id", user?.id ?? "")
-    .single();
+    .maybeSingle();
 
   const unit = profile?.weight_unit === "lb" ? "lb" : "kg";
 

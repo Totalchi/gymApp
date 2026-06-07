@@ -54,6 +54,13 @@ const nl: Dict = {
   "auth.resetSub": "Kies een nieuw wachtwoord voor je account.",
   "auth.newPassword": "Nieuw wachtwoord",
   "auth.updatePassword": "Wachtwoord opslaan",
+  "err.title": "Er ging iets mis",
+  "err.sub": "Er trad een onverwachte fout op. Probeer het opnieuw.",
+  "err.retry": "Opnieuw proberen",
+  "err.home": "Naar dashboard",
+  "nf.title": "Pagina niet gevonden",
+  "nf.sub": "Deze pagina bestaat niet (meer).",
+  "nf.home": "Naar dashboard",
   // dashboard
   "dash.title": "Mijn schema's",
   "dash.subtitle":
@@ -453,6 +460,13 @@ const en: Dict = {
   "auth.resetSub": "Choose a new password for your account.",
   "auth.newPassword": "New password",
   "auth.updatePassword": "Save password",
+  "err.title": "Something went wrong",
+  "err.sub": "An unexpected error occurred. Please try again.",
+  "err.retry": "Try again",
+  "err.home": "Go to dashboard",
+  "nf.title": "Page not found",
+  "nf.sub": "This page doesn't exist (anymore).",
+  "nf.home": "Go to dashboard",
   "dash.title": "My routines",
   "dash.subtitle":
     "Build weekly training routines with push/pull/legs days, sets, reps, weight and automatic RIR.",

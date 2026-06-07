@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { Header } from "@/components/Header";
 import { getT } from "@/lib/serverLang";
 import { sendMessage } from "@/app/messages/actions";
+import { isUuid } from "@/lib/text";
 
 function nameOf(p?: { display_name: string | null; username: string | null }) {
   return p?.display_name || (p?.username ? `@${p.username}` : "Atleet");
@@ -15,6 +16,7 @@ export default async function MessagesPage({
   params: Promise<{ userId: string }>;
 }) {
   const { userId } = await params;
+  if (!isUuid(userId)) notFound();
   const supabase = await createClient();
   const {
     data: { user },
