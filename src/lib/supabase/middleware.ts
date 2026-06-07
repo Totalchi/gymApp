@@ -4,7 +4,7 @@ import { NextResponse, type NextRequest } from "next/server";
 type CookieToSet = { name: string; value: string; options?: CookieOptions };
 
 /** Routes die zonder login toegankelijk zijn. */
-const PUBLIC_PATHS = ["/login", "/register", "/auth"];
+const PUBLIC_PATHS = ["/login", "/register", "/auth", "/forgot"];
 
 /**
  * Ververst de Supabase-sessie bij elke request en beschermt routes die
