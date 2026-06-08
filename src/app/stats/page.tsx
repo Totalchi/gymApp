@@ -24,29 +24,39 @@ export default async function StatsPage({
   const rangeDays = (RANGES.find((r) => r.key === range) ?? RANGES[3]).days;
   const cutoff = rangeDays != null ? new Date(Date.now() - rangeDays * 864e5).toISOString() : null;
 
-  // Alles parallel: gebruiker, sessies (kalender/volume) en sets (spiergroepen).
+  // Server-side aggregaties (snel); val terug op client-tellen vóór migratie 0020.
   const [
     {
       data: { user },
     },
-    { data: sessions },
-    { data: setRows },
+    { data: sessionDatesRaw },
+    { data: dailyRows },
+    { data: muscleRows },
   ] = await Promise.all([
     supabase.auth.getUser(),
-    supabase.from("workout_sessions").select("performed_at, workout_sets(weight, reps)"),
-    supabase
-      .from("workout_sets")
-      .select("weight, reps, exercise:exercises(primary_muscles), session:workout_sessions(performed_at)"),
+    supabase.from("workout_sessions").select("performed_at"),
+    supabase.rpc("user_daily_volume"),
+    supabase.rpc("user_muscle_volume", { p_since: cutoff }),
   ]);
+  const sessionDates = (sessionDatesRaw ?? []) as { performed_at: string }[];
 
   const dayVolume: Record<string, number> = {};
-  for (const s of sessions ?? []) {
-    const day = new Date(s.performed_at).toISOString().slice(0, 10);
-    let v = 0;
-    for (const set of (s.workout_sets ?? []) as { weight: number | null; reps: number | null }[]) {
-      v += (set.weight ?? 0) * (set.reps ?? 0);
+  if (dailyRows) {
+    for (const r of dailyRows as { day: string; volume: number }[]) {
+      dayVolume[r.day] = Number(r.volume) || 0;
     }
-    dayVolume[day] = (dayVolume[day] ?? 0) + v;
+  } else {
+    const { data: fb } = await supabase
+      .from("workout_sessions")
+      .select("performed_at, workout_sets(weight, reps)");
+    for (const s of fb ?? []) {
+      const day = new Date(s.performed_at).toISOString().slice(0, 10);
+      let v = 0;
+      for (const set of (s.workout_sets ?? []) as { weight: number | null; reps: number | null }[]) {
+        v += (set.weight ?? 0) * (set.reps ?? 0);
+      }
+      dayVolume[day] = (dayVolume[day] ?? 0) + v;
+    }
   }
 
   // Per week: totaal volume + aantal workouts (laatste 12 weken, maandag-start).
@@ -71,16 +81,13 @@ export default async function StatsPage({
       count: 0,
     });
   }
-  for (const s of sessions ?? []) {
-    const key = weekStart(new Date(s.performed_at)).toISOString().slice(0, 10);
-    const idx = weekIdx.get(key);
-    if (idx == null) continue;
-    let v = 0;
-    for (const set of (s.workout_sets ?? []) as { weight: number | null; reps: number | null }[]) {
-      v += (set.weight ?? 0) * (set.reps ?? 0);
-    }
-    weeks[idx].volume += v;
-    weeks[idx].count += 1;
+  for (const [dayStr, vol] of Object.entries(dayVolume)) {
+    const idx = weekIdx.get(weekStart(new Date(dayStr)).toISOString().slice(0, 10));
+    if (idx != null) weeks[idx].volume += vol;
+  }
+  for (const s of sessionDates) {
+    const idx = weekIdx.get(weekStart(new Date(s.performed_at)).toISOString().slice(0, 10));
+    if (idx != null) weeks[idx].count += 1;
   }
   const volumePoints: ChartPoint[] = weeks.map((w) => ({
     label: w.label,
@@ -89,19 +96,28 @@ export default async function StatsPage({
   const maxWeekCount = Math.max(1, ...weeks.map((w) => w.count));
   const hasWeekData = weeks.some((w) => w.count > 0);
 
-  // Spiergroep-verdeling op basis van set-volume (binnen gekozen periode).
+  // Spiergroep-verdeling (binnen gekozen periode).
   const muscleVolume: Record<string, number> = {};
-  for (const r of (setRows ?? []) as unknown as {
-    weight: number | null;
-    reps: number | null;
-    exercise: { primary_muscles: string[] } | null;
-    session: { performed_at: string } | null;
-  }[]) {
-    if (cutoff && (!r.session || r.session.performed_at < cutoff)) continue;
-    const v = (r.weight ?? 0) * (r.reps ?? 0);
-    if (!v || !r.exercise) continue;
-    for (const m of r.exercise.primary_muscles ?? []) {
-      muscleVolume[m] = (muscleVolume[m] ?? 0) + v;
+  if (muscleRows) {
+    for (const r of muscleRows as { muscle: string; volume: number }[]) {
+      muscleVolume[r.muscle] = Number(r.volume) || 0;
+    }
+  } else {
+    const { data: setRows } = await supabase
+      .from("workout_sets")
+      .select("weight, reps, exercise:exercises(primary_muscles), session:workout_sessions(performed_at)");
+    for (const r of (setRows ?? []) as unknown as {
+      weight: number | null;
+      reps: number | null;
+      exercise: { primary_muscles: string[] } | null;
+      session: { performed_at: string } | null;
+    }[]) {
+      if (cutoff && (!r.session || r.session.performed_at < cutoff)) continue;
+      const v = (r.weight ?? 0) * (r.reps ?? 0);
+      if (!v || !r.exercise) continue;
+      for (const m of r.exercise.primary_muscles ?? []) {
+        muscleVolume[m] = (muscleVolume[m] ?? 0) + v;
+      }
     }
   }
   const muscles = Object.entries(muscleVolume).sort(([, a], [, b]) => b - a);
