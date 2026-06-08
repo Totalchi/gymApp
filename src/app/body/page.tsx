@@ -111,11 +111,11 @@ export default async function BodyPage() {
                   <p className="truncate text-xs text-muted">
                     {[
                       m.weight != null && `${m.weight} kg`,
-                      m.body_fat != null && `${m.body_fat}% vet`,
-                      m.chest != null && `borst ${m.chest}`,
-                      m.waist != null && `taille ${m.waist}`,
-                      m.arms != null && `armen ${m.arms}`,
-                      m.thighs != null && `benen ${m.thighs}`,
+                      m.body_fat != null && `${m.body_fat}% ${t("body.sFat")}`,
+                      m.chest != null && `${t("body.sChest")} ${m.chest}`,
+                      m.waist != null && `${t("body.sWaist")} ${m.waist}`,
+                      m.arms != null && `${t("body.sArms")} ${m.arms}`,
+                      m.thighs != null && `${t("body.sThighs")} ${m.thighs}`,
                     ]
                       .filter(Boolean)
                       .join(" · ") || "—"}

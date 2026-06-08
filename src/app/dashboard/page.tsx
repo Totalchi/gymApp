@@ -113,8 +113,9 @@ export default async function DashboardPage() {
     { data: routines },
     { data: folders },
     { data: todayDays },
-    { data: sessions },
+    { data: sessionDatesRaw },
     { data: profile },
+    { data: totalsRows },
   ] = await Promise.all([
     supabase.auth.getUser(),
     supabase
@@ -130,27 +131,43 @@ export default async function DashboardPage() {
       .from("routine_days")
       .select("id, name, day_type, routine_id")
       .eq("weekday", todayIdx),
-    supabase.from("workout_sessions").select("performed_at, workout_sets(weight, reps)"),
+    // Alleen datums (licht) — voor streak + 'deze week'.
+    supabase.from("workout_sessions").select("performed_at"),
     supabase.from("profiles").select("role").maybeSingle(),
+    // Totalen server-side berekend (snel, weinig data).
+    supabase.rpc("user_workout_totals"),
   ]);
   const isCoach = profile?.role === "coach";
-  const allSessions = sessions ?? [];
-  const totalWorkouts = allSessions.length;
-  let totalVolume = 0;
+  const sessionDates = (sessionDatesRaw ?? []) as { performed_at: string }[];
+
+  let totalWorkouts = sessionDates.length;
   let totalSets = 0;
-  for (const s of allSessions) {
-    for (const set of (s.workout_sets ?? []) as { weight: number | null; reps: number | null }[]) {
-      totalVolume += (set.weight ?? 0) * (set.reps ?? 0);
-      totalSets += 1;
+  let totalVolume = 0;
+  const totals = (totalsRows as { workouts: number; sets: number; volume: number }[] | null)?.[0];
+  if (totals) {
+    totalWorkouts = Number(totals.workouts) || 0;
+    totalSets = Number(totals.sets) || 0;
+    totalVolume = Number(totals.volume) || 0;
+  } else {
+    // Fallback vóór migratie 0020: tel client-side.
+    const { data: fb } = await supabase
+      .from("workout_sessions")
+      .select("workout_sets(weight, reps)");
+    for (const s of fb ?? []) {
+      for (const set of (s.workout_sets ?? []) as { weight: number | null; reps: number | null }[]) {
+        totalVolume += (set.weight ?? 0) * (set.reps ?? 0);
+        totalSets += 1;
+      }
     }
   }
+
   const weekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
-  const thisWeek = allSessions.filter(
+  const thisWeek = sessionDates.filter(
     (s) => new Date(s.performed_at).getTime() >= weekAgo,
   ).length;
 
   const days = new Set(
-    allSessions.map((s) => new Date(s.performed_at).toISOString().slice(0, 10)),
+    sessionDates.map((s) => new Date(s.performed_at).toISOString().slice(0, 10)),
   );
   let streak = 0;
   const cur = new Date();

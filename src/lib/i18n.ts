@@ -288,6 +288,11 @@ const nl: Dict = {
   "body.thighs": "Benen (cm)",
   "body.measurements": "Metingen",
   "body.empty": "Nog geen metingen. Voeg je eerste meting hierboven toe.",
+  "body.sFat": "vet",
+  "body.sChest": "borst",
+  "body.sWaist": "taille",
+  "body.sArms": "armen",
+  "body.sThighs": "benen",
   // templates
   "tpl.title": "Kant-en-klare programma's",
   "tpl.subtitle":
@@ -682,6 +687,11 @@ const en: Dict = {
   "body.thighs": "Thighs (cm)",
   "body.measurements": "Measurements",
   "body.empty": "No measurements yet. Add your first one above.",
+  "body.sFat": "fat",
+  "body.sChest": "chest",
+  "body.sWaist": "waist",
+  "body.sArms": "arms",
+  "body.sThighs": "thighs",
   "tpl.title": "Ready-made programs",
   "tpl.subtitle":
     "Pick a proven routine and add it to your own with one tap. You can tweak it afterwards.",
