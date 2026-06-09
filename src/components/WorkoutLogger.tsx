@@ -450,7 +450,7 @@ export function WorkoutLogger({
       )}
 
       {groups.map((g, gi) => (
-        <section key={g.exerciseId + gi} className="rounded-2xl border border-line bg-surface">
+        <section key={g.exerciseId + gi} className="rounded-2xl border border-line bg-surface shadow-[var(--shadow)]">
           <header className="flex items-center gap-3 border-b border-line px-4 py-3">
             <button
               type="button"

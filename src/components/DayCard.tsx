@@ -96,7 +96,7 @@ export function DayCard({
         transition,
         opacity: isDragging ? 0.6 : 1,
       }}
-      className="rounded-2xl border border-line bg-surface"
+      className="rounded-2xl border border-line bg-surface shadow-[var(--shadow)]"
     >
       <header className="flex items-center justify-between gap-3 border-b border-line px-4 py-4 sm:px-5">
         <div className="flex min-w-0 items-center gap-2 sm:gap-3">

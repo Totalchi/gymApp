@@ -76,7 +76,7 @@ export function ExerciseBrowser({ refreshKey = 0 }: { refreshKey?: number }) {
             <button
               key={ex.id}
               onClick={() => setSelected(ex)}
-              className="group overflow-hidden rounded-2xl border border-line bg-surface text-left transition hover:border-muted"
+              className="group overflow-hidden rounded-2xl border border-line bg-surface text-left shadow-[var(--shadow)] transition hover:-translate-y-0.5 hover:border-primary/40"
             >
               <div className="relative aspect-square w-full bg-white">
                 {ex.image_urls?.[0] ? (

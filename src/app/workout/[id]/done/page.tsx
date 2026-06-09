@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { Header } from "@/components/Header";
+import { Confetti } from "@/components/Confetti";
 import { getT } from "@/lib/serverLang";
 import { estimateOneRepMax } from "@/lib/rir";
 
@@ -95,9 +96,10 @@ export default async function WorkoutDonePage({
   return (
     <>
       <Header email={user?.email} />
+      <Confetti fire={prs.length > 0} />
       <main className="mx-auto max-w-lg px-4 py-10 text-center">
-        <div className="mb-3 text-6xl">🎉</div>
-        <h1 className="text-3xl font-bold">{t("done.title")}</h1>
+        <div className="mb-3 inline-block animate-pop text-6xl">🎉</div>
+        <h1 className="text-3xl font-bold tracking-tight">{t("done.title")}</h1>
         <p className="mt-1 text-muted">{session.day_name}</p>
 
         <div className="mt-6 grid grid-cols-3 gap-3">
@@ -106,7 +108,7 @@ export default async function WorkoutDonePage({
             { label: t("done.sets"), value: setCount },
             { label: t("done.volume"), value: `${Math.round(volume).toLocaleString()} kg` },
           ].map((s) => (
-            <div key={s.label} className="rounded-2xl border border-line bg-surface p-4">
+            <div key={s.label} className="rounded-2xl border border-line bg-surface p-4 shadow-[var(--shadow)]">
               <p className="text-xl font-bold tabular-nums">{s.value}</p>
               <p className="mt-0.5 text-xs text-faint">{s.label}</p>
             </div>
@@ -114,7 +116,7 @@ export default async function WorkoutDonePage({
         </div>
 
         {prs.length > 0 && (
-          <div className="mt-6 rounded-2xl border border-amber-500/30 bg-amber-500/10 p-5 text-left">
+          <div className="mt-6 rounded-2xl border border-amber-500/40 bg-amber-500/10 p-5 text-left shadow-[0_8px_30px_-8px_rgb(245_158_11_/_0.35)]">
             <h2 className="mb-3 text-center font-semibold text-amber-300">
               🏆 {prs.length} {prs.length === 1 ? t("done.record") : t("done.records")}
             </h2>
