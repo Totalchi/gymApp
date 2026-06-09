@@ -33,7 +33,7 @@ function RoutineCard({
 }) {
   const dayTypes = [...new Set(r.routine_days.map((d) => d.day_type))];
   return (
-    <div className="group relative flex flex-col rounded-2xl border border-line bg-surface p-5 transition hover:border-primary/40">
+    <div className="group relative flex flex-col rounded-2xl border border-line bg-surface p-5 shadow-[var(--shadow)] transition hover:-translate-y-0.5 hover:border-primary/40">
       <Link href={`/routines/${r.id}`} className="flex-1">
         {r.assigned_by && (
           <span className="mb-1 inline-block rounded-full bg-primary/15 px-2 py-0.5 text-[11px] font-medium text-primary ring-1 ring-primary/30">
@@ -100,7 +100,8 @@ function RoutineCard({
 
 export default async function DashboardPage() {
   const supabase = await createClient();
-  const { t } = await getT();
+  const { t, lang } = await getT();
+  const loc = lang === "en" ? "en-US" : "nl-NL";
 
   // Vandaag op het programma (dagen gekoppeld aan de huidige weekdag).
   const todayIdx = (new Date().getDay() + 6) % 7; // 0 = maandag
@@ -133,7 +134,7 @@ export default async function DashboardPage() {
       .eq("weekday", todayIdx),
     // Alleen datums (licht) — voor streak + 'deze week'.
     supabase.from("workout_sessions").select("performed_at"),
-    supabase.from("profiles").select("role").maybeSingle(),
+    supabase.from("profiles").select("role, display_name").maybeSingle(),
     // Totalen server-side berekend (snel, weinig data).
     supabase.rpc("user_workout_totals"),
   ]);
@@ -177,12 +178,16 @@ export default async function DashboardPage() {
     cur.setDate(cur.getDate() - 1);
   }
 
+  const firstName = (profile?.display_name || "").trim().split(" ")[0] || "";
+  const hour = new Date().getHours();
+  const greetKey = hour < 6 ? "greet.night" : hour < 12 ? "greet.morning" : hour < 18 ? "greet.afternoon" : "greet.evening";
+
   const stats = [
-    { label: t("dash.workouts"), value: totalWorkouts, href: "/history" },
-    { label: t("dash.thisWeek"), value: thisWeek, href: "/history" },
-    { label: t("dash.streak"), value: `${streak}🔥`, href: "/achievements" },
-    { label: t("dash.setsLogged"), value: totalSets, href: "/history" },
-    { label: t("dash.totalVolume"), value: `${Math.round(totalVolume).toLocaleString()} kg`, href: "/stats" },
+    { label: t("dash.workouts"), value: totalWorkouts, href: "/history", icon: "🏋️", tint: "text-indigo-300", ring: "ring-indigo-500/25", bg: "bg-indigo-500/10" },
+    { label: t("dash.thisWeek"), value: thisWeek, href: "/history", icon: "📅", tint: "text-sky-300", ring: "ring-sky-500/25", bg: "bg-sky-500/10" },
+    { label: t("dash.streak"), value: streak, href: "/achievements", icon: "🔥", tint: "text-amber-300", ring: "ring-amber-500/25", bg: "bg-amber-500/10" },
+    { label: t("dash.setsLogged"), value: totalSets, href: "/history", icon: "✅", tint: "text-emerald-300", ring: "ring-emerald-500/25", bg: "bg-emerald-500/10" },
+    { label: t("dash.totalVolume"), value: `${Math.round(totalVolume).toLocaleString()} kg`, href: "/stats", icon: "📊", tint: "text-violet-300", ring: "ring-violet-500/25", bg: "bg-violet-500/10" },
   ];
 
   const all = (routines as RoutineRow[]) ?? [];
@@ -207,8 +212,12 @@ export default async function DashboardPage() {
       <Header email={user?.email} />
       <main className="mx-auto max-w-5xl px-4 py-8">
         <div className="mb-6">
-          <h1 className="text-3xl font-bold">{t("dash.title")}</h1>
-          <p className="mt-1 text-muted">{t("dash.subtitle")}</p>
+          <p className="text-sm font-medium text-faint">
+            {new Date().toLocaleDateString(loc, { weekday: "long", day: "numeric", month: "long" })}
+          </p>
+          <h1 className="mt-0.5 text-3xl font-bold tracking-tight">
+            {t(greetKey)}{firstName ? `, ${firstName}` : ""} 👋
+          </h1>
         </div>
 
         {/* Vandaag op het programma */}
@@ -222,7 +231,7 @@ export default async function DashboardPage() {
                 (d) => (
                   <div
                     key={d.id}
-                    className="flex items-center justify-between gap-3 rounded-2xl border border-primary/40 bg-primary/5 p-4"
+                    className="flex items-center justify-between gap-3 rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/10 to-transparent p-4 shadow-[var(--shadow)]"
                   >
                     <div className="min-w-0">
                       <span
@@ -255,10 +264,17 @@ export default async function DashboardPage() {
             <Link
               key={s.label}
               href={s.href}
-              className="rounded-2xl border border-line bg-surface p-4 text-center transition hover:border-primary/50"
+              className="card group flex flex-col gap-2 p-4 transition hover:-translate-y-0.5 hover:border-primary/40"
             >
-              <p className="text-xl font-bold tabular-nums">{s.value}</p>
-              <p className="mt-0.5 text-xs text-faint">{s.label}</p>
+              <span
+                className={`flex h-9 w-9 items-center justify-center rounded-xl text-base ring-1 ${s.bg} ${s.ring}`}
+              >
+                {s.icon}
+              </span>
+              <div>
+                <p className={`text-2xl font-bold tabular-nums ${s.tint}`}>{s.value}</p>
+                <p className="mt-0.5 text-xs text-faint">{s.label}</p>
+              </div>
             </Link>
           ))}
         </div>

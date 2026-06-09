@@ -65,6 +65,10 @@ const nl: Dict = {
   "dash.title": "Mijn schema's",
   "dash.subtitle":
     "Bouw wekelijkse trainingsschema's met push/pull/legs-dagen, sets, reps, kg en automatische RIR.",
+  "greet.morning": "Goedemorgen",
+  "greet.afternoon": "Goedemiddag",
+  "greet.evening": "Goedenavond",
+  "greet.night": "Nog wakker",
   "dash.newSchema": "Nieuw schema",
   "dash.namePh": "Bijv. Push / Pull / Legs",
   "dash.descPh": "Korte omschrijving (optioneel)",
@@ -475,6 +479,10 @@ const en: Dict = {
   "dash.title": "My routines",
   "dash.subtitle":
     "Build weekly training routines with push/pull/legs days, sets, reps, weight and automatic RIR.",
+  "greet.morning": "Good morning",
+  "greet.afternoon": "Good afternoon",
+  "greet.evening": "Good evening",
+  "greet.night": "Still up",
   "dash.newSchema": "New routine",
   "dash.namePh": "E.g. Push / Pull / Legs",
   "dash.descPh": "Short description (optional)",

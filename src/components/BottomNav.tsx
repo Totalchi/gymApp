@@ -33,9 +33,9 @@ export function BottomNav() {
   }
 
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-canvas/95 backdrop-blur md:hidden">
+    <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-canvas/90 backdrop-blur-xl md:hidden">
       <div
-        className="mx-auto flex max-w-lg items-stretch justify-around"
+        className="mx-auto flex max-w-lg items-stretch justify-around px-1"
         style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
       >
         {TABS.map(({ href, label, Icon }) => {
@@ -45,11 +45,17 @@ export function BottomNav() {
             <Link
               key={href}
               href={href}
-              className={`flex flex-1 flex-col items-center gap-0.5 py-2 text-[10px] font-medium transition ${
+              className={`flex flex-1 flex-col items-center gap-1 pb-1.5 pt-2 text-[10px] font-medium transition ${
                 active ? "text-primary" : "text-faint hover:text-fg"
               }`}
             >
-              <Icon className="h-6 w-6" />
+              <span
+                className={`flex h-7 w-12 items-center justify-center rounded-full transition ${
+                  active ? "bg-primary/15" : ""
+                }`}
+              >
+                <Icon className="h-[22px] w-[22px]" />
+              </span>
               {label}
             </Link>
           );
