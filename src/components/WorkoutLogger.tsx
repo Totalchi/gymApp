@@ -531,8 +531,8 @@ export function WorkoutLogger({
               return (
                 <div
                   key={si}
-                  className={`grid grid-cols-[1.75rem_4rem_1fr_1fr_2.75rem_2rem_2rem] items-center gap-1.5 rounded-lg py-0.5 ${
-                    s.completed ? "bg-emerald-500/10" : ""
+                  className={`grid grid-cols-[1.75rem_4rem_1fr_1fr_2.75rem_2rem_2rem] items-center gap-1.5 rounded-lg py-0.5 transition-colors ${
+                    s.completed ? "bg-emerald-500/10 ring-1 ring-emerald-500/20" : ""
                   }`}
                 >
                   <button
@@ -571,10 +571,10 @@ export function WorkoutLogger({
                       type="button"
                       onClick={() => toggleComplete(gi, si)}
                       aria-label="Set afvinken"
-                      className={`flex h-6 w-6 items-center justify-center rounded-md text-xs transition ${
+                      className={`flex h-7 w-7 items-center justify-center rounded-lg text-sm font-bold transition ${
                         s.completed
-                          ? "bg-emerald-500 text-white"
-                          : "bg-surface2 text-faint hover:bg-surface2"
+                          ? "animate-pop bg-emerald-500 text-white shadow-[0_0_0_3px_rgb(16_185_129_/_0.18)]"
+                          : "bg-surface2 text-faint hover:text-fg"
                       }`}
                     >
                       ✓
