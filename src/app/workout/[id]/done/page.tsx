@@ -93,6 +93,21 @@ export default async function WorkoutDonePage({
       isFirst: !(eid in prevBest),
     }));
 
+  // Dag-streak (aaneengesloten trainingsdagen, eindigend vandaag/gisteren).
+  const { data: dates } = await supabase
+    .from("workout_sessions")
+    .select("performed_at");
+  const dayset = new Set(
+    (dates ?? []).map((d) => new Date(d.performed_at).toISOString().slice(0, 10)),
+  );
+  let streak = 0;
+  const cur = new Date();
+  if (!dayset.has(cur.toISOString().slice(0, 10))) cur.setDate(cur.getDate() - 1);
+  while (dayset.has(cur.toISOString().slice(0, 10))) {
+    streak += 1;
+    cur.setDate(cur.getDate() - 1);
+  }
+
   return (
     <>
       <Header email={user?.email} />
@@ -101,6 +116,12 @@ export default async function WorkoutDonePage({
         <div className="mb-3 inline-block animate-pop text-6xl">🎉</div>
         <h1 className="text-3xl font-bold tracking-tight">{t("done.title")}</h1>
         <p className="mt-1 text-muted">{session.day_name}</p>
+
+        {streak >= 2 && (
+          <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-amber-500/30 bg-amber-500/10 px-4 py-1.5 text-sm font-semibold text-amber-300">
+            🔥 {streak} {t("done.streakDays")}
+          </div>
+        )}
 
         <div className="mt-6 grid grid-cols-3 gap-3">
           {[
