@@ -10,7 +10,6 @@ import { useT } from "@/components/LangProvider";
 import { PlateCalculator } from "@/components/PlateCalculator";
 import { ExercisePicker } from "@/components/ExercisePicker";
 import { ExerciseDetailModal } from "@/components/ExerciseDetailModal";
-import { computeRir } from "@/lib/rir";
 import type { ProgressionSuggestion } from "@/lib/progression";
 import { SET_TYPES, SET_TYPE_COLORS, type SetType, type Exercise } from "@/lib/types";
 
@@ -505,21 +504,16 @@ export function WorkoutLogger({
           )}
 
           <div className="space-y-1.5 p-3 sm:p-4">
-            <div className="grid grid-cols-[1.75rem_4rem_1fr_1fr_2.75rem_2rem_2rem] items-center gap-1.5 px-1 text-[10px] font-medium uppercase tracking-wide text-faint">
+            <div className="grid grid-cols-[1.5rem_3.25rem_1fr_1fr_2.25rem_2.5rem] items-center gap-1.5 px-1 text-[10px] font-medium uppercase tracking-wide text-faint">
               <span>{t("wk.set")}</span>
               <span>{t("wk.previous")}</span>
               <span>{t("wk.reps")}</span>
               <span>{unit}</span>
-              <span className="text-center">1RM</span>
               <span className="text-center">RIR</span>
               <span></span>
             </div>
 
             {g.sets.map((s, si) => {
-              const w = num(s.weight);
-              const r = num(s.reps);
-              const orm = num(s.oneRm);
-              const rir = w && r && orm ? computeRir({ weight: w, reps: r, oneRepMax: orm }) : null;
               const prev = g.previous[si];
               const prevLabel =
                 prev && prev.weight != null && prev.reps != null
@@ -531,7 +525,7 @@ export function WorkoutLogger({
               return (
                 <div
                   key={si}
-                  className={`grid grid-cols-[1.75rem_4rem_1fr_1fr_2.75rem_2rem_2rem] items-center gap-1.5 rounded-lg py-0.5 transition-colors ${
+                  className={`grid grid-cols-[1.5rem_3.25rem_1fr_1fr_2.25rem_2.5rem] items-center gap-1.5 rounded-lg py-1 transition-colors ${
                     s.completed ? "bg-emerald-500/10 ring-1 ring-emerald-500/20" : ""
                   }`}
                 >
@@ -554,7 +548,6 @@ export function WorkoutLogger({
                   </span>
                   <NumInput value={s.reps} onChange={(v) => updateSet(gi, si, "reps", v)} />
                   <NumInput value={s.weight} step="0.5" onChange={(v) => updateSet(gi, si, "weight", v)} />
-                  <NumInput value={s.oneRm} step="0.5" small onChange={(v) => updateSet(gi, si, "oneRm", v)} />
                   <input
                     type="number"
                     inputMode="decimal"
@@ -562,16 +555,16 @@ export function WorkoutLogger({
                     min="0"
                     value={s.rir}
                     onChange={(e) => updateSet(gi, si, "rir", e.target.value)}
-                    placeholder={rir ? String(rir.rir) : "–"}
-                    title="Laat leeg voor automatische RIR, of vul zelf in"
-                    className="w-full rounded-md border border-line bg-canvas px-0.5 py-1.5 text-center text-sm font-bold tabular-nums focus:border-primary focus:outline-none"
+                    placeholder="–"
+                    title="RIR (reps in reserve) — optioneel"
+                    className="w-full rounded-md border border-line bg-canvas px-0.5 py-2 text-center text-sm font-bold tabular-nums focus:border-primary focus:outline-none"
                   />
                   <div className="flex items-center justify-end gap-1">
                     <button
                       type="button"
                       onClick={() => toggleComplete(gi, si)}
                       aria-label="Set afvinken"
-                      className={`flex h-7 w-7 items-center justify-center rounded-lg text-sm font-bold transition ${
+                      className={`flex h-9 w-9 items-center justify-center rounded-lg text-base font-bold transition active:scale-95 ${
                         s.completed
                           ? "animate-pop bg-emerald-500 text-white shadow-[0_0_0_3px_rgb(16_185_129_/_0.18)]"
                           : "bg-surface2 text-faint hover:text-fg"
