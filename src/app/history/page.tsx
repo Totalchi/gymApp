@@ -5,6 +5,7 @@ import { getT } from "@/lib/serverLang";
 import { deleteSession, repeatWorkout } from "@/app/workout/actions";
 import { toggleShared } from "@/app/social/actions";
 import { EmptyState } from "@/components/EmptyState";
+import { ConfirmButton } from "@/components/ConfirmButton";
 
 export default async function HistoryPage() {
   const supabase = await createClient();
@@ -97,12 +98,14 @@ export default async function HistoryPage() {
                     </form>
                     <form action={deleteSession}>
                       <input type="hidden" name="id" value={s.id} />
-                      <button
-                        type="submit"
+                      <ConfirmButton
+                        message={t("confirm.workout")}
+                        confirmLabel={t("common.delete")}
+                        cancelLabel={t("common.cancel")}
                         className="text-xs text-faint transition hover:text-danger"
                       >
                         {t("common.delete")}
-                      </button>
+                      </ConfirmButton>
                     </form>
                   </div>
                 </div>

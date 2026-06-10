@@ -8,6 +8,7 @@ import {
   deleteProgressPhoto,
   togglePhotoShared,
 } from "@/app/body/photoActions";
+import { ConfirmButton } from "@/components/ConfirmButton";
 import { getT } from "@/lib/serverLang";
 import type { BodyMetric } from "@/lib/types";
 
@@ -123,12 +124,14 @@ export default async function BodyPage() {
                 </div>
                 <form action={deleteBodyMetric}>
                   <input type="hidden" name="id" value={m.id} />
-                  <button
-                    type="submit"
+                  <ConfirmButton
+                    message={t("confirm.metric")}
+                    confirmLabel={t("common.delete")}
+                    cancelLabel={t("common.cancel")}
                     className="text-xs text-faint transition hover:text-danger"
                   >
                     {t("common.delete")}
-                  </button>
+                  </ConfirmButton>
                 </form>
               </div>
             ))}
@@ -207,9 +210,14 @@ export default async function BodyPage() {
                     <form action={deleteProgressPhoto}>
                       <input type="hidden" name="id" value={p.id} />
                       <input type="hidden" name="path" value={p.path} />
-                      <button className="text-xs text-faint transition hover:text-danger">
+                      <ConfirmButton
+                        message={t("confirm.photo")}
+                        confirmLabel={t("common.delete")}
+                        cancelLabel={t("common.cancel")}
+                        className="text-xs text-faint transition hover:text-danger"
+                      >
                         {t("common.delete")}
-                      </button>
+                      </ConfirmButton>
                     </form>
                   </div>
                 </div>

@@ -12,6 +12,7 @@ import {
 } from "@/app/routines/actions";
 import { startWorkout } from "@/app/workout/actions";
 import { StartRoutineButton } from "@/components/StartRoutineButton";
+import { ConfirmButton } from "@/components/ConfirmButton";
 import { DAY_TYPE_COLORS, DAY_TYPE_LABELS, type DayType } from "@/lib/types";
 
 interface RoutineRow {
@@ -94,9 +95,14 @@ function RoutineCard({
         )}
         <form action={deleteRoutine} className="ml-auto">
           <input type="hidden" name="id" value={r.id} />
-          <button type="submit" className="text-faint transition hover:text-danger">
+          <ConfirmButton
+            message={t("confirm.routine")}
+            confirmLabel={t("common.delete")}
+            cancelLabel={t("common.cancel")}
+            className="text-faint transition hover:text-danger"
+          >
             {t("common.delete")}
-          </button>
+          </ConfirmButton>
         </form>
       </div>
     </div>
@@ -396,12 +402,14 @@ export default async function DashboardPage() {
                   {section.deletable && (
                     <form action={deleteFolder} className="ml-auto">
                       <input type="hidden" name="id" value={section.id!} />
-                      <button
-                        type="submit"
+                      <ConfirmButton
+                        message={t("confirm.folder")}
+                        confirmLabel={t("common.delete")}
+                        cancelLabel={t("common.cancel")}
                         className="text-xs text-faint transition hover:text-danger"
                       >
                         {t("dash.deleteFolder")}
-                      </button>
+                      </ConfirmButton>
                     </form>
                   )}
                 </div>

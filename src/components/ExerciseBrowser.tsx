@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
 import { deleteCustomExercise } from "@/app/exercises/actions";
+import { ConfirmButton } from "@/components/ConfirmButton";
 import { expandSearchTerms } from "@/lib/exerciseSearch";
 import { useT } from "@/components/LangProvider";
 import { MUSCLE_GROUPS, type Exercise } from "@/lib/types";
@@ -189,13 +190,14 @@ function ExerciseModal({
           {exercise.owner_id && (
             <form action={deleteCustomExercise} className="mt-5">
               <input type="hidden" name="id" value={exercise.id} />
-              <button
-                type="submit"
-                onClick={onClose}
+              <ConfirmButton
+                message={t("confirm.exercise")}
+                confirmLabel={t("common.delete")}
+                cancelLabel={t("common.cancel")}
                 className="text-sm text-faint transition hover:text-danger"
               >
                 {t("ex.deleteCustom")}
-              </button>
+              </ConfirmButton>
             </form>
           )}
         </div>
