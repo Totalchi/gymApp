@@ -1,6 +1,13 @@
 import type { Metadata, Viewport } from "next";
+import { Inter } from "next/font/google";
 import "./globals.css";
 import { UnitProvider } from "@/components/UnitProvider";
+
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+  display: "swap",
+});
 import { LangProvider } from "@/components/LangProvider";
 import { BottomNav } from "@/components/BottomNav";
 import { AppUpdater } from "@/components/AppUpdater";
@@ -42,7 +49,7 @@ export default async function RootLayout({
   const [lang, unit] = await Promise.all([getLang(), getUnit()]);
 
   return (
-    <html lang={lang}>
+    <html lang={lang} className={inter.variable}>
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
