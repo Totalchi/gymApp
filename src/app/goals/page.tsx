@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { Header } from "@/components/Header";
 import { GoalForm } from "@/components/GoalForm";
+import { ConfirmButton } from "@/components/ConfirmButton";
 import { getT } from "@/lib/serverLang";
 import { deleteGoal } from "@/app/goals/actions";
 import { estimateOneRepMax } from "@/lib/rir";
@@ -99,12 +100,14 @@ export default async function GoalsPage() {
                     <p className="truncate font-medium">{label}</p>
                     <form action={deleteGoal}>
                       <input type="hidden" name="id" value={g.id} />
-                      <button
-                        type="submit"
+                      <ConfirmButton
+                        message={t("confirm.goal")}
+                        confirmLabel={t("common.delete")}
+                        cancelLabel={t("common.cancel")}
                         className="text-xs text-faint transition hover:text-danger"
                       >
                         {t("common.delete")}
-                      </button>
+                      </ConfirmButton>
                     </form>
                   </div>
                   <div className="h-3 w-full overflow-hidden rounded-full bg-surface2">
