@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { Header } from "@/components/Header";
 import { getT } from "@/lib/serverLang";
 import { toggleLike } from "@/app/social/actions";
+import { EmptyState } from "@/components/EmptyState";
 
 function nameOf(p?: { display_name: string | null; username: string | null }) {
   return p?.display_name || (p?.username ? `@${p.username}` : "Atleet");
@@ -74,12 +75,15 @@ export default async function FeedPage() {
         </div>
 
         {sessions.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-line py-16 text-center text-faint">
-            {t("feed.empty")}{" "}
-            <Link href="/people" className="text-primary hover:underline">
-              {t("feed.findPeople")}
-            </Link>
-          </div>
+          <EmptyState
+            icon="👥"
+            title={t("feed.empty")}
+            action={
+              <Link href="/people" className="btn-primary inline-block px-5 py-2.5 text-sm">
+                {t("feed.findPeople")}
+              </Link>
+            }
+          />
         ) : (
           <div className="space-y-4">
             {sessions.map((s) => {

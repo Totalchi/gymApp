@@ -4,6 +4,7 @@ import { Header } from "@/components/Header";
 import { getT } from "@/lib/serverLang";
 import { deleteSession, repeatWorkout } from "@/app/workout/actions";
 import { toggleShared } from "@/app/social/actions";
+import { EmptyState } from "@/components/EmptyState";
 
 export default async function HistoryPage() {
   const supabase = await createClient();
@@ -33,9 +34,15 @@ export default async function HistoryPage() {
         </div>
 
         {!sessions || sessions.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-line py-16 text-center text-faint">
-            {t("hist.empty")}
-          </div>
+          <EmptyState
+            icon="📋"
+            title={t("hist.empty")}
+            action={
+              <Link href="/dashboard" className="btn-primary inline-block px-5 py-2.5 text-sm">
+                {t("err.home")}
+              </Link>
+            }
+          />
         ) : (
           <div className="space-y-3">
             {sessions.map((s) => {
