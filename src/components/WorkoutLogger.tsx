@@ -346,7 +346,12 @@ export function WorkoutLogger({
   function toggleComplete(gi: number, si: number) {
     const willComplete = !groups[gi].sets[si].completed;
     updateSet(gi, si, "completed", willComplete);
-    if (willComplete) startRest(groups[gi].restSeconds ?? restDuration);
+    if (willComplete) {
+      try {
+        navigator.vibrate?.(18);
+      } catch {}
+      startRest(groups[gi].restSeconds ?? restDuration);
+    }
   }
 
   function cycleType(gi: number, si: number) {
