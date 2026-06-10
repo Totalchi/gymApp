@@ -11,6 +11,7 @@ import {
   setRoutineFolder,
 } from "@/app/routines/actions";
 import { startWorkout } from "@/app/workout/actions";
+import { StartRoutineButton } from "@/components/StartRoutineButton";
 import { DAY_TYPE_COLORS, DAY_TYPE_LABELS, type DayType } from "@/lib/types";
 
 interface RoutineRow {
@@ -19,7 +20,7 @@ interface RoutineRow {
   description: string | null;
   folder_id: string | null;
   assigned_by: string | null;
-  routine_days: { day_type: DayType }[];
+  routine_days: { id: string; name: string; day_type: DayType; day_order: number }[];
 }
 
 function RoutineCard({
@@ -60,7 +61,11 @@ function RoutineCard({
         </div>
       </Link>
 
-      <div className="mt-4 flex flex-wrap items-center gap-3 border-t border-line pt-3 text-xs">
+      <div className="mt-4">
+        <StartRoutineButton routineId={r.id} days={r.routine_days} />
+      </div>
+
+      <div className="mt-3 flex flex-wrap items-center gap-3 border-t border-line pt-3 text-xs">
         <form action={duplicateRoutine}>
           <input type="hidden" name="id" value={r.id} />
           <button type="submit" className="text-muted transition hover:text-primary">
@@ -121,7 +126,7 @@ export default async function DashboardPage() {
     supabase.auth.getUser(),
     supabase
       .from("routines")
-      .select("id, name, description, created_at, folder_id, assigned_by, routine_days(day_type)")
+      .select("id, name, description, created_at, folder_id, assigned_by, routine_days(id, name, day_type, day_order)")
       .order("created_at", { ascending: false }),
     supabase
       .from("routine_folders")
