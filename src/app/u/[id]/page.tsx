@@ -60,7 +60,7 @@ export default async function ProfilePage({
       .maybeSingle(),
     supabase
       .from("workout_sessions")
-      .select("id, day_name, performed_at, workout_sets(weight, reps)")
+      .select("id, day_name, performed_at, workout_sets(weight, reps, unilateral)")
       .eq("user_id", id)
       .eq("shared", true)
       .order("performed_at", { ascending: false })
@@ -132,8 +132,8 @@ export default async function ProfilePage({
         ) : (
           <div className="space-y-2">
             {sessions.map((s) => {
-              const sets = (s.workout_sets ?? []) as { weight: number | null; reps: number | null }[];
-              const vol = sets.reduce((n, x) => n + (x.weight ?? 0) * (x.reps ?? 0), 0);
+              const sets = (s.workout_sets ?? []) as { weight: number | null; reps: number | null; unilateral: boolean | null }[];
+              const vol = sets.reduce((n, x) => n + (x.weight ?? 0) * (x.reps ?? 0) * (x.unilateral ? 2 : 1), 0);
               return (
                 <Link
                   key={s.id}

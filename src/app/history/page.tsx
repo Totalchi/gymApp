@@ -17,7 +17,7 @@ export default async function HistoryPage() {
 
   const { data: sessions } = await supabase
     .from("workout_sessions")
-    .select("id, day_name, performed_at, notes, duration_seconds, shared, workout_sets(reps, weight)")
+    .select("id, day_name, performed_at, notes, duration_seconds, shared, workout_sets(reps, weight, unilateral)")
     .order("performed_at", { ascending: false });
 
   return (
@@ -50,9 +50,10 @@ export default async function HistoryPage() {
               const sets = (s.workout_sets ?? []) as {
                 reps: number | null;
                 weight: number | null;
+                unilateral: boolean | null;
               }[];
               const volume = sets.reduce(
-                (sum, st) => sum + (st.reps ?? 0) * (st.weight ?? 0),
+                (sum, st) => sum + (st.reps ?? 0) * (st.weight ?? 0) * (st.unilateral ? 2 : 1),
                 0,
               );
               const date = new Date(s.performed_at).toLocaleDateString(loc, {
