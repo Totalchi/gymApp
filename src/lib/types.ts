@@ -139,6 +139,7 @@ export interface RoutineExercise {
   rest: string | null;
   rest_seconds: number | null;
   superset_group: number | null;
+  unilateral: boolean;
 }
 
 /** Set-types zoals in Hevy. */
