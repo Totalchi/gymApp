@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { createPortal } from "react-dom";
 import Image from "next/image";
 import { useSortable } from "@dnd-kit/sortable";
@@ -56,10 +56,39 @@ export function ExerciseRow({
   const [showDetail, setShowDetail] = useState(false);
   const [swapOpen, setSwapOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
+  // Optimistische schakelaars (meteen kleur, server volgt op de achtergrond).
+  const [superset, setSuperset] = useState(item.superset_group != null);
+  const [unilateral, setUnilateral] = useState(item.unilateral ?? false);
+  const [, startTransition] = useTransition();
   const unit = useUnit();
   const t = useT();
 
   useEffect(() => setMounted(true), []);
+  useEffect(() => setSuperset(item.superset_group != null), [item.superset_group]);
+  useEffect(() => setUnilateral(item.unilateral ?? false), [item.unilateral]);
+
+  function onToggleSuperset() {
+    setSuperset((s) => !s);
+    const fd = new FormData();
+    fd.set("id", item.id);
+    fd.set("day_id", item.day_id);
+    fd.set("routine_id", routineId);
+    startTransition(() => {
+      void toggleSuperset(fd);
+    });
+  }
+
+  function onToggleUnilateral() {
+    const next = !unilateral;
+    setUnilateral(next);
+    const fd = new FormData();
+    fd.set("id", item.id);
+    fd.set("routine_id", routineId);
+    fd.set("unilateral", String(next));
+    startTransition(() => {
+      void toggleUnilateral(fd);
+    });
+  }
 
   function onSwap(ex: Exercise) {
     const fd = new FormData();
@@ -86,7 +115,7 @@ export function ExerciseRow({
       action={updateRoutineExercise}
       onSubmit={() => setDirty(false)}
       className={`bg-surface px-4 py-4 sm:px-5 ${
-        item.superset_group != null ? "border-l-2 border-l-sky-500" : ""
+        superset ? "border-l-2 border-l-sky-500" : ""
       }`}
     >
       <input type="hidden" name="id" value={item.id} />
@@ -238,28 +267,30 @@ export function ExerciseRow({
         className="mt-3 w-full rounded-lg border border-line bg-canvas px-3 py-2 text-sm placeholder:text-faint focus:border-primary focus:outline-none"
       />
 
-      <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1">
+      <div className="mt-3 flex flex-wrap items-center gap-2">
         <button
-          type="submit"
-          formAction={toggleSuperset}
-          className={`text-xs transition hover:text-sky-300 ${
-            item.superset_group != null ? "text-sky-400" : "text-faint"
-          }`}
+          type="button"
+          onClick={onToggleSuperset}
           title="Koppel deze oefening als superset met de oefening erboven"
+          className={`rounded-full border px-3 py-1.5 text-xs font-medium transition active:scale-95 ${
+            superset
+              ? "border-sky-500/40 bg-sky-500/15 text-sky-300"
+              : "border-line text-faint hover:text-fg"
+          }`}
         >
-          🔗 {item.superset_group != null ? t("routine.supersetLinked") : t("routine.supersetWithPrev")}
+          🔗 {superset ? t("routine.supersetLinked") : t("routine.supersetWithPrev")}
         </button>
         <button
-          type="submit"
-          formAction={toggleUnilateral}
-          name="unilateral"
-          value={item.unilateral ? "false" : "true"}
-          className={`text-xs transition hover:text-amber-300 ${
-            item.unilateral ? "text-amber-400" : "text-faint"
-          }`}
+          type="button"
+          onClick={onToggleUnilateral}
           title={t("routine.unilateralHint")}
+          className={`rounded-full border px-3 py-1.5 text-xs font-medium transition active:scale-95 ${
+            unilateral
+              ? "border-amber-500/40 bg-amber-500/15 text-amber-300"
+              : "border-line text-faint hover:text-fg"
+          }`}
         >
-          🫱 {item.unilateral ? t("routine.unilateralOn") : t("routine.unilateral")}
+          🫱 {unilateral ? t("routine.unilateralOn") : t("routine.unilateral")}
         </button>
       </div>
 
