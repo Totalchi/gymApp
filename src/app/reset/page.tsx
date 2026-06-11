@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 import { updatePassword, type AuthState } from "@/app/login/actions";
 import { useT } from "@/components/LangProvider";
+import { AuthTopBar } from "@/components/AuthTopBar";
 import { IconDumbbell } from "@/components/Icons";
 
 export default function ResetPage() {
@@ -13,7 +14,8 @@ export default function ResetPage() {
   const t = useT();
 
   return (
-    <main className="flex min-h-screen items-center justify-center px-4 py-10">
+    <main className="relative flex min-h-screen items-center justify-center px-4 py-10">
+      <AuthTopBar />
       <div className="w-full max-w-sm">
         <div className="mb-8 text-center">
           <div className="mb-3 inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-primary text-primary-fg">
