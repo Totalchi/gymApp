@@ -24,7 +24,7 @@ export default async function FeedPage() {
     supabase.auth.getUser(),
     supabase
       .from("workout_sessions")
-      .select("id, user_id, day_name, performed_at, workout_sets(weight, reps, exercise_name)")
+      .select("id, user_id, day_name, performed_at, workout_sets(weight, reps, exercise_name, unilateral)")
       .eq("shared", true)
       .order("performed_at", { ascending: false })
       .limit(40),
@@ -91,8 +91,9 @@ export default async function FeedPage() {
                 weight: number | null;
                 reps: number | null;
                 exercise_name: string | null;
+                unilateral: boolean | null;
               }[];
-              const volume = sets.reduce((n, x) => n + (x.weight ?? 0) * (x.reps ?? 0), 0);
+              const volume = sets.reduce((n, x) => n + (x.weight ?? 0) * (x.reps ?? 0) * (x.unilateral ? 2 : 1), 0);
               const exNames = [...new Set(sets.map((x) => x.exercise_name).filter(Boolean))].slice(0, 4);
               const p = profById.get(s.user_id);
               const initial = nameOf(p).replace("@", "").charAt(0).toUpperCase();

@@ -76,6 +76,7 @@ export interface WorkoutSet {
   rir: number | null;
   set_type: SetType;
   completed: boolean;
+  unilateral: boolean;
 }
 
 export interface Routine {

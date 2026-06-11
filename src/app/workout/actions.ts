@@ -31,7 +31,7 @@ export async function repeatWorkout(formData: FormData) {
 
   const { data: srcSets } = await supabase
     .from("workout_sets")
-    .select("exercise_id, exercise_name, set_number, reps, weight, one_rep_max, rir, set_type")
+    .select("exercise_id, exercise_name, set_number, reps, weight, one_rep_max, rir, set_type, unilateral")
     .eq("session_id", sourceId)
     .order("set_number");
 
@@ -58,6 +58,7 @@ export async function repeatWorkout(formData: FormData) {
     rir: s.rir,
     set_type: s.set_type ?? "normal",
     completed: false,
+    unilateral: (s as { unilateral?: boolean }).unilateral ?? false,
   }));
   if (rows.length) await supabase.from("workout_sets").insert(rows);
 
@@ -90,7 +91,7 @@ export async function startWorkout(formData: FormData) {
   // Geplande oefeningen ophalen en omzetten naar gelogde sets.
   const { data: planned } = await supabase
     .from("routine_exercises")
-    .select("exercise_id, sets, reps, weight, one_rep_max, rir, position, exercise:exercises(name)")
+    .select("exercise_id, sets, reps, weight, one_rep_max, rir, position, unilateral, exercise:exercises(name)")
     .eq("day_id", dayId)
     .order("position");
 
@@ -167,6 +168,7 @@ export async function startWorkout(formData: FormData) {
         rir,
         set_type: "normal",
         completed: false,
+        unilateral: (pe as { unilateral?: boolean }).unilateral ?? false,
       });
     }
   }
@@ -188,6 +190,7 @@ interface SetInput {
   rir?: number | null;
   set_type?: string;
   completed?: boolean;
+  unilateral?: boolean;
 }
 
 /**
@@ -237,6 +240,7 @@ export async function saveWorkout(
       rir,
       set_type: s.set_type ?? "normal",
       completed: s.completed ?? true,
+      unilateral: s.unilateral ?? false,
     };
   });
 

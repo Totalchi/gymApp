@@ -90,7 +90,7 @@ export default async function WorkoutDetailPage({
     .in("id", commenterIds.length ? commenterIds : ["__none__"]);
   const cProfById = new Map((cProfs ?? []).map((p) => [p.id, p]));
 
-  const volume = setRows.reduce((n, s) => n + (s.weight ?? 0) * (s.reps ?? 0), 0);
+  const volume = setRows.reduce((n, s) => n + (s.weight ?? 0) * (s.reps ?? 0) * (s.unilateral ? 2 : 1), 0);
 
   return (
     <>

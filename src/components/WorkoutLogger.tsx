@@ -429,6 +429,7 @@ export function WorkoutLogger({
         rir: num(s.rir),
         set_type: s.setType,
         completed: s.completed,
+        unilateral: g.unilateral,
       })),
     );
     startTransition(() => {

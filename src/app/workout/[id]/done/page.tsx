@@ -37,15 +37,15 @@ export default async function WorkoutDonePage({
 
   const { data: thisSets } = await supabase
     .from("workout_sets")
-    .select("exercise_id, exercise_name, weight, reps, rir, set_type")
+    .select("exercise_id, exercise_name, weight, reps, rir, set_type, unilateral")
     .eq("session_id", id);
   const sets = (thisSets ?? []).filter(
     (s) => s.weight && s.reps && s.set_type !== "warmup",
   );
 
-  // Totalen.
+  // Totalen (per-zijde telt ×2).
   let volume = 0;
-  for (const s of sets) volume += (s.weight ?? 0) * (s.reps ?? 0);
+  for (const s of sets) volume += (s.weight ?? 0) * (s.reps ?? 0) * (s.unilateral ? 2 : 1);
   const setCount = sets.length;
   const minutes = session.duration_seconds
     ? Math.round(session.duration_seconds / 60)
