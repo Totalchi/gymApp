@@ -65,7 +65,7 @@ export default async function MenuPage() {
         {/* Profielkaart */}
         <Link
           href={user ? `/u/${user.id}` : "/feed"}
-          className="mb-6 flex items-center gap-4 rounded-2xl border border-line bg-surface p-4 transition hover:border-primary/40"
+          className="mb-6 flex items-center gap-4 rounded-2xl border border-line bg-surface p-4 shadow-[var(--shadow)] transition hover:-translate-y-0.5 hover:border-primary/40"
         >
           <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary text-xl font-bold text-primary-fg">
             {initial}
@@ -83,7 +83,7 @@ export default async function MenuPage() {
               <h2 className="mb-2 px-1 text-xs font-semibold uppercase tracking-wide text-faint">
                 {s.title}
               </h2>
-              <div className="divide-y divide-line overflow-hidden rounded-2xl border border-line bg-surface">
+              <div className="divide-y divide-line overflow-hidden rounded-2xl border border-line bg-surface shadow-[var(--shadow)]">
                 {s.items.map((it) => (
                   <Row key={it.href} {...it} />
                 ))}
@@ -96,7 +96,7 @@ export default async function MenuPage() {
             <h2 className="mb-2 px-1 text-xs font-semibold uppercase tracking-wide text-faint">
               {t("menu.account")}
             </h2>
-            <div className="divide-y divide-line overflow-hidden rounded-2xl border border-line bg-surface">
+            <div className="divide-y divide-line overflow-hidden rounded-2xl border border-line bg-surface shadow-[var(--shadow)]">
               <Row href="/notifications" label={t("notif.title")} icon="🔔" />
               <Row href="/settings" label={t("nav.settings")} icon="⚙️" />
               <form action={signout}>

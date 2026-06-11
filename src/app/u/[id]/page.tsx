@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { Header } from "@/components/Header";
+import { EmptyState } from "@/components/EmptyState";
 import { getT } from "@/lib/serverLang";
 import { toggleFollow } from "@/app/social/actions";
 
@@ -29,7 +30,13 @@ export default async function ProfilePage({
 
   const isSelf = user?.id === id;
 
-  const [{ count: followers }, { count: following }, { data: amF }] = await Promise.all([
+  const [
+    { count: followers },
+    { count: following },
+    { count: workoutCount },
+    { data: amF },
+    { data: sessions },
+  ] = await Promise.all([
     supabase
       .from("follows")
       .select("*", { count: "exact", head: true })
@@ -41,45 +48,54 @@ export default async function ProfilePage({
       .eq("follower_id", id)
       .eq("status", "accepted"),
     supabase
+      .from("workout_sessions")
+      .select("*", { count: "exact", head: true })
+      .eq("user_id", id)
+      .eq("shared", true),
+    supabase
       .from("follows")
       .select("status")
       .eq("follower_id", user?.id ?? "")
       .eq("following_id", id)
       .maybeSingle(),
+    supabase
+      .from("workout_sessions")
+      .select("id, day_name, performed_at, workout_sets(weight, reps)")
+      .eq("user_id", id)
+      .eq("shared", true)
+      .order("performed_at", { ascending: false })
+      .limit(20),
   ]);
+
   const followState: "none" | "pending" | "accepted" =
     amF?.status === "accepted" ? "accepted" : amF ? "pending" : "none";
-
-  const { data: sessions } = await supabase
-    .from("workout_sessions")
-    .select("id, day_name, performed_at, workout_sets(weight, reps)")
-    .eq("user_id", id)
-    .eq("shared", true)
-    .order("performed_at", { ascending: false })
-    .limit(20);
+  const name = nameOf(profile ?? undefined);
+  const initial = name.replace("@", "").charAt(0).toUpperCase();
 
   return (
     <>
       <Header email={user?.email} />
-      <main className="mx-auto max-w-xl px-4 py-8">
-        <div className="mb-6 flex items-center gap-4">
-          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary text-2xl font-bold text-primary-fg">
-            {nameOf(profile ?? undefined).replace("@", "").charAt(0).toUpperCase()}
+      <main className="mx-auto max-w-xl px-4 py-6">
+        {/* Banner + avatar */}
+        <div className="h-24 rounded-3xl bg-gradient-to-br from-primary/40 via-primary/15 to-transparent" />
+        <div className="-mt-10 mb-4 flex items-end gap-4 px-1">
+          <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-full bg-primary text-3xl font-bold text-primary-fg shadow-[var(--shadow-lg)] ring-4 ring-canvas">
+            {initial}
           </div>
-          <div className="min-w-0 flex-1">
-            <h1 className="truncate text-2xl font-bold">{nameOf(profile ?? undefined)}</h1>
+          <div className="min-w-0 flex-1 pb-1">
+            <h1 className="truncate text-2xl font-bold tracking-tight">{name}</h1>
             {profile?.username && (
-              <p className="text-sm text-faint">@{profile.username}</p>
+              <p className="truncate text-sm text-faint">@{profile.username}</p>
             )}
           </div>
           {!isSelf && user && (
-            <form action={toggleFollow}>
+            <form action={toggleFollow} className="pb-1">
               <input type="hidden" name="target_id" value={id} />
               <button
                 type="submit"
                 className={`rounded-xl px-4 py-2 text-sm font-semibold transition ${
                   followState === "none"
-                    ? "bg-primary text-primary-fg hover:brightness-110"
+                    ? "btn-primary"
                     : "border border-line text-fg hover:bg-surface2"
                 }`}
               >
@@ -93,23 +109,26 @@ export default async function ProfilePage({
           )}
         </div>
 
-        {profile?.bio && <p className="mb-4 text-sm text-muted">{profile.bio}</p>}
+        {profile?.bio && <p className="mb-4 px-1 text-sm text-muted">{profile.bio}</p>}
 
-        <div className="mb-6 flex gap-6 text-sm">
-          <Link href={`/u/${id}/followers`} className="transition hover:text-primary">
-            <strong>{followers ?? 0}</strong>{" "}
-            <span className="text-faint">{t("social.followers")}</span>
+        {/* Stat-strip */}
+        <div className="mb-6 grid grid-cols-3 divide-x divide-line overflow-hidden rounded-2xl border border-line bg-surface shadow-[var(--shadow)]">
+          <div className="px-3 py-3 text-center">
+            <p className="text-xl font-bold tabular-nums">{workoutCount ?? 0}</p>
+            <p className="text-xs text-faint">{t("dash.workouts")}</p>
+          </div>
+          <Link href={`/u/${id}/followers`} className="px-3 py-3 text-center transition hover:bg-surface2">
+            <p className="text-xl font-bold tabular-nums">{followers ?? 0}</p>
+            <p className="text-xs text-faint">{t("social.followers")}</p>
           </Link>
-          <Link href={`/u/${id}/following`} className="transition hover:text-primary">
-            <strong>{following ?? 0}</strong>{" "}
-            <span className="text-faint">{t("social.following")}</span>
+          <Link href={`/u/${id}/following`} className="px-3 py-3 text-center transition hover:bg-surface2">
+            <p className="text-xl font-bold tabular-nums">{following ?? 0}</p>
+            <p className="text-xs text-faint">{t("social.following")}</p>
           </Link>
         </div>
 
         {!sessions || sessions.length === 0 ? (
-          <p className="rounded-2xl border border-dashed border-line py-10 text-center text-sm text-faint">
-            {t("social.noWorkouts")}
-          </p>
+          <EmptyState icon="🏋️" title={t("social.noWorkouts")} />
         ) : (
           <div className="space-y-2">
             {sessions.map((s) => {
@@ -119,10 +138,10 @@ export default async function ProfilePage({
                 <Link
                   key={s.id}
                   href={`/w/${s.id}`}
-                  className="block rounded-xl border border-line bg-surface px-4 py-3 transition hover:border-primary/40"
+                  className="block rounded-2xl border border-line bg-surface px-4 py-3 shadow-[var(--shadow)] transition hover:-translate-y-0.5 hover:border-primary/40"
                 >
-                  <p className="font-medium">{s.day_name ?? "Workout"}</p>
-                  <p className="text-xs text-faint">
+                  <p className="font-semibold">{s.day_name ?? "Workout"}</p>
+                  <p className="mt-0.5 text-xs text-faint">
                     {new Date(s.performed_at).toLocaleDateString(loc, {
                       day: "numeric",
                       month: "short",
