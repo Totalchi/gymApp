@@ -104,20 +104,23 @@ export default async function WorkoutPage({
     string,
     { repLow: number | null; repHigh: number | null }
   > = {};
+  const unilateralByExercise: Record<string, boolean> = {};
   if (session.day_id) {
     const { data: planned } = await supabase
       .from("routine_exercises")
-      .select("exercise_id, rest, reps, reps_max")
+      .select("exercise_id, rest, reps, reps_max, unilateral")
       .eq("day_id", session.day_id);
     for (const p of (planned ?? []) as {
       exercise_id: string;
       rest: string | null;
       reps: number | null;
       reps_max: number | null;
+      unilateral: boolean | null;
     }[]) {
       const secs = parseRestToSeconds(p.rest);
       if (secs) restByExercise[p.exercise_id] = secs;
       targetByExercise[p.exercise_id] = { repLow: p.reps, repHigh: p.reps_max };
+      if (p.unilateral) unilateralByExercise[p.exercise_id] = true;
     }
   }
 
@@ -141,6 +144,7 @@ export default async function WorkoutPage({
         restSeconds: restByExercise[s.exercise_id] ?? null,
         previous: previousByExercise[s.exercise_id] ?? [],
         suggestion: suggestion && suggestion.kind === "up" ? suggestion : null,
+        unilateral: unilateralByExercise[s.exercise_id] ?? false,
         sets: [],
       });
     }

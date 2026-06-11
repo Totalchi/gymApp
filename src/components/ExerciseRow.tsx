@@ -9,6 +9,7 @@ import {
   updateRoutineExercise,
   deleteRoutineExercise,
   toggleSuperset,
+  toggleUnilateral,
   swapRoutineExercise,
 } from "@/app/routines/actions";
 import { DragHandle } from "@/components/DragHandle";
@@ -237,16 +238,30 @@ export function ExerciseRow({
         className="mt-3 w-full rounded-lg border border-line bg-canvas px-3 py-2 text-sm placeholder:text-faint focus:border-primary focus:outline-none"
       />
 
-      <button
-        type="submit"
-        formAction={toggleSuperset}
-        className={`mt-2 text-xs transition hover:text-sky-300 ${
-          item.superset_group != null ? "text-sky-400" : "text-faint"
-        }`}
-        title="Koppel deze oefening als superset met de oefening erboven"
-      >
-        🔗 {item.superset_group != null ? t("routine.supersetLinked") : t("routine.supersetWithPrev")}
-      </button>
+      <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1">
+        <button
+          type="submit"
+          formAction={toggleSuperset}
+          className={`text-xs transition hover:text-sky-300 ${
+            item.superset_group != null ? "text-sky-400" : "text-faint"
+          }`}
+          title="Koppel deze oefening als superset met de oefening erboven"
+        >
+          🔗 {item.superset_group != null ? t("routine.supersetLinked") : t("routine.supersetWithPrev")}
+        </button>
+        <button
+          type="submit"
+          formAction={toggleUnilateral}
+          name="unilateral"
+          value={item.unilateral ? "false" : "true"}
+          className={`text-xs transition hover:text-amber-300 ${
+            item.unilateral ? "text-amber-400" : "text-faint"
+          }`}
+          title={t("routine.unilateralHint")}
+        >
+          🫱 {item.unilateral ? t("routine.unilateralOn") : t("routine.unilateral")}
+        </button>
+      </div>
 
       {showDetail && (
         <ExerciseDetailModal

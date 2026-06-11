@@ -112,7 +112,7 @@ export async function duplicateRoutine(formData: FormData) {
 
   const { data: src } = await supabase
     .from("routines")
-    .select("name, description, folder_id, routine_days(name, day_type, day_order, routine_exercises(exercise_id, position, sets, reps, reps_max, weight, one_rep_max, rir, rir_max, notes, rest, rest_seconds, superset_group))")
+    .select("name, description, folder_id, routine_days(name, day_type, day_order, routine_exercises(exercise_id, position, sets, reps, reps_max, weight, one_rep_max, rir, rir_max, notes, rest, rest_seconds, superset_group, unilateral))")
     .eq("id", id)
     .single();
   if (!src) return;
@@ -231,6 +231,16 @@ export async function setRoutineFolder(formData: FormData) {
 // ---------------------------------------------------------------------------
 // Supersets
 // ---------------------------------------------------------------------------
+/** Wissel de "per zijde" (unilateraal) markering van een oefening. */
+export async function toggleUnilateral(formData: FormData) {
+  const { supabase } = await requireUser();
+  const id = String(formData.get("id"));
+  const routineId = String(formData.get("routine_id"));
+  const next = String(formData.get("unilateral")) === "true";
+  await supabase.from("routine_exercises").update({ unilateral: next }).eq("id", id);
+  revalidatePath(`/routines/${routineId}`);
+}
+
 export async function toggleSuperset(formData: FormData) {
   const { supabase } = await requireUser();
   const id = String(formData.get("id"));

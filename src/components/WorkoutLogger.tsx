@@ -29,6 +29,7 @@ interface Group {
   restSeconds: number | null;
   previous: { weight: number | null; reps: number | null }[];
   suggestion: ProgressionSuggestion | null;
+  unilateral: boolean;
   sets: SetRow[];
 }
 
@@ -39,6 +40,7 @@ export interface LoggerInitialGroup {
   restSeconds: number | null;
   previous: { weight: number | null; reps: number | null }[];
   suggestion?: ProgressionSuggestion | null;
+  unilateral?: boolean;
   sets: {
     reps: number | null;
     weight: number | null;
@@ -79,6 +81,7 @@ export function WorkoutLogger({
       restSeconds: g.restSeconds ?? null,
       previous: g.previous,
       suggestion: g.suggestion ?? null,
+      unilateral: g.unilateral ?? false,
       sets: g.sets.map((s) => ({
         reps: s.reps != null ? String(s.reps) : "",
         weight: s.weight != null ? String(s.weight) : "",
@@ -120,6 +123,7 @@ export function WorkoutLogger({
               restSeconds: null,
               previous: [],
               suggestion: null,
+              unilateral: false,
             },
       ),
     );
@@ -136,6 +140,7 @@ export function WorkoutLogger({
         restSeconds: null,
         previous: [],
         suggestion: null,
+        unilateral: false,
         sets: [
           { reps: "", weight: "", oneRm: "", rir: "", setType: "normal", completed: false },
         ],
@@ -473,13 +478,20 @@ export function WorkoutLogger({
                 <div className="flex h-full w-full items-center justify-center">🏋️</div>
               )}
             </button>
-            <button
-              type="button"
-              onClick={() => openDetail(g.exerciseId)}
-              className="min-w-0 flex-1 truncate text-left font-semibold hover:text-primary"
-            >
-              {g.name}
-            </button>
+            <div className="min-w-0 flex-1">
+              <button
+                type="button"
+                onClick={() => openDetail(g.exerciseId)}
+                className="block max-w-full truncate text-left font-semibold hover:text-primary"
+              >
+                {g.name}
+              </button>
+              {g.unilateral && (
+                <span className="text-[11px] font-medium text-amber-400">
+                  🫱 {t("wk.perSide")}
+                </span>
+              )}
+            </div>
             <button
               type="button"
               onClick={() => setSwapIdx(gi)}
