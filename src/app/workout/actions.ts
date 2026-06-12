@@ -175,7 +175,9 @@ export async function startWorkout(formData: FormData) {
       // Vorige keer heeft voorrang; anders de geplande waarde uit het schema.
       const prevSet = prevByExSet[pe.exercise_id]?.[i];
       const weight = prevSet?.weight ?? pe.weight ?? null;
-      const reps = prevSet?.reps ?? pe.reps ?? null;
+      // Reps NIET voorinvullen vanuit het schema-doel (dat is een bereik, bv 8-10);
+      // alleen je werkelijke reps van vorige keer. Het doel toont als placeholder.
+      const reps = prevSet?.reps ?? null;
       const oneRm = prevSet?.one_rep_max ?? pe.one_rep_max ?? null;
       const rir =
         pe.rir != null
