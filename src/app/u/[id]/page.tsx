@@ -51,7 +51,8 @@ export default async function ProfilePage({
       .from("workout_sessions")
       .select("*", { count: "exact", head: true })
       .eq("user_id", id)
-      .eq("shared", true),
+      .eq("shared", true)
+      .not("completed_at", "is", null),
     supabase
       .from("follows")
       .select("status")
@@ -63,6 +64,7 @@ export default async function ProfilePage({
       .select("id, day_name, performed_at, workout_sets(weight, reps, unilateral)")
       .eq("user_id", id)
       .eq("shared", true)
+      .not("completed_at", "is", null)
       .order("performed_at", { ascending: false })
       .limit(20),
   ]);

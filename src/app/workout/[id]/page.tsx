@@ -60,7 +60,7 @@ export default async function WorkoutPage({
   if (exerciseIds.length) {
     const { data: prev } = await supabase
       .from("workout_sets")
-      .select("exercise_id, set_number, weight, reps, rir, set_type, session:workout_sessions!inner(id, performed_at)")
+      .select("exercise_id, set_number, weight, reps, rir, set_type, session:workout_sessions!inner(id, performed_at, completed_at)")
       .in("exercise_id", exerciseIds)
       .neq("session_id", id)
       .order("set_number");
@@ -71,12 +71,12 @@ export default async function WorkoutPage({
       reps: number | null;
       rir: number | null;
       set_type: string | null;
-      session: { id: string; performed_at: string } | null;
+      session: { id: string; performed_at: string; completed_at: string | null } | null;
     };
     const latestSessionByEx: Record<string, string> = {};
     const latestTimeByEx: Record<string, string> = {};
     for (const r of (prev ?? []) as unknown as PrevRow[]) {
-      if (!r.session) continue;
+      if (!r.session || !r.session.completed_at) continue;
       const t = r.session.performed_at;
       if (!latestTimeByEx[r.exercise_id] || t > latestTimeByEx[r.exercise_id]) {
         latestTimeByEx[r.exercise_id] = t;

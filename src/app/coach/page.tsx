@@ -63,7 +63,8 @@ export default async function CoachPage({
       .from("workout_sessions")
       .select("user_id, performed_at")
       .in("user_id", clientIds)
-      .gte("performed_at", weekAgo);
+      .gte("performed_at", weekAgo)
+      .not("completed_at", "is", null);
     for (const s of cs ?? []) {
       sessionsThisWeek[s.user_id] = (sessionsThisWeek[s.user_id] ?? 0) + 1;
     }

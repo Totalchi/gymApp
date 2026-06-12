@@ -62,6 +62,7 @@ export interface WorkoutSession {
   performed_at: string;
   notes: string | null;
   duration_seconds: number | null;
+  completed_at: string | null;
 }
 
 export interface WorkoutSet {

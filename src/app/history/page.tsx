@@ -17,7 +17,7 @@ export default async function HistoryPage() {
 
   const { data: sessions } = await supabase
     .from("workout_sessions")
-    .select("id, day_name, performed_at, notes, duration_seconds, shared, workout_sets(reps, weight, unilateral)")
+    .select("id, day_name, performed_at, notes, duration_seconds, shared, completed_at, workout_sets(reps, weight, unilateral)")
     .eq("user_id", user?.id ?? "")
     .order("performed_at", { ascending: false });
 
@@ -69,7 +69,14 @@ export default async function HistoryPage() {
                   className="flex items-center justify-between gap-3 rounded-2xl border border-line bg-surface p-4"
                 >
                   <Link href={`/workout/${s.id}`} className="min-w-0 flex-1">
-                    <p className="font-semibold">{s.day_name ?? "Workout"}</p>
+                    <p className="font-semibold">
+                      {s.day_name ?? "Workout"}
+                      {!s.completed_at && (
+                        <span className="ml-2 rounded-full bg-amber-500/15 px-2 py-0.5 text-[11px] font-medium text-amber-300 ring-1 ring-amber-500/30">
+                          ⏳ {t("hist.inProgress")}
+                        </span>
+                      )}
+                    </p>
                     <p className="text-sm text-muted">{date}</p>
                     <p className="mt-1 text-xs text-faint">
                       {sets.length} {t("hist.sets")} · {Math.round(volume).toLocaleString()} kg {t("hist.volume")}

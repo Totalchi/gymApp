@@ -26,6 +26,7 @@ export default async function FeedPage() {
       .from("workout_sessions")
       .select("id, user_id, day_name, performed_at, workout_sets(weight, reps, exercise_name, unilateral)")
       .eq("shared", true)
+      .not("completed_at", "is", null)
       .order("performed_at", { ascending: false })
       .limit(40),
   ]);

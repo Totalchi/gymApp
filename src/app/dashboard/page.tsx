@@ -143,8 +143,11 @@ export default async function DashboardPage() {
       .from("routine_days")
       .select("id, name, day_type, routine_id")
       .eq("weekday", todayIdx),
-    // Alleen datums (licht) — voor streak + 'deze week'.
-    supabase.from("workout_sessions").select("performed_at, user_id"),
+    // Alleen datums (licht) — voor streak + 'deze week'. Enkel afgeronde workouts.
+    supabase
+      .from("workout_sessions")
+      .select("performed_at, user_id")
+      .not("completed_at", "is", null),
     supabase.from("profiles").select("role, display_name").maybeSingle(),
     // Totalen server-side berekend (snel, weinig data).
     supabase.rpc("user_workout_totals"),

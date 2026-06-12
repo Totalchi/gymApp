@@ -65,6 +65,7 @@ export async function GET(request: Request) {
     .from("workout_sessions")
     .select("user_id")
     .gte("performed_at", todayStart)
+    .not("completed_at", "is", null)
     .in("user_id", [...enabled.keys()]);
   const trainedToday = new Set((todaySessions ?? []).map((s) => s.user_id));
 
@@ -116,6 +117,7 @@ export async function GET(request: Request) {
       .from("workout_sessions")
       .select("user_id, performed_at")
       .in("user_id", candidates)
+      .not("completed_at", "is", null)
       .order("performed_at", { ascending: false });
     const lastByUser = new Map<string, string>();
     for (const s of lastSessions ?? []) {

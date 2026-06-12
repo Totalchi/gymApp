@@ -34,7 +34,10 @@ export default async function StatsPage({
     { data: muscleRows },
   ] = await Promise.all([
     supabase.auth.getUser(),
-    supabase.from("workout_sessions").select("performed_at, user_id"),
+    supabase
+      .from("workout_sessions")
+      .select("performed_at, user_id")
+      .not("completed_at", "is", null),
     supabase.rpc("user_daily_volume"),
     supabase.rpc("user_muscle_volume", { p_since: cutoff }),
   ]);

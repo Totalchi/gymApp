@@ -267,6 +267,7 @@ const nl: Dict = {
   // history
   "hist.title": "Geschiedenis",
   "hist.progress": "📈 Voortgang",
+  "hist.inProgress": "Niet afgerond",
   "hist.empty":
     "Nog geen workouts gelogd. Start er één vanaf een dag in je schema! 💪",
   "hist.sets": "sets",
@@ -690,6 +691,7 @@ const en: Dict = {
   "done.dashboard": "Dashboard",
   "hist.title": "History",
   "hist.progress": "📈 Progress",
+  "hist.inProgress": "Not finished",
   "hist.empty": "No workouts logged yet. Start one from a day in your routine! 💪",
   "hist.sets": "sets",
   "hist.volume": "volume",
