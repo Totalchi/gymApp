@@ -30,6 +30,7 @@ interface Group {
   previous: { weight: number | null; reps: number | null }[];
   suggestion: ProgressionSuggestion | null;
   unilateral: boolean;
+  repTarget: string | null;
   sets: SetRow[];
 }
 
@@ -41,6 +42,7 @@ export interface LoggerInitialGroup {
   previous: { weight: number | null; reps: number | null }[];
   suggestion?: ProgressionSuggestion | null;
   unilateral?: boolean;
+  repTarget?: string | null;
   sets: {
     reps: number | null;
     weight: number | null;
@@ -82,6 +84,7 @@ export function WorkoutLogger({
       previous: g.previous,
       suggestion: g.suggestion ?? null,
       unilateral: g.unilateral ?? false,
+      repTarget: g.repTarget ?? null,
       sets: g.sets.map((s) => ({
         reps: s.reps != null ? String(s.reps) : "",
         weight: s.weight != null ? String(s.weight) : "",
@@ -124,6 +127,7 @@ export function WorkoutLogger({
               previous: [],
               suggestion: null,
               unilateral: false,
+              repTarget: null,
             },
       ),
     );
@@ -141,6 +145,7 @@ export function WorkoutLogger({
         previous: [],
         suggestion: null,
         unilateral: false,
+        repTarget: null,
         sets: [
           { reps: "", weight: "", oneRm: "", rir: "", setType: "normal", completed: false },
         ],
@@ -565,7 +570,11 @@ export function WorkoutLogger({
                   <span className="truncate text-xs text-faint" title="Vorige keer">
                     {prevLabel}
                   </span>
-                  <NumInput value={s.reps} onChange={(v) => updateSet(gi, si, "reps", v)} />
+                  <NumInput
+                    value={s.reps}
+                    placeholder={s.setType === "warmup" ? undefined : g.repTarget ?? undefined}
+                    onChange={(v) => updateSet(gi, si, "reps", v)}
+                  />
                   <NumInput value={s.weight} step="0.5" onChange={(v) => updateSet(gi, si, "weight", v)} />
                   <input
                     type="number"
@@ -760,11 +769,13 @@ function NumInput({
   onChange,
   step = "1",
   small = false,
+  placeholder,
 }: {
   value: string;
   onChange: (v: string) => void;
   step?: string;
   small?: boolean;
+  placeholder?: string;
 }) {
   return (
     <input
@@ -773,8 +784,9 @@ function NumInput({
       step={step}
       min="0"
       value={value}
+      placeholder={placeholder}
       onChange={(e) => onChange(e.target.value)}
-      className={`w-full rounded-lg border border-line bg-canvas px-1 py-1.5 text-center tabular-nums focus:border-primary focus:outline-none ${
+      className={`w-full rounded-lg border border-line bg-canvas px-1 py-1.5 text-center tabular-nums placeholder:text-faint placeholder:font-normal focus:border-primary focus:outline-none ${
         small ? "text-xs" : ""
       }`}
     />

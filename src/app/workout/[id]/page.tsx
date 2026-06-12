@@ -138,6 +138,12 @@ export default async function WorkoutPage({
       const suggestion = target
         ? suggestProgression(prevWorkingByExercise[s.exercise_id] ?? [], target)
         : null;
+      const repTarget =
+        target?.repLow != null
+          ? target.repHigh != null && target.repHigh !== target.repLow
+            ? `${target.repLow}-${target.repHigh}`
+            : String(target.repLow)
+          : null;
       groups.push({
         exerciseId: s.exercise_id,
         name: meta?.name ?? s.exercise_name ?? "Oefening",
@@ -146,6 +152,7 @@ export default async function WorkoutPage({
         previous: previousByExercise[s.exercise_id] ?? [],
         suggestion: suggestion && suggestion.kind === "up" ? suggestion : null,
         unilateral: unilateralByExercise[s.exercise_id] ?? false,
+        repTarget,
         sets: [],
       });
     }
