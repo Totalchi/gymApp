@@ -77,6 +77,7 @@ export interface WorkoutSet {
   set_type: SetType;
   completed: boolean;
   unilateral: boolean;
+  position: number;
 }
 
 export interface Routine {
@@ -141,6 +142,7 @@ export interface RoutineExercise {
   rest_seconds: number | null;
   superset_group: number | null;
   unilateral: boolean;
+  warmup_sets: number;
 }
 
 /** Set-types zoals in Hevy. */

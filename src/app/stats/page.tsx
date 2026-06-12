@@ -34,11 +34,14 @@ export default async function StatsPage({
     { data: muscleRows },
   ] = await Promise.all([
     supabase.auth.getUser(),
-    supabase.from("workout_sessions").select("performed_at"),
+    supabase.from("workout_sessions").select("performed_at, user_id"),
     supabase.rpc("user_daily_volume"),
     supabase.rpc("user_muscle_volume", { p_since: cutoff }),
   ]);
-  const sessionDates = (sessionDatesRaw ?? []) as { performed_at: string }[];
+  // Alleen je EIGEN sessies (RLS laat ook gedeelde workouts van gevolgden door).
+  const sessionDates = (
+    (sessionDatesRaw ?? []) as { performed_at: string; user_id: string }[]
+  ).filter((s) => s.user_id === user?.id);
 
   const dayVolume: Record<string, number> = {};
   if (dailyRows) {

@@ -144,13 +144,16 @@ export default async function DashboardPage() {
       .select("id, name, day_type, routine_id")
       .eq("weekday", todayIdx),
     // Alleen datums (licht) — voor streak + 'deze week'.
-    supabase.from("workout_sessions").select("performed_at"),
+    supabase.from("workout_sessions").select("performed_at, user_id"),
     supabase.from("profiles").select("role, display_name").maybeSingle(),
     // Totalen server-side berekend (snel, weinig data).
     supabase.rpc("user_workout_totals"),
   ]);
   const isCoach = profile?.role === "coach";
-  const sessionDates = (sessionDatesRaw ?? []) as { performed_at: string }[];
+  // Alleen je EIGEN sessies (RLS laat ook gedeelde workouts van gevolgden door).
+  const sessionDates = (
+    (sessionDatesRaw ?? []) as { performed_at: string; user_id: string }[]
+  ).filter((s) => s.user_id === user?.id);
 
   let totalWorkouts = sessionDates.length;
   let totalSets = 0;
@@ -270,6 +273,7 @@ export default async function DashboardPage() {
           </div>
         )}
 
+        {totalWorkouts > 0 && (
         <div className="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-5">
           {stats.map((s) => (
             <Link
@@ -289,6 +293,7 @@ export default async function DashboardPage() {
             </Link>
           ))}
         </div>
+        )}
 
         {/* Nieuw schema (inklapbaar zodat het dashboard rustig blijft) */}
         <details className="group mb-6 overflow-hidden rounded-2xl border border-line bg-surface">

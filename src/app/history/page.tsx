@@ -18,6 +18,7 @@ export default async function HistoryPage() {
   const { data: sessions } = await supabase
     .from("workout_sessions")
     .select("id, day_name, performed_at, notes, duration_seconds, shared, workout_sets(reps, weight, unilateral)")
+    .eq("user_id", user?.id ?? "")
     .order("performed_at", { ascending: false });
 
   return (

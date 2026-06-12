@@ -10,6 +10,7 @@ import {
   deleteRoutineExercise,
   toggleSuperset,
   toggleUnilateral,
+  setWarmupSets,
   swapRoutineExercise,
 } from "@/app/routines/actions";
 import { DragHandle } from "@/components/DragHandle";
@@ -59,6 +60,7 @@ export function ExerciseRow({
   // Optimistische schakelaars (meteen kleur, server volgt op de achtergrond).
   const [superset, setSuperset] = useState(item.superset_group != null);
   const [unilateral, setUnilateral] = useState(item.unilateral ?? false);
+  const [warmups, setWarmups] = useState(item.warmup_sets ?? 0);
   const [, startTransition] = useTransition();
   const unit = useUnit();
   const t = useT();
@@ -66,6 +68,7 @@ export function ExerciseRow({
   useEffect(() => setMounted(true), []);
   useEffect(() => setSuperset(item.superset_group != null), [item.superset_group]);
   useEffect(() => setUnilateral(item.unilateral ?? false), [item.unilateral]);
+  useEffect(() => setWarmups(item.warmup_sets ?? 0), [item.warmup_sets]);
 
   function onToggleSuperset() {
     setSuperset((s) => !s);
@@ -87,6 +90,18 @@ export function ExerciseRow({
     fd.set("unilateral", String(next));
     startTransition(() => {
       void toggleUnilateral(fd);
+    });
+  }
+
+  function onCycleWarmups() {
+    const next = (warmups + 1) % 4; // 0 → 1 → 2 → 3 → 0
+    setWarmups(next);
+    const fd = new FormData();
+    fd.set("id", item.id);
+    fd.set("routine_id", routineId);
+    fd.set("warmup_sets", String(next));
+    startTransition(() => {
+      void setWarmupSets(fd);
     });
   }
 
@@ -291,6 +306,18 @@ export function ExerciseRow({
           }`}
         >
           🫱 {unilateral ? t("routine.unilateralOn") : t("routine.unilateral")}
+        </button>
+        <button
+          type="button"
+          onClick={onCycleWarmups}
+          title={t("routine.warmupHint")}
+          className={`rounded-full border px-3 py-1.5 text-xs font-medium transition active:scale-95 ${
+            warmups > 0
+              ? "border-orange-500/40 bg-orange-500/15 text-orange-300"
+              : "border-line text-faint hover:text-fg"
+          }`}
+        >
+          🔥 {warmups > 0 ? `${warmups}× warmup` : t("routine.warmup")}
         </button>
       </div>
 
