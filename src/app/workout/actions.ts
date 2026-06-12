@@ -107,7 +107,7 @@ export async function startWorkout(formData: FormData) {
     const { data: prev } = await supabase
       .from("workout_sets")
       .select(
-        "exercise_id, set_number, weight, reps, one_rep_max, set_type, session:workout_sessions!inner(user_id, performed_at)",
+        "exercise_id, set_number, weight, reps, one_rep_max, set_type, session:workout_sessions!inner(user_id, performed_at, completed_at)",
       )
       .in("exercise_id", exerciseIds)
       .order("set_number");
@@ -118,11 +118,11 @@ export async function startWorkout(formData: FormData) {
       reps: number | null;
       one_rep_max: number | null;
       set_type: string | null;
-      session: { user_id: string; performed_at: string } | null;
+      session: { user_id: string; performed_at: string; completed_at: string | null } | null;
     };
     const latestTime: Record<string, string> = {};
     for (const r of (prev ?? []) as unknown as PrevRow[]) {
-      if (!r.session || r.session.user_id !== user.id) continue;
+      if (!r.session || r.session.user_id !== user.id || !r.session.completed_at) continue;
       const t = r.session.performed_at;
       if (!latestTime[r.exercise_id] || t > latestTime[r.exercise_id]) {
         latestTime[r.exercise_id] = t;
@@ -131,7 +131,7 @@ export async function startWorkout(formData: FormData) {
     // Tel alleen werksets (warmups vorige keer verschuiven de nummering niet).
     const workingCounter: Record<string, number> = {};
     for (const r of (prev ?? []) as unknown as PrevRow[]) {
-      if (!r.session || r.session.user_id !== user.id) continue;
+      if (!r.session || r.session.user_id !== user.id || !r.session.completed_at) continue;
       if (r.session.performed_at !== latestTime[r.exercise_id]) continue;
       if (r.set_type === "warmup") continue;
       const n = (workingCounter[r.exercise_id] = (workingCounter[r.exercise_id] ?? 0) + 1);
@@ -240,7 +240,7 @@ export async function saveWorkout(
   // Eigendom controleren.
   const { data: session } = await supabase
     .from("workout_sessions")
-    .select("id, user_id, routine_id")
+    .select("id, user_id, routine_id, completed_at")
     .eq("id", sessionId)
     .single();
   if (!session || session.user_id !== user.id) {
@@ -286,6 +286,10 @@ export async function saveWorkout(
     .update({
       notes: notes.trim() || null,
       duration_seconds: durationSeconds ?? null,
+      // Pas bij "Stop workout" telt de sessie mee; eerdere afronding behouden.
+      completed_at:
+        (session as { completed_at?: string | null }).completed_at ??
+        new Date().toISOString(),
     })
     .eq("id", sessionId);
 

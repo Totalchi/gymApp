@@ -44,6 +44,7 @@ export default async function CoachClientPage({
     .from("workout_sessions")
     .select("id, day_name, performed_at, workout_sets(weight, reps, unilateral)")
     .eq("user_id", clientId)
+    .not("completed_at", "is", null)
     .order("performed_at", { ascending: false })
     .limit(15);
 
