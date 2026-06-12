@@ -35,6 +35,7 @@ export default async function WorkoutDetailPage({
     .from("workout_sets")
     .select("*")
     .eq("session_id", id)
+    .order("position")
     .order("set_number");
   const setRows = (sets ?? []) as WorkoutSet[];
 

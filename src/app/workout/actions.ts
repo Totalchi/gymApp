@@ -31,7 +31,7 @@ export async function repeatWorkout(formData: FormData) {
 
   const { data: srcSets } = await supabase
     .from("workout_sets")
-    .select("exercise_id, exercise_name, set_number, reps, weight, one_rep_max, rir, set_type, unilateral")
+    .select("exercise_id, exercise_name, set_number, reps, weight, one_rep_max, rir, set_type, unilateral, position")
     .eq("session_id", sourceId)
     .order("set_number");
 
@@ -59,6 +59,7 @@ export async function repeatWorkout(formData: FormData) {
     set_type: s.set_type ?? "normal",
     completed: false,
     unilateral: (s as { unilateral?: boolean }).unilateral ?? false,
+    position: (s as { position?: number }).position ?? 0,
   }));
   if (rows.length) await supabase.from("workout_sets").insert(rows);
 
@@ -91,7 +92,7 @@ export async function startWorkout(formData: FormData) {
   // Geplande oefeningen ophalen en omzetten naar gelogde sets.
   const { data: planned } = await supabase
     .from("routine_exercises")
-    .select("exercise_id, sets, reps, weight, one_rep_max, rir, position, unilateral, exercise:exercises(name)")
+    .select("exercise_id, sets, reps, weight, one_rep_max, rir, position, unilateral, warmup_sets, exercise:exercises(name)")
     .eq("day_id", dayId)
     .order("position");
 
@@ -106,7 +107,7 @@ export async function startWorkout(formData: FormData) {
     const { data: prev } = await supabase
       .from("workout_sets")
       .select(
-        "exercise_id, set_number, weight, reps, one_rep_max, session:workout_sessions!inner(user_id, performed_at)",
+        "exercise_id, set_number, weight, reps, one_rep_max, set_type, session:workout_sessions!inner(user_id, performed_at)",
       )
       .in("exercise_id", exerciseIds)
       .order("set_number");
@@ -116,6 +117,7 @@ export async function startWorkout(formData: FormData) {
       weight: number | null;
       reps: number | null;
       one_rep_max: number | null;
+      set_type: string | null;
       session: { user_id: string; performed_at: string } | null;
     };
     const latestTime: Record<string, string> = {};
@@ -126,10 +128,14 @@ export async function startWorkout(formData: FormData) {
         latestTime[r.exercise_id] = t;
       }
     }
+    // Tel alleen werksets (warmups vorige keer verschuiven de nummering niet).
+    const workingCounter: Record<string, number> = {};
     for (const r of (prev ?? []) as unknown as PrevRow[]) {
       if (!r.session || r.session.user_id !== user.id) continue;
       if (r.session.performed_at !== latestTime[r.exercise_id]) continue;
-      (prevByExSet[r.exercise_id] ??= {})[r.set_number] = {
+      if (r.set_type === "warmup") continue;
+      const n = (workingCounter[r.exercise_id] = (workingCounter[r.exercise_id] ?? 0) + 1);
+      (prevByExSet[r.exercise_id] ??= {})[n] = {
         weight: r.weight,
         reps: r.reps,
         one_rep_max: r.one_rep_max,
@@ -141,6 +147,30 @@ export async function startWorkout(formData: FormData) {
   for (const pe of planned ?? []) {
     const exercise = pe.exercise as unknown as { name?: string } | null;
     const setCount = Math.max(1, pe.sets ?? 1);
+    const warmups = Math.max(0, (pe as { warmup_sets?: number }).warmup_sets ?? 0);
+    const unilateral = (pe as { unilateral?: boolean }).unilateral ?? false;
+    let setNo = 0;
+
+    // Geplande warmup-sets eerst (op ~50% van het werkgewicht).
+    const firstWorkWeight = prevByExSet[pe.exercise_id]?.[1]?.weight ?? pe.weight ?? null;
+    const warmWeight = firstWorkWeight ? Math.round(firstWorkWeight * 0.5 * 2) / 2 : null;
+    for (let w = 0; w < warmups; w++) {
+      rows.push({
+        session_id: session.id,
+        exercise_id: pe.exercise_id,
+        exercise_name: exercise?.name ?? null,
+        set_number: ++setNo,
+        reps: null,
+        weight: warmWeight,
+        one_rep_max: null,
+        rir: null,
+        set_type: "warmup",
+        completed: false,
+        unilateral,
+        position: pe.position ?? 0,
+      });
+    }
+
     for (let i = 1; i <= setCount; i++) {
       // Vorige keer heeft voorrang; anders de geplande waarde uit het schema.
       const prevSet = prevByExSet[pe.exercise_id]?.[i];
@@ -161,14 +191,15 @@ export async function startWorkout(formData: FormData) {
         session_id: session.id,
         exercise_id: pe.exercise_id,
         exercise_name: exercise?.name ?? null,
-        set_number: i,
+        set_number: ++setNo,
         reps,
         weight,
         one_rep_max: oneRm,
         rir,
         set_type: "normal",
         completed: false,
-        unilateral: (pe as { unilateral?: boolean }).unilateral ?? false,
+        unilateral,
+        position: pe.position ?? 0,
       });
     }
   }
@@ -191,6 +222,7 @@ interface SetInput {
   set_type?: string;
   completed?: boolean;
   unilateral?: boolean;
+  position?: number;
 }
 
 /**
@@ -241,6 +273,7 @@ export async function saveWorkout(
       set_type: s.set_type ?? "normal",
       completed: s.completed ?? true,
       unilateral: s.unilateral ?? false,
+      position: s.position ?? 0,
     };
   });
 

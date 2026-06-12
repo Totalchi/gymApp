@@ -96,7 +96,8 @@ export default async function WorkoutDonePage({
   // Dag-streak (aaneengesloten trainingsdagen, eindigend vandaag/gisteren).
   const { data: dates } = await supabase
     .from("workout_sessions")
-    .select("performed_at");
+    .select("performed_at")
+    .eq("user_id", user?.id ?? "");
   const dayset = new Set(
     (dates ?? []).map((d) => new Date(d.performed_at).toISOString().slice(0, 10)),
   );

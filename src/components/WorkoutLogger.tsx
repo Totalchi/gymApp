@@ -418,7 +418,7 @@ export function WorkoutLogger({
     try {
       localStorage.removeItem(startKey);
     } catch {}
-    const flat = groups.flatMap((g) =>
+    const flat = groups.flatMap((g, gi) =>
       g.sets.map((s, idx) => ({
         exercise_id: g.exerciseId,
         exercise_name: g.name,
@@ -430,6 +430,7 @@ export function WorkoutLogger({
         set_type: s.setType,
         completed: s.completed,
         unilateral: g.unilateral,
+        position: gi,
       })),
     );
     startTransition(() => {

@@ -31,6 +31,7 @@ export default async function WorkoutPage({
     .from("workout_sets")
     .select("*")
     .eq("session_id", id)
+    .order("position")
     .order("exercise_id")
     .order("set_number");
 
