@@ -4,7 +4,8 @@ import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { Header } from "@/components/Header";
 import { getT } from "@/lib/serverLang";
-import { toggleLike, addComment, deleteComment } from "@/app/social/actions";
+import { LikeButton } from "@/components/LikeButton";
+import { CommentBox, type CommentItem } from "@/components/CommentBox";
 import type { WorkoutSet } from "@/lib/types";
 
 function nameOf(p?: { display_name: string | null; username: string | null }) {
@@ -84,12 +85,19 @@ export default async function WorkoutDetailPage({
     .eq("session_id", id)
     .order("created_at");
   const comments = commentsData ?? [];
-  const commenterIds = [...new Set(comments.map((c) => c.user_id))];
+  const commenterIds = [...new Set([...comments.map((c) => c.user_id), user?.id].filter(Boolean) as string[])];
   const { data: cProfs } = await supabase
     .from("profiles")
     .select("id, display_name, username")
     .in("id", commenterIds.length ? commenterIds : ["__none__"]);
   const cProfById = new Map((cProfs ?? []).map((p) => [p.id, p]));
+  const commentItems: CommentItem[] = comments.map((c) => ({
+    id: c.id,
+    user_id: c.user_id,
+    body: c.body,
+    name: nameOf(cProfById.get(c.user_id)),
+  }));
+  const currentUserName = user ? nameOf(cProfById.get(user.id)) : "Atleet";
 
   const volume = setRows.reduce((n, s) => n + (s.weight ?? 0) * (s.reps ?? 0) * (s.unilateral ? 2 : 1), 0);
 
@@ -131,17 +139,7 @@ export default async function WorkoutDetailPage({
 
         {/* Like + comment-teller */}
         <div className="mb-5 flex items-center gap-4 border-y border-line py-3 text-sm">
-          <form action={toggleLike}>
-            <input type="hidden" name="session_id" value={id} />
-            <button
-              type="submit"
-              className={`flex items-center gap-1 transition ${
-                likedByMe ? "text-rose-400" : "text-muted hover:text-rose-400"
-              }`}
-            >
-              {likedByMe ? "♥" : "♡"} {likeCount}
-            </button>
-          </form>
+          <LikeButton sessionId={id} liked={likedByMe} count={likeCount} />
           <span className="flex items-center gap-1 text-muted">💬 {comments.length}</span>
         </div>
 
@@ -176,50 +174,20 @@ export default async function WorkoutDetailPage({
           ))}
         </div>
 
-        {/* Comments */}
-        <h2 className="mb-2 mt-6 font-semibold">{t("feed.comments")}</h2>
-        <form action={addComment} className="mb-4 flex gap-2">
-          <input type="hidden" name="session_id" value={id} />
-          <input
-            name="body"
-            required
-            maxLength={500}
-            placeholder={t("feed.commentPh")}
-            className="flex-1 rounded-xl border border-line bg-canvas px-3.5 py-2.5 text-sm placeholder:text-faint focus:border-primary focus:outline-none"
-          />
-          <button
-            type="submit"
-            className="rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-fg transition hover:brightness-110"
-          >
-            {t("feed.send")}
-          </button>
-        </form>
-
-        {comments.length === 0 ? (
-          <p className="text-sm text-faint">{t("feed.noComments")}</p>
-        ) : (
-          <div className="space-y-3">
-            {comments.map((c) => (
-              <div key={c.id} className="flex items-start justify-between gap-3">
-                <div className="min-w-0">
-                  <Link href={`/u/${c.user_id}`} className="text-sm font-medium hover:text-primary">
-                    {nameOf(cProfById.get(c.user_id))}
-                  </Link>
-                  <p className="text-sm text-muted">{c.body}</p>
-                </div>
-                {c.user_id === user?.id && (
-                  <form action={deleteComment}>
-                    <input type="hidden" name="id" value={c.id} />
-                    <input type="hidden" name="session_id" value={id} />
-                    <button type="submit" className="shrink-0 text-xs text-faint hover:text-danger">
-                      {t("common.delete")}
-                    </button>
-                  </form>
-                )}
-              </div>
-            ))}
-          </div>
-        )}
+        {/* Comments (optimistisch — geen herlaad bij plaatsen) */}
+        <CommentBox
+          sessionId={id}
+          currentUserId={user?.id ?? null}
+          currentUserName={currentUserName}
+          initial={commentItems}
+          labels={{
+            comments: t("feed.comments"),
+            placeholder: t("feed.commentPh"),
+            send: t("feed.send"),
+            none: t("feed.noComments"),
+            delete: t("common.delete"),
+          }}
+        />
       </main>
     </>
   );

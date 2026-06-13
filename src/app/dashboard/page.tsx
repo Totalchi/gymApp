@@ -10,7 +10,7 @@ import {
   deleteFolder,
   setRoutineFolder,
 } from "@/app/routines/actions";
-import { startWorkout } from "@/app/workout/actions";
+import { startWorkout, startEmptyWorkout } from "@/app/workout/actions";
 import { StartRoutineButton } from "@/components/StartRoutineButton";
 import { ConfirmButton } from "@/components/ConfirmButton";
 import { DAY_TYPE_COLORS, DAY_TYPE_LABELS, type DayType } from "@/lib/types";
@@ -236,6 +236,16 @@ export default async function DashboardPage() {
             {t(greetKey)}{firstName ? `, ${firstName}` : ""} 👋
           </h1>
         </div>
+
+        {/* Snelle start zonder schema (Hevy-stijl) */}
+        <form action={startEmptyWorkout} className="mb-8">
+          <button
+            type="submit"
+            className="flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-500 px-5 py-3.5 font-semibold text-white shadow-[var(--shadow)] transition hover:opacity-90 active:scale-[0.99]"
+          >
+            ⚡ {t("dash.startEmpty")}
+          </button>
+        </form>
 
         {/* Vandaag op het programma */}
         {todayDays && todayDays.length > 0 && (

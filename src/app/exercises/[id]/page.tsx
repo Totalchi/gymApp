@@ -14,7 +14,7 @@ interface SetRow {
   reps: number | null;
   rir: number | null;
   set_type: string;
-  session: { id: string; performed_at: string } | null;
+  session: { id: string; performed_at: string; completed_at: string | null } | null;
 }
 
 export default async function ExerciseDetailPage({
@@ -40,10 +40,10 @@ export default async function ExerciseDetailPage({
 
   const { data: setsData } = await supabase
     .from("workout_sets")
-    .select("weight, reps, rir, set_type, session:workout_sessions!inner(id, performed_at)")
+    .select("weight, reps, rir, set_type, session:workout_sessions!inner(id, performed_at, completed_at)")
     .eq("exercise_id", id);
   const sets = ((setsData ?? []) as unknown as SetRow[]).filter(
-    (s) => s.weight && s.reps && s.set_type !== "warmup" && s.session,
+    (s) => s.weight && s.reps && s.set_type !== "warmup" && s.session && s.session.completed_at,
   );
 
   // Records.

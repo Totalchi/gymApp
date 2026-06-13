@@ -140,28 +140,34 @@ export async function toggleLike(formData: FormData) {
   } else {
     await supabase.from("likes").insert({ user_id: user.id, session_id: sessionId });
   }
-  revalidatePath("/feed");
-  revalidatePath(`/w/${sessionId}`);
+  // Geen revalidatePath: de UI is optimistisch (LikeButton). Scheelt een dure
+  // feed-herlaad bij elke like.
 }
 
-export async function addComment(formData: FormData) {
+/**
+ * Voeg een reactie toe en geef het nieuwe id terug, zodat de client de
+ * optimistisch geplaatste reactie kan koppelen zonder de pagina te herladen.
+ */
+export async function addComment(formData: FormData): Promise<string | null> {
   const { supabase, user } = await requireUser();
   const sessionId = String(formData.get("session_id"));
   const body = String(formData.get("body") ?? "").trim();
-  if (!body) return;
-  await supabase
+  if (!body) return null;
+  const { data } = await supabase
     .from("comments")
-    .insert({ session_id: sessionId, user_id: user.id, body: body.slice(0, 500) });
-  revalidatePath(`/w/${sessionId}`);
-  revalidatePath("/feed");
+    .insert({ session_id: sessionId, user_id: user.id, body: body.slice(0, 500) })
+    .select("id")
+    .single();
+  // Geen revalidatePath: de UI is optimistisch (CommentBox). Scheelt een dure
+  // feed-herlaad bij elke reactie.
+  return data?.id ?? null;
 }
 
 export async function deleteComment(formData: FormData) {
   const { supabase } = await requireUser();
   const id = String(formData.get("id"));
-  const sessionId = String(formData.get("session_id"));
   await supabase.from("comments").delete().eq("id", id);
-  revalidatePath(`/w/${sessionId}`);
+  // Geen revalidatePath: de UI is optimistisch (CommentBox).
 }
 
 export async function toggleShared(formData: FormData) {
