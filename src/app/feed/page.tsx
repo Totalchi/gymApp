@@ -24,7 +24,7 @@ export default async function FeedPage() {
     supabase.auth.getUser(),
     supabase
       .from("workout_sessions")
-      .select("id, user_id, day_name, performed_at, workout_sets(weight, reps, exercise_name, unilateral)")
+      .select("id, user_id, day_name, performed_at, duration_seconds, pr_count, workout_sets(weight, reps, exercise_name, unilateral)")
       .eq("shared", true)
       .not("completed_at", "is", null)
       .order("performed_at", { ascending: false })
@@ -98,6 +98,8 @@ export default async function FeedPage() {
               const exNames = [...new Set(sets.map((x) => x.exercise_name).filter(Boolean))].slice(0, 4);
               const p = profById.get(s.user_id);
               const initial = nameOf(p).replace("@", "").charAt(0).toUpperCase();
+              const durationMin = s.duration_seconds ? Math.round(s.duration_seconds / 60) : null;
+              const prCount = (s as { pr_count?: number }).pr_count ?? 0;
               return (
                 <article key={s.id} className="rounded-2xl border border-line bg-surface p-4">
                   <div className="mb-3 flex items-center gap-3">
@@ -122,9 +124,17 @@ export default async function FeedPage() {
                   </div>
 
                   <Link href={`/w/${s.id}`} className="block">
-                    <p className="font-semibold">{s.day_name ?? "Workout"}</p>
+                    <div className="flex items-center gap-2">
+                      <p className="font-semibold">{s.day_name ?? "Workout"}</p>
+                      {prCount > 0 && (
+                        <span className="rounded-full bg-amber-400/15 px-2 py-0.5 text-xs font-semibold text-amber-400 ring-1 ring-amber-400/30">
+                          🏆 {prCount} {prCount === 1 ? t("feed.pr") : t("feed.prs")}
+                        </span>
+                      )}
+                    </div>
                     <p className="mt-0.5 text-sm text-muted">
                       {sets.length} {t("hist.sets")} · {Math.round(volume).toLocaleString()} kg
+                      {durationMin ? ` · ⏱ ${durationMin} ${t("hist.min")}` : ""}
                     </p>
                     {exNames.length > 0 && (
                       <p className="mt-1 truncate text-xs text-faint">{exNames.join(" · ")}</p>

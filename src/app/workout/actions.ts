@@ -67,6 +67,24 @@ export async function repeatWorkout(formData: FormData) {
 }
 
 /**
+ * Start een lege workout zonder schema: maakt een sessie zonder geplande sets,
+ * waarna je vrij oefeningen kunt toevoegen en loggen (Hevy-stijl).
+ */
+export async function startEmptyWorkout(formData: FormData) {
+  const { supabase, user } = await requireUser();
+  const dayName = String(formData.get("day_name") || "").trim() || "Snelle workout";
+
+  const { data: session, error } = await supabase
+    .from("workout_sessions")
+    .insert({ user_id: user.id, day_name: dayName })
+    .select("id")
+    .single();
+
+  if (error || !session) throw new Error(error?.message ?? "Sessie mislukt");
+  redirect(`/workout/${session.id}`);
+}
+
+/**
  * Start een workout vanuit een dag: maakt een sessie aan en vult alvast de
  * geplande sets in (vanuit het schema). Daarna kun je de echte waarden loggen.
  */
@@ -340,7 +358,15 @@ export async function saveWorkout(
             exerciseId: id,
           },
         }));
-      if (prNotifs.length) await supabase.from("notifications").insert(prNotifs);
+      if (prNotifs.length) {
+        await supabase.from("notifications").insert(prNotifs);
+        // Bewaar het aantal PR's op de sessie zodat de feed snel een 🏆-badge
+        // kan tonen zonder per workout opnieuw te rekenen.
+        await supabase
+          .from("workout_sessions")
+          .update({ pr_count: prNotifs.length })
+          .eq("id", sessionId);
+      }
     }
   } catch {}
 

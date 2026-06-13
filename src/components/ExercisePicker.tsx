@@ -33,9 +33,11 @@ export function ExercisePicker({
     setLoading(true);
 
     const timer = setTimeout(async () => {
+      // Alleen de velden die de kiezer toont/gebruikt — niet de zware
+      // instructie-teksten. Scheelt veel data bij elke toetsaanslag.
       let q = supabase
         .from("exercises")
-        .select("*")
+        .select("id, name, category, level, mechanic, force, equipment, primary_muscles, secondary_muscles, image_urls, owner_id")
         .order("name")
         .limit(60);
 
@@ -52,7 +54,8 @@ export function ExercisePicker({
 
       const { data } = await q;
       if (active) {
-        setResults((data as Exercise[]) ?? []);
+        // instructions niet opgehaald (zwaar) — vul met lege array voor het type.
+        setResults(((data ?? []) as Omit<Exercise, "instructions">[]).map((e) => ({ ...e, instructions: [] })));
         setLoading(false);
       }
     }, 250);
