@@ -2,7 +2,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { Header } from "@/components/Header";
 import { getT } from "@/lib/serverLang";
-import { toggleLike } from "@/app/social/actions";
+import { LikeButton } from "@/components/LikeButton";
 import { EmptyState } from "@/components/EmptyState";
 
 function nameOf(p?: { display_name: string | null; username: string | null }) {
@@ -132,17 +132,11 @@ export default async function FeedPage() {
                   </Link>
 
                   <div className="mt-3 flex items-center gap-4 border-t border-line pt-3 text-sm">
-                    <form action={toggleLike}>
-                      <input type="hidden" name="session_id" value={s.id} />
-                      <button
-                        type="submit"
-                        className={`flex items-center gap-1 transition ${
-                          likedByMe[s.id] ? "text-rose-400" : "text-muted hover:text-rose-400"
-                        }`}
-                      >
-                        {likedByMe[s.id] ? "♥" : "♡"} {likeCount[s.id] ?? 0}
-                      </button>
-                    </form>
+                    <LikeButton
+                      sessionId={s.id}
+                      liked={!!likedByMe[s.id]}
+                      count={likeCount[s.id] ?? 0}
+                    />
                     <Link href={`/w/${s.id}`} className="flex items-center gap-1 text-muted hover:text-primary">
                       💬 {commentCount[s.id] ?? 0}
                     </Link>
