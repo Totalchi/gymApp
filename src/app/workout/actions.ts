@@ -122,12 +122,17 @@ export async function startWorkout(formData: FormData) {
     Record<number, { weight: number | null; reps: number | null; one_rep_max: number | null }>
   > = {};
   if (exerciseIds.length) {
+    // Server-side filteren op eigen, afgeronde sessies: RLS laat ook gedeelde
+    // workouts van gevolgden door — die willen we hier niet én het scheelt
+    // veel data over de lijn.
     const { data: prev } = await supabase
       .from("workout_sets")
       .select(
         "exercise_id, set_number, weight, reps, one_rep_max, set_type, session:workout_sessions!inner(user_id, performed_at, completed_at)",
       )
       .in("exercise_id", exerciseIds)
+      .eq("session.user_id", user.id)
+      .not("session.completed_at", "is", null)
       .order("set_number");
     type PrevRow = {
       exercise_id: string;
@@ -246,6 +251,51 @@ interface SetInput {
 }
 
 /**
+ * Tussentijdse autosave tijdens een workout: schrijft de huidige sets + notities
+ * naar de database ZONDER de sessie af te ronden. Zo ben je niets kwijt als de
+ * app wordt weggegooid en je later hervat.
+ */
+export async function autosaveWorkout(
+  sessionId: string,
+  sets: SetInput[],
+  notes: string,
+) {
+  const { supabase, user } = await requireUser();
+
+  const { data: session } = await supabase
+    .from("workout_sessions")
+    .select("id, user_id, completed_at")
+    .eq("id", sessionId)
+    .single();
+  if (!session || session.user_id !== user.id) return;
+  // Al afgerond (bv. op een ander apparaat): niets meer overschrijven.
+  if (session.completed_at) return;
+
+  await supabase.from("workout_sets").delete().eq("session_id", sessionId);
+  const rows = sets.map((s) => ({
+    session_id: sessionId,
+    exercise_id: s.exercise_id,
+    exercise_name: s.exercise_name,
+    set_number: s.set_number,
+    reps: s.reps,
+    weight: s.weight,
+    one_rep_max: s.one_rep_max,
+    rir: s.rir ?? null,
+    set_type: s.set_type ?? "normal",
+    completed: s.completed ?? false,
+    unilateral: s.unilateral ?? false,
+    position: s.position ?? 0,
+  }));
+  if (rows.length > 0) await supabase.from("workout_sets").insert(rows);
+
+  await supabase
+    .from("workout_sessions")
+    .update({ notes: notes.trim() || null })
+    .eq("id", sessionId);
+  // Geen revalidatePath/redirect: dit draait stil op de achtergrond.
+}
+
+/**
  * Sla de gelogde sets op. We vervangen de bestaande sets door de doorgegeven
  * lijst en herberekenen RIR server-side.
  */
@@ -331,6 +381,7 @@ export async function saveWorkout(
         .from("workout_sets")
         .select("exercise_id, weight, reps, set_type, session:workout_sessions!inner(user_id)")
         .in("exercise_id", exIds)
+        .eq("session.user_id", user.id)
         .neq("session_id", sessionId);
       type PR = {
         exercise_id: string;

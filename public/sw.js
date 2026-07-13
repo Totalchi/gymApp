@@ -31,15 +31,39 @@ async function cacheFirst(request, cacheName) {
   return res;
 }
 
-async function networkFirst(request, cacheName) {
+// Network-first met een tijdslimiet: bij een trage (koude) server tonen we na
+// `timeoutMs` direct de gecachete pagina; het netwerkantwoord ververst intussen
+// de cache op de achtergrond voor de volgende keer.
+async function networkFirst(request, cacheName, timeoutMs) {
   const cache = await caches.open(cacheName);
-  try {
-    const res = await fetch(request);
+  const network = fetch(request).then((res) => {
     if (res && res.ok) cache.put(request, res.clone());
     return res;
+  });
+  // Voorkom "unhandled rejection" wanneer we hieronder al de cache serveerden.
+  network.catch(() => {});
+
+  try {
+    return await new Promise((resolve, reject) => {
+      const timer = setTimeout(() => reject(new Error("timeout")), timeoutMs);
+      network.then(
+        (res) => {
+          clearTimeout(timer);
+          resolve(res);
+        },
+        (err) => {
+          clearTimeout(timer);
+          reject(err);
+        },
+      );
+    });
   } catch {
     const hit = await cache.match(request);
     if (hit) return hit;
+    // Niets in cache: dan toch (langer) op het netwerk wachten.
+    try {
+      return await network;
+    } catch {}
     const dash = await cache.match("/dashboard");
     if (dash) return dash;
     return Response.error();
@@ -68,7 +92,7 @@ self.addEventListener("fetch", (event) => {
   // Volledige paginanavigaties: network-first (updates blijven binnenkomen),
   // val terug op cache wanneer je offline bent.
   if (request.mode === "navigate") {
-    event.respondWith(networkFirst(request, PAGE_CACHE));
+    event.respondWith(networkFirst(request, PAGE_CACHE, 2500));
     return;
   }
 });

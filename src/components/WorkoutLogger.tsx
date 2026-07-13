@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState, useTransition } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { saveWorkout } from "@/app/workout/actions";
+import { autosaveWorkout, saveWorkout } from "@/app/workout/actions";
 import { createClient } from "@/lib/supabase/client";
 import { useUnit } from "@/components/UnitProvider";
 import { useT } from "@/components/LangProvider";
@@ -56,6 +56,42 @@ export interface LoggerInitialGroup {
 function num(s: string): number | null {
   const v = parseFloat(s.replace(",", "."));
   return Number.isFinite(v) ? v : null;
+}
+
+/** Zet de logger-state om naar rijen voor de database. */
+function flattenGroups(groups: Group[]) {
+  return groups.flatMap((g, gi) =>
+    g.sets.map((s, idx) => ({
+      exercise_id: g.exerciseId,
+      exercise_name: g.name,
+      set_number: idx + 1,
+      reps: num(s.reps),
+      weight: num(s.weight),
+      one_rep_max: num(s.oneRm),
+      rir: num(s.rir),
+      set_type: s.setType,
+      completed: s.completed,
+      unilateral: g.unilateral,
+      position: gi,
+    })),
+  );
+}
+
+/** Ruim oude workout-drafts op (ouder dan 7 dagen). */
+function purgeOldDrafts() {
+  try {
+    const cutoff = Date.now() - 7 * 24 * 60 * 60 * 1000;
+    for (let i = localStorage.length - 1; i >= 0; i--) {
+      const key = localStorage.key(i);
+      if (!key?.startsWith("gymapp-workout-draft-")) continue;
+      try {
+        const at = (JSON.parse(localStorage.getItem(key) ?? "{}") as { at?: number }).at;
+        if (!at || at < cutoff) localStorage.removeItem(key);
+      } catch {
+        localStorage.removeItem(key);
+      }
+    }
+  } catch {}
 }
 
 function fmtTime(total: number): string {
@@ -154,6 +190,70 @@ export function WorkoutLogger({
   }
   const unit = useUnit();
   const t = useT();
+
+  // ---- Draft: niets kwijtraken als de app mid-workout wordt weggegooid ----
+  // Elke wijziging gaat meteen naar localStorage en (met een korte vertraging)
+  // naar de server. Bij het heropenen van de sessie wordt de draft hersteld.
+  const draftKey = `gymapp-workout-draft-${sessionId}`;
+  const firstRunRef = useRef(true);
+  const dirtyRef = useRef(false);
+  const autosaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const groupsRef = useRef(groups);
+  const notesRef = useRef(notes);
+  groupsRef.current = groups;
+  notesRef.current = notes;
+
+  // Herstel de draft bij het openen (na een reload of geheugen-kill).
+  useEffect(() => {
+    try {
+      purgeOldDrafts();
+      const raw = localStorage.getItem(draftKey);
+      if (raw) {
+        const draft = JSON.parse(raw) as { groups?: Group[]; notes?: string };
+        if (Array.isArray(draft.groups) && draft.groups.length) setGroups(draft.groups);
+        if (typeof draft.notes === "string") setNotes(draft.notes);
+      }
+    } catch {}
+  }, [draftKey]);
+
+  function flushAutosave() {
+    if (!dirtyRef.current) return;
+    dirtyRef.current = false;
+    if (autosaveTimerRef.current) clearTimeout(autosaveTimerRef.current);
+    autosaveTimerRef.current = null;
+    void autosaveWorkout(sessionId, flattenGroups(groupsRef.current), notesRef.current);
+  }
+
+  // Bij elke wijziging: direct lokaal bewaren + server-autosave inplannen.
+  useEffect(() => {
+    if (firstRunRef.current) {
+      firstRunRef.current = false;
+      return;
+    }
+    try {
+      localStorage.setItem(draftKey, JSON.stringify({ groups, notes, at: Date.now() }));
+    } catch {}
+    dirtyRef.current = true;
+    if (autosaveTimerRef.current) clearTimeout(autosaveTimerRef.current);
+    autosaveTimerRef.current = setTimeout(flushAutosave, 4000);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [groups, notes, draftKey]);
+
+  // App naar de achtergrond (of tab dicht): meteen naar de server schrijven.
+  useEffect(() => {
+    function onHide() {
+      if (document.visibilityState === "hidden") flushAutosave();
+    }
+    document.addEventListener("visibilitychange", onHide);
+    return () => document.removeEventListener("visibilitychange", onHide);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  useEffect(
+    () => () => {
+      if (autosaveTimerRef.current) clearTimeout(autosaveTimerRef.current);
+    },
+    [],
+  );
 
   // Workout-duur: pas tellen vanaf "Start workout" (blijft bewaard bij reload).
   const startKey = `gymapp-workout-start-${sessionId}`;
@@ -420,26 +520,16 @@ export function WorkoutLogger({
       startMs != null
         ? Math.max(0, Math.floor((Date.now() - startMs) / 1000))
         : elapsed;
+    // Autosave stoppen en draft opruimen: de definitieve save neemt het over.
+    dirtyRef.current = false;
+    if (autosaveTimerRef.current) clearTimeout(autosaveTimerRef.current);
+    autosaveTimerRef.current = null;
     try {
       localStorage.removeItem(startKey);
+      localStorage.removeItem(draftKey);
     } catch {}
-    const flat = groups.flatMap((g, gi) =>
-      g.sets.map((s, idx) => ({
-        exercise_id: g.exerciseId,
-        exercise_name: g.name,
-        set_number: idx + 1,
-        reps: num(s.reps),
-        weight: num(s.weight),
-        one_rep_max: num(s.oneRm),
-        rir: num(s.rir),
-        set_type: s.setType,
-        completed: s.completed,
-        unilateral: g.unilateral,
-        position: gi,
-      })),
-    );
     startTransition(() => {
-      void saveWorkout(sessionId, flat, notes, secs);
+      void saveWorkout(sessionId, flattenGroups(groups), notes, secs);
     });
   }
 

@@ -57,12 +57,17 @@ export default async function WorkoutPage({
     string,
     { weight: number | null; reps: number | null }[]
   > = {};
-  if (exerciseIds.length) {
+  if (exerciseIds.length && user) {
+    // Alleen JOUW afgeronde sessies (server-side gefilterd): RLS laat ook
+    // gedeelde workouts van gevolgden door en die horen niet in "vorige keer".
+    // Scheelt bovendien veel data op de pagina die je mid-workout opent.
     const { data: prev } = await supabase
       .from("workout_sets")
-      .select("exercise_id, set_number, weight, reps, rir, set_type, session:workout_sessions!inner(id, performed_at, completed_at)")
+      .select("exercise_id, set_number, weight, reps, rir, set_type, session:workout_sessions!inner(id, user_id, performed_at, completed_at)")
       .in("exercise_id", exerciseIds)
       .neq("session_id", id)
+      .eq("session.user_id", user.id)
+      .not("session.completed_at", "is", null)
       .order("set_number");
     type PrevRow = {
       exercise_id: string;
