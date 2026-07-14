@@ -74,7 +74,7 @@ export default async function MessagesPage({
           <h1 className="text-lg font-bold">{nameOf(other ?? undefined)}</h1>
         </div>
 
-        <div className="flex-1 space-y-2 overflow-y-auto rounded-2xl border border-line bg-surface p-3">
+        <div className="flex-1 space-y-2 overflow-y-auto card-flat p-3">
           {!messages || messages.length === 0 ? (
             <p className="py-10 text-center text-sm text-faint">{t("msg.empty")}</p>
           ) : (
@@ -116,9 +116,9 @@ export default async function MessagesPage({
             name="body"
             autoComplete="off"
             placeholder={t("msg.placeholder")}
-            className="flex-1 rounded-xl border border-line bg-canvas px-3.5 py-2.5 placeholder:text-faint focus:border-primary focus:outline-none"
+            className="flex-1 input"
           />
-          <button className="rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-fg transition hover:brightness-110">
+          <button className="btn-primary px-4 text-sm">
             {t("msg.send")}
           </button>
         </form>

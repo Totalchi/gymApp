@@ -173,7 +173,7 @@ export default async function StatsPage({
         </div>
 
         {/* Kalender */}
-        <section className="mb-6 rounded-2xl border border-line bg-surface p-5">
+        <section className="mb-6 card-flat p-5">
           <h2 className="mb-3 font-semibold">{t("stats.calendar")}</h2>
           <div className="flex gap-1 overflow-x-auto pb-1">
             {columns.map((col, i) => (
@@ -202,12 +202,12 @@ export default async function StatsPage({
         {/* Volume + workouts per week */}
         {hasWeekData && (
           <>
-            <section className="mb-6 rounded-2xl border border-line bg-surface p-5">
+            <section className="mb-6 card-flat p-5">
               <h2 className="mb-2 font-semibold">{t("stats.weeklyVolume")}</h2>
               <LineChart points={volumePoints} unit="" />
             </section>
 
-            <section className="mb-6 rounded-2xl border border-line bg-surface p-5">
+            <section className="mb-6 card-flat p-5">
               <h2 className="mb-3 font-semibold">{t("stats.workoutsPerWeek")}</h2>
               <div className="flex h-28 items-end justify-between gap-1">
                 {weeks.map((w, i) => (
@@ -228,7 +228,7 @@ export default async function StatsPage({
         )}
 
         {/* Spiergroep-verdeling */}
-        <section className="rounded-2xl border border-line bg-surface p-5">
+        <section className="card-flat p-5">
           <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
             <h2 className="font-semibold">{t("stats.volumePerMuscle")}</h2>
             <div className="flex flex-wrap gap-1.5">

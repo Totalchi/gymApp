@@ -35,7 +35,7 @@ function RoutineCard({
 }) {
   const dayTypes = [...new Set(r.routine_days.map((d) => d.day_type))];
   return (
-    <div className="group relative flex flex-col rounded-2xl border border-line bg-surface p-5 shadow-[var(--shadow)] transition hover:-translate-y-0.5 hover:border-primary/40">
+    <div className="group relative flex flex-col card p-5 transition hover:-translate-y-0.5 hover:border-primary/40">
       <Link href={`/routines/${r.id}`} className="flex-1">
         {r.assigned_by && (
           <span className="mb-1 inline-block rounded-full bg-primary/15 px-2 py-0.5 text-[11px] font-medium text-primary ring-1 ring-primary/30">
@@ -309,7 +309,7 @@ export default async function DashboardPage() {
         )}
 
         {/* Nieuw schema (inklapbaar zodat het dashboard rustig blijft) */}
-        <details className="group mb-6 overflow-hidden rounded-2xl border border-line bg-surface">
+        <details className="group mb-6 overflow-hidden card-flat">
           <summary className="flex cursor-pointer list-none items-center justify-between px-5 py-4 font-semibold">
             <span>➕ {t("dash.newSchema")}</span>
             <span className="text-faint transition group-open:rotate-180">⌄</span>
@@ -319,16 +319,16 @@ export default async function DashboardPage() {
               name="name"
               required
               placeholder={t("dash.namePh")}
-              className="flex-1 rounded-xl border border-line bg-canvas px-3.5 py-2.5 placeholder:text-faint focus:border-primary focus:outline-none"
+              className="flex-1 input"
             />
             <input
               name="description"
               placeholder={t("dash.descPh")}
-              className="flex-1 rounded-xl border border-line bg-canvas px-3.5 py-2.5 placeholder:text-faint focus:border-primary focus:outline-none"
+              className="flex-1 input"
             />
             <button
               type="submit"
-              className="rounded-xl bg-primary px-5 py-2.5 font-semibold text-primary-fg transition hover:brightness-110"
+              className="btn-primary"
             >
               {t("dash.create")}
             </button>
@@ -336,7 +336,7 @@ export default async function DashboardPage() {
         </details>
 
         {all.length === 0 ? (
-          <div className="rounded-2xl border border-line bg-surface p-6 text-center">
+          <div className="card-flat p-6 text-center">
             <div className="text-4xl">👋</div>
             <h2 className="mt-2 text-xl font-bold">{t("onb.title")}</h2>
             <p className="mt-1 text-sm text-muted">{t("onb.sub")}</p>
@@ -353,7 +353,7 @@ export default async function DashboardPage() {
             <div className="mt-5">
               <Link
                 href="/templates"
-                className="inline-block rounded-xl bg-primary px-6 py-3 font-semibold text-primary-fg transition hover:brightness-110"
+                className="inline-block btn-primary px-6 py-3"
               >
                 {t("onb.useTemplate")}
               </Link>
@@ -365,7 +365,7 @@ export default async function DashboardPage() {
                 <p className="mt-1 text-xs text-muted">{t("onb.coachSub")}</p>
                 <Link
                   href="/coach"
-                  className="mt-3 inline-block rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-fg transition hover:brightness-110"
+                  className="mt-3 inline-block btn-primary rounded-lg px-4 py-2 text-sm"
                 >
                   {t("onb.coachCta")}
                 </Link>
@@ -381,7 +381,7 @@ export default async function DashboardPage() {
               ))}
             </div>
             {all.length >= 2 && (
-              <details className="group mt-6 rounded-2xl border border-line bg-surface">
+              <details className="group mt-6 card-flat">
                 <summary className="flex cursor-pointer list-none items-center justify-between px-4 py-3 text-sm text-muted">
                   <span>🗂 {t("dash.addFolder")}</span>
                   <span className="text-faint transition group-open:rotate-180">⌄</span>
@@ -393,11 +393,11 @@ export default async function DashboardPage() {
                       name="name"
                       required
                       placeholder={t("dash.folderPh")}
-                      className="flex-1 rounded-xl border border-line bg-canvas px-3.5 py-2 text-sm placeholder:text-faint focus:border-primary focus:outline-none"
+                      className="flex-1 input py-2 text-sm"
                     />
                     <button
                       type="submit"
-                      className="rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-fg transition hover:brightness-110"
+                      className="btn-primary px-4 py-2 text-sm"
                     >
                       {t("dash.addFolder")}
                     </button>
@@ -443,7 +443,7 @@ export default async function DashboardPage() {
               </div>
             ))}
 
-            <details className="group rounded-2xl border border-line bg-surface">
+            <details className="group card-flat">
               <summary className="flex cursor-pointer list-none items-center justify-between px-4 py-3 text-sm text-muted">
                 <span>🗂 {t("dash.addFolder")}</span>
                 <span className="text-faint transition group-open:rotate-180">⌄</span>
@@ -454,11 +454,11 @@ export default async function DashboardPage() {
                     name="name"
                     required
                     placeholder={t("dash.folderPh")}
-                    className="flex-1 rounded-xl border border-line bg-canvas px-3.5 py-2 text-sm placeholder:text-faint focus:border-primary focus:outline-none"
+                    className="flex-1 input py-2 text-sm"
                   />
                   <button
                     type="submit"
-                    className="rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-fg transition hover:brightness-110"
+                    className="btn-primary px-4 py-2 text-sm"
                   >
                     {t("dash.addFolder")}
                   </button>

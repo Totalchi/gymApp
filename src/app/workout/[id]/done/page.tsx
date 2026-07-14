@@ -131,7 +131,7 @@ export default async function WorkoutDonePage({
             { label: t("done.sets"), value: setCount },
             { label: t("done.volume"), value: `${Math.round(volume).toLocaleString()} kg` },
           ].map((s) => (
-            <div key={s.label} className="rounded-2xl border border-line bg-surface p-4 shadow-[var(--shadow)]">
+            <div key={s.label} className="card p-4">
               <p className="text-xl font-bold tabular-nums">{s.value}</p>
               <p className="mt-0.5 text-xs text-faint">{s.label}</p>
             </div>
@@ -161,7 +161,7 @@ export default async function WorkoutDonePage({
         <div className="mt-8 flex justify-center gap-3">
           <Link
             href="/history"
-            className="rounded-xl bg-primary px-6 py-2.5 font-semibold text-primary-fg transition hover:brightness-110"
+            className="btn-primary px-6"
           >
             {t("done.toHistory")}
           </Link>

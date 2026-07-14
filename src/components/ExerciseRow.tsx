@@ -130,7 +130,7 @@ export function ExerciseRow({
       action={updateRoutineExercise}
       onSubmit={() => setDirty(false)}
       className={`bg-surface px-4 py-4 sm:px-5 ${
-        superset ? "border-l-2 border-l-sky-500" : ""
+        superset ? "border-l-2 border-l-primary" : ""
       }`}
     >
       <input type="hidden" name="id" value={item.id} />
@@ -253,7 +253,7 @@ export function ExerciseRow({
           type="button"
           onClick={() => setSwapOpen(true)}
           title={t("routine.swapHint")}
-          className="px-1 py-1 text-sm text-faint transition hover:text-primary"
+          className="px-2 py-1.5 text-sm text-faint transition hover:text-primary"
         >
           {t("routine.swap")}
         </button>
@@ -263,7 +263,7 @@ export function ExerciseRow({
           onClick={(e) => {
             if (!confirm(t("routine.confirmDeleteExercise"))) e.preventDefault();
           }}
-          className="px-1 py-1 text-sm text-faint transition hover:text-danger"
+          className="px-2 py-1.5 text-sm text-faint transition hover:text-danger"
         >
           {t("common.delete")}
         </button>
@@ -289,7 +289,7 @@ export function ExerciseRow({
           title="Koppel deze oefening als superset met de oefening erboven"
           className={`rounded-full border px-3 py-1.5 text-xs font-medium transition active:scale-95 ${
             superset
-              ? "border-sky-500/40 bg-sky-500/15 text-sky-300"
+              ? "border-primary/40 bg-primary/15 text-primary"
               : "border-line text-faint hover:text-fg"
           }`}
         >

@@ -24,7 +24,7 @@ export default async function TemplatesPage() {
           {ROUTINE_TEMPLATES.map((tpl) => (
             <div
               key={tpl.id}
-              className="rounded-2xl border border-line bg-surface p-5"
+              className="card-flat p-5"
             >
               <div className="flex items-start justify-between gap-3">
                 <div>
@@ -51,7 +51,7 @@ export default async function TemplatesPage() {
                 <input type="hidden" name="template_id" value={tpl.id} />
                 <button
                   type="submit"
-                  className="rounded-xl bg-primary px-5 py-2.5 font-semibold text-primary-fg transition hover:brightness-110"
+                  className="btn-primary"
                 >
                   {t("tpl.add")}
                 </button>

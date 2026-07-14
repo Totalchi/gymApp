@@ -80,12 +80,12 @@ export function CommentBox({
           onChange={(e) => setText(e.target.value)}
           maxLength={500}
           placeholder={labels.placeholder}
-          className="flex-1 rounded-xl border border-line bg-canvas px-3.5 py-2.5 text-sm placeholder:text-faint focus:border-primary focus:outline-none"
+          className="flex-1 input text-sm"
         />
         <button
           type="submit"
           disabled={!text.trim()}
-          className="rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-fg transition hover:brightness-110 disabled:opacity-50"
+          className="btn-primary px-4 text-sm"
         >
           {labels.send}
         </button>

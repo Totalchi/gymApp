@@ -72,7 +72,7 @@ export function ExercisePicker({
       onClick={onClose}
     >
       <div
-        className="flex max-h-[85vh] w-full max-w-2xl flex-col overflow-hidden rounded-2xl border border-line bg-surface"
+        className="flex max-h-[85vh] w-full max-w-2xl flex-col overflow-hidden card-flat"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header + filters */}
@@ -91,7 +91,7 @@ export function ExercisePicker({
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder={t("ex.search")}
-            className="mb-3 w-full rounded-xl border border-line bg-canvas px-3.5 py-2.5 placeholder:text-faint focus:border-primary focus:outline-none"
+            className="mb-3 input"
           />
           <div className="flex flex-wrap gap-1.5">
             <FilterChip active={muscle === ""} onClick={() => setMuscle("")}>
@@ -157,7 +157,7 @@ export function ExercisePicker({
                         className="flex w-full items-center gap-3 rounded-xl p-2 text-left transition hover:bg-surface2/70"
                       >
                         {meta}
-                        <span className="shrink-0 rounded-lg bg-primary px-3 py-1.5 text-sm font-semibold text-white">
+                        <span className="shrink-0 btn-primary rounded-lg px-3 py-1.5 text-sm">
                           {label}
                         </span>
                       </button>
@@ -173,7 +173,7 @@ export function ExercisePicker({
                         {meta}
                         <button
                           type="submit"
-                          className="shrink-0 rounded-lg bg-primary px-3 py-1.5 text-sm font-semibold text-white transition hover:brightness-110"
+                          className="shrink-0 btn-primary rounded-lg px-3 py-1.5 text-sm"
                         >
                           {label}
                         </button>
@@ -204,7 +204,7 @@ function FilterChip({
       onClick={onClick}
       className={`rounded-full px-2.5 py-1 text-xs capitalize ring-1 transition ${
         active
-          ? "bg-primary text-white ring-primary"
+          ? "bg-primary text-primary-fg ring-primary"
           : "bg-canvas text-muted ring-line hover:ring-muted"
       }`}
     >

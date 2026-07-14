@@ -95,7 +95,7 @@ export default async function CoachPage({
                   </span>
                   <form action={acceptCoach}>
                     <input type="hidden" name="id" value={r.id} />
-                    <button className="rounded-lg bg-primary px-3 py-1.5 text-sm font-semibold text-primary-fg">
+                    <button className="btn-primary rounded-lg px-3 py-1.5 text-sm">
                       {t("coach.accept")}
                     </button>
                   </form>
@@ -123,7 +123,7 @@ export default async function CoachPage({
                   </Link>
                   <Link
                     href={`/messages/${r.coach_id}`}
-                    className="rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-primary-fg"
+                    className="btn-primary rounded-lg px-3 py-1.5 text-xs"
                   >
                     💬 {t("coach.message")}
                   </Link>
@@ -197,9 +197,9 @@ export default async function CoachPage({
               name="q"
               defaultValue={query}
               placeholder={t("social.searchPh")}
-              className="flex-1 rounded-xl border border-line bg-canvas px-3.5 py-2.5 placeholder:text-faint focus:border-primary focus:outline-none"
+              className="flex-1 input"
             />
-            <button className="rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-fg">
+            <button className="btn-primary px-4 text-sm">
               {t("social.search")}
             </button>
           </form>
@@ -215,7 +215,7 @@ export default async function CoachPage({
                 ) : (
                   <form action={inviteClient}>
                     <input type="hidden" name="target_id" value={p.id} />
-                    <button className="rounded-lg bg-primary px-3 py-1.5 text-sm font-semibold text-primary-fg">
+                    <button className="btn-primary rounded-lg px-3 py-1.5 text-sm">
                       {t("coach.inviteBtn")}
                     </button>
                   </form>

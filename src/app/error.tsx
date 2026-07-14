@@ -13,7 +13,7 @@ export default function Error({ reset }: { error: Error; reset: () => void }) {
       <div className="mt-5 flex gap-2">
         <button
           onClick={reset}
-          className="rounded-xl bg-primary px-5 py-2.5 font-semibold text-primary-fg transition hover:brightness-110"
+          className="btn-primary"
         >
           {t("err.retry")}
         </button>

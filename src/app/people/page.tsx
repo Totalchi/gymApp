@@ -47,18 +47,18 @@ export default async function PeoplePage({
       <Header email={user?.email} />
       <main className="mx-auto max-w-xl px-4 py-8">
         <h1 className="mb-1 text-3xl font-bold">{t("social.findTitle")}</h1>
-        <p className="mb-5 text-muted">{t("social.findSub")}</p>
+        <p className="mb-6 text-muted">{t("social.findSub")}</p>
 
         <form method="get" className="mb-6 flex gap-2">
           <input
             name="q"
             defaultValue={query}
             placeholder={t("social.searchPh")}
-            className="flex-1 rounded-xl border border-line bg-canvas px-3.5 py-2.5 placeholder:text-faint focus:border-primary focus:outline-none"
+            className="input flex-1"
           />
           <button
             type="submit"
-            className="rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-fg transition hover:brightness-110"
+            className="btn-primary px-4 text-sm"
           >
             {t("social.search")}
           </button>

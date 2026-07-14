@@ -25,7 +25,7 @@ export function AddDayForm({ routineId }: { routineId: string }) {
     <form
       action={addDay}
       onSubmit={() => setOpen(false)}
-      className="mt-5 rounded-2xl border border-line bg-surface p-5"
+      className="mt-5 card-flat p-5"
     >
       <input type="hidden" name="routine_id" value={routineId} />
       <h3 className="mb-3 font-semibold">{t("routine.newDay")}</h3>
@@ -36,7 +36,7 @@ export function AddDayForm({ routineId }: { routineId: string }) {
             key={t}
             className={`cursor-pointer rounded-full px-3 py-1.5 text-sm ring-1 transition ${
               dayType === t
-                ? "bg-primary text-white ring-primary"
+                ? "bg-primary text-primary-fg ring-primary"
                 : "bg-canvas text-muted ring-line hover:ring-muted"
             }`}
           >
@@ -59,12 +59,12 @@ export function AddDayForm({ routineId }: { routineId: string }) {
           defaultValue={DAY_TYPE_LABELS[dayType]}
           key={dayType}
           placeholder={t("routine.dayNamePh")}
-          className="flex-1 rounded-xl border border-line bg-canvas px-3.5 py-2.5 focus:border-primary focus:outline-none"
+          className="flex-1 input"
         />
         <div className="flex gap-2">
           <button
             type="submit"
-            className="rounded-xl bg-primary px-5 py-2.5 font-semibold text-primary-fg transition hover:brightness-110"
+            className="btn-primary"
           >
             {t("routine.add")}
           </button>

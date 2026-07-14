@@ -10,7 +10,7 @@ export default async function NotFound() {
       <p className="mt-1 max-w-sm text-sm text-muted">{t("nf.sub")}</p>
       <Link
         href="/dashboard"
-        className="mt-5 rounded-xl bg-primary px-5 py-2.5 font-semibold text-primary-fg transition hover:brightness-110"
+        className="mt-5 btn-primary"
       >
         {t("nf.home")}
       </Link>

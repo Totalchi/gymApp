@@ -120,7 +120,7 @@ export function EnablePushButton() {
     <button
       onClick={enable}
       disabled={busy}
-      className="mb-4 w-full rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-primary-fg transition hover:brightness-110 disabled:opacity-50"
+      className="mb-4 w-full btn-primary px-4 py-3 text-sm"
     >
       🔔 {t("notif.enable")}
     </button>

@@ -107,7 +107,7 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
         <button
           type="submit"
           disabled={pending}
-          className="w-full rounded-xl bg-primary px-4 py-2.5 font-semibold text-white shadow-lg  transition hover:opacity-90 disabled:opacity-50"
+          className="w-full btn-primary"
         >
           {pending
             ? t("auth.working")

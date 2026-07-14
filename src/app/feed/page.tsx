@@ -101,7 +101,7 @@ export default async function FeedPage() {
               const durationMin = s.duration_seconds ? Math.round(s.duration_seconds / 60) : null;
               const prCount = (s as { pr_count?: number }).pr_count ?? 0;
               return (
-                <article key={s.id} className="rounded-2xl border border-line bg-surface p-4">
+                <article key={s.id} className="card-flat p-4">
                   <div className="mb-3 flex items-center gap-3">
                     <Link
                       href={`/u/${s.user_id}`}

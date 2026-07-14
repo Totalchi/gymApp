@@ -537,6 +537,7 @@ export function WorkoutLogger({
     (n, g) => n + g.sets.filter((s) => s.completed).length,
     0,
   );
+  const totalSets = groups.reduce((n, g) => n + g.sets.length, 0);
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
@@ -556,7 +557,7 @@ export function WorkoutLogger({
       )}
 
       {groups.map((g, gi) => (
-        <section key={g.exerciseId + gi} className="rounded-2xl border border-line bg-surface shadow-[var(--shadow)]">
+        <section key={g.exerciseId + gi} className="card">
           <header className="flex items-center gap-3 border-b border-line px-4 py-3">
             <button
               type="button"
@@ -737,7 +738,7 @@ export function WorkoutLogger({
         onChange={(e) => setNotes(e.target.value)}
         placeholder={t("wk.notesPh")}
         rows={3}
-        className="w-full rounded-2xl border border-line bg-surface px-4 py-3 placeholder:text-faint focus:border-primary focus:outline-none"
+        className="w-full card-flat px-4 py-3 placeholder:text-faint focus:border-primary focus:outline-none"
       />
         </div>
       </div>
@@ -751,22 +752,22 @@ export function WorkoutLogger({
               <span className="tabular-nums text-base font-bold">{fmtTime(restLeft)}</span>
               {restPaused && <span className="ml-1 text-xs">⏸</span>}
             </span>
-            <button type="button" onClick={() => adjustRest(-15)} className="rounded-md bg-sky-500/20 px-2 py-1 text-xs font-medium text-sky-100">
+            <button type="button" onClick={() => adjustRest(-15)} className="rounded-lg bg-sky-500/20 px-3 py-2 text-xs font-medium text-sky-100 active:scale-95">
               −15
             </button>
-            <button type="button" onClick={() => adjustRest(15)} className="rounded-md bg-sky-500/20 px-2 py-1 text-xs font-medium text-sky-100">
+            <button type="button" onClick={() => adjustRest(15)} className="rounded-lg bg-sky-500/20 px-3 py-2 text-xs font-medium text-sky-100 active:scale-95">
               +15
             </button>
             {restPaused ? (
-              <button type="button" onClick={resumeRest} className="rounded-md bg-sky-500/30 px-3 py-1 text-xs font-semibold text-sky-50">
+              <button type="button" onClick={resumeRest} className="rounded-lg bg-sky-500/30 px-3 py-2 text-xs font-semibold text-sky-50 active:scale-95">
                 ▶ {t("wk.resume")}
               </button>
             ) : (
-              <button type="button" onClick={pauseRest} className="rounded-md bg-sky-500/30 px-3 py-1 text-xs font-semibold text-sky-50">
+              <button type="button" onClick={pauseRest} className="rounded-lg bg-sky-500/30 px-3 py-2 text-xs font-semibold text-sky-50 active:scale-95">
                 ⏸ {t("wk.pause")}
               </button>
             )}
-            <button type="button" onClick={stopRest} className="rounded-md bg-sky-500 px-3 py-1 text-xs font-semibold text-white">
+            <button type="button" onClick={stopRest} className="rounded-lg bg-sky-500 px-3 py-2 text-xs font-semibold text-white active:scale-95">
               {t("wk.stop")}
             </button>
           </div>
@@ -778,6 +779,15 @@ export function WorkoutLogger({
         className="border-t border-line bg-canvas"
         style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
       >
+        {/* Dunne voortgangsbalk: afgevinkte sets t.o.v. totaal. */}
+        {running && totalSets > 0 && (
+          <div className="h-0.5 w-full bg-surface2">
+            <div
+              className="h-full bg-gradient-to-r from-emerald-500 to-teal-400 transition-all duration-300"
+              style={{ width: `${Math.round((completedCount / totalSets) * 100)}%` }}
+            />
+          </div>
+        )}
         <div className="mx-auto flex max-w-3xl items-center justify-between gap-3 px-4 py-3">
           <div className="min-w-0">
             <p className="truncate text-sm font-medium">{dayName}</p>
@@ -790,7 +800,7 @@ export function WorkoutLogger({
               ) : (
                 t("wk.notStarted")
               )}{" "}
-              · {completedCount} {t("wk.setsDone")}
+              · <span className="tabular-nums">{completedCount}/{totalSets}</span> {t("wk.setsDone")}
             </p>
           </div>
           <div className="flex items-center gap-2">

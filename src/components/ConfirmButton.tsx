@@ -53,7 +53,7 @@ export function ConfirmButton({
             <div
               role="alertdialog"
               aria-modal="true"
-              className="w-full max-w-xs rounded-2xl border border-line bg-surface p-5 shadow-[var(--shadow-lg)]"
+              className="w-full max-w-xs card-flat p-5 shadow-[var(--shadow-lg)]"
               onClick={(e) => e.stopPropagation()}
             >
               <div className="mb-3 flex h-11 w-11 items-center justify-center rounded-full bg-danger/15 text-xl">

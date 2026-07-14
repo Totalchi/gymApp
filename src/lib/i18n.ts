@@ -276,6 +276,7 @@ const nl: Dict = {
   "hist.min": "min",
   "hist.repeat": "Herhaal",
   // stats
+  "chart.noData": "Nog geen data.",
   "stats.title": "Statistieken",
   "stats.export": "⬇ Export CSV",
   "stats.calendar": "Trainingskalender",
@@ -701,6 +702,7 @@ const en: Dict = {
   "hist.volume": "volume",
   "hist.min": "min",
   "hist.repeat": "Repeat",
+  "chart.noData": "No data yet.",
   "stats.title": "Statistics",
   "stats.export": "⬇ Export CSV",
   "stats.calendar": "Training calendar",

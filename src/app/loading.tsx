@@ -8,7 +8,7 @@ export default function Loading() {
         {Array.from({ length: 6 }).map((_, i) => (
           <div
             key={i}
-            className="h-20 animate-pulse rounded-2xl border border-line bg-surface"
+            className="h-20 animate-pulse card-flat"
             style={{ animationDelay: `${i * 60}ms` }}
           />
         ))}

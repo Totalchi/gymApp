@@ -95,7 +95,7 @@ export default async function GoalsPage() {
                   : 0;
               const reached = current != null && current >= g.target;
               return (
-                <div key={g.id} className="rounded-2xl border border-line bg-surface p-4">
+                <div key={g.id} className="card-flat p-4">
                   <div className="mb-2 flex items-center justify-between gap-3">
                     <p className="truncate font-medium">{label}</p>
                     <form action={deleteGoal}>

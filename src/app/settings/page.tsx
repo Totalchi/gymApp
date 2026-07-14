@@ -26,7 +26,7 @@ export default async function SettingsPage() {
 
         <form
           action={updateProfile}
-          className="space-y-5 rounded-2xl border border-line bg-surface p-5"
+          className="space-y-5 card-flat p-5"
         >
           <label className="block">
             <span className="mb-1.5 block text-sm font-medium text-muted">
@@ -36,7 +36,7 @@ export default async function SettingsPage() {
               name="display_name"
               defaultValue={profile?.display_name ?? ""}
               placeholder={t("set.namePh")}
-              className="w-full rounded-xl border border-line bg-canvas px-3.5 py-2.5 focus:border-primary focus:outline-none"
+              className="input"
             />
           </label>
 
@@ -48,7 +48,7 @@ export default async function SettingsPage() {
               name="username"
               defaultValue={profile?.username ?? ""}
               placeholder={t("set.usernamePh")}
-              className="w-full rounded-xl border border-line bg-canvas px-3.5 py-2.5 focus:border-primary focus:outline-none"
+              className="input"
             />
           </label>
 
@@ -61,7 +61,7 @@ export default async function SettingsPage() {
               defaultValue={profile?.bio ?? ""}
               rows={2}
               placeholder={t("set.bioPh")}
-              className="w-full rounded-xl border border-line bg-canvas px-3.5 py-2.5 focus:border-primary focus:outline-none"
+              className="input"
             />
           </label>
 
@@ -91,7 +91,7 @@ export default async function SettingsPage() {
 
           <button
             type="submit"
-            className="rounded-xl bg-primary px-5 py-2.5 font-semibold text-primary-fg transition hover:brightness-110"
+            className="btn-primary"
           >
             {t("common.save")}
           </button>

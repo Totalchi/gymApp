@@ -114,7 +114,7 @@ export default async function ProfilePage({
         {profile?.bio && <p className="mb-4 px-1 text-sm text-muted">{profile.bio}</p>}
 
         {/* Stat-strip */}
-        <div className="mb-6 grid grid-cols-3 divide-x divide-line overflow-hidden rounded-2xl border border-line bg-surface shadow-[var(--shadow)]">
+        <div className="mb-6 grid grid-cols-3 divide-x divide-line overflow-hidden card">
           <div className="px-3 py-3 text-center">
             <p className="text-xl font-bold tabular-nums">{workoutCount ?? 0}</p>
             <p className="text-xs text-faint">{t("dash.workouts")}</p>
@@ -140,7 +140,7 @@ export default async function ProfilePage({
                 <Link
                   key={s.id}
                   href={`/w/${s.id}`}
-                  className="block rounded-2xl border border-line bg-surface px-4 py-3 shadow-[var(--shadow)] transition hover:-translate-y-0.5 hover:border-primary/40"
+                  className="block card px-4 py-3 transition hover:-translate-y-0.5 hover:border-primary/40"
                 >
                   <p className="font-semibold">{s.day_name ?? "Workout"}</p>
                   <p className="mt-0.5 text-xs text-faint">
