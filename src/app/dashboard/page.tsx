@@ -200,7 +200,7 @@ export default async function DashboardPage() {
   const greetKey = hour < 6 ? "greet.night" : hour < 12 ? "greet.morning" : hour < 18 ? "greet.afternoon" : "greet.evening";
 
   const stats = [
-    { label: t("dash.workouts"), value: totalWorkouts, href: "/history", icon: "🏋️", tint: "text-indigo-300", ring: "ring-indigo-500/25", bg: "bg-indigo-500/10" },
+    { label: t("dash.workouts"), value: totalWorkouts, href: "/history", icon: "🏋️", tint: "text-blue-300", ring: "ring-blue-500/25", bg: "bg-blue-500/10" },
     { label: t("dash.thisWeek"), value: thisWeek, href: "/history", icon: "📅", tint: "text-sky-300", ring: "ring-sky-500/25", bg: "bg-sky-500/10" },
     { label: t("dash.streak"), value: streak, href: "/achievements", icon: "🔥", tint: "text-amber-300", ring: "ring-amber-500/25", bg: "bg-amber-500/10" },
     { label: t("dash.setsLogged"), value: totalSets, href: "/history", icon: "✅", tint: "text-emerald-300", ring: "ring-emerald-500/25", bg: "bg-emerald-500/10" },

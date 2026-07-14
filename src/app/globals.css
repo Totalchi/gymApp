@@ -29,19 +29,21 @@
   --c-fg: #f1f3f7;
   --c-muted: #a0aabd;
   --c-faint: #6b7689;
-  --c-primary: #6366f1;
-  --c-primary-2: #818cf8;
-  --c-primary-fg: #ffffff;
+  /* Sportief elektrisch blauw; donkere tekst op felle knoppen (leest beter
+     én oogt moderner dan wit-op-middenblauw). */
+  --c-primary: #60a5fa;
+  --c-primary-2: #38bdf8;
+  --c-primary-fg: #0b1220;
   --c-danger: #fb7185;
   --c-success: #34d399;
   --c-warning: #fbbf24;
   /* Grafiek: lijn/vlak + recessief grid (dataviz: grid hoort terug te wijken). */
-  --c-chart: #818cf8;
+  --c-chart: #3b82f6;
   --c-chart-grid: rgb(148 163 184 / 0.14);
   /* Zachte elevatie + accentgloed */
   --shadow: 0 1px 2px rgb(0 0 0 / 0.3), 0 8px 24px -12px rgb(0 0 0 / 0.55);
   --shadow-lg: 0 16px 40px -12px rgb(0 0 0 / 0.6);
-  --glow: 0 8px 28px -8px rgb(99 102 241 / 0.5);
+  --glow: 0 8px 28px -8px rgb(96 165 250 / 0.4);
   color-scheme: dark;
 }
 
@@ -53,17 +55,17 @@
   --c-fg: #14171d;
   --c-muted: #525b6e;
   --c-faint: #8d96a8;
-  --c-primary: #4f46e5;
-  --c-primary-2: #6366f1;
+  --c-primary: #2563eb;
+  --c-primary-2: #3b82f6;
   --c-primary-fg: #ffffff;
   --c-danger: #e11d48;
   --c-success: #059669;
   --c-warning: #d97706;
-  --c-chart: #4f46e5;
+  --c-chart: #2563eb;
   --c-chart-grid: rgb(15 23 42 / 0.08);
   --shadow: 0 1px 2px rgb(15 23 42 / 0.04), 0 10px 26px -14px rgb(15 23 42 / 0.18);
   --shadow-lg: 0 18px 44px -16px rgb(15 23 42 / 0.22);
-  --glow: 0 10px 30px -10px rgb(79 70 229 / 0.35);
+  --glow: 0 10px 30px -10px rgb(37 99 235 / 0.3);
   color-scheme: light;
 }
 
@@ -72,7 +74,7 @@ body {
   /* Subtiele accentgloed bovenaan voor diepte (premium gevoel). */
   background-image: radial-gradient(
     900px 520px at 50% -240px,
-    rgb(99 102 241 / 0.1),
+    rgb(56 189 248 / 0.09),
     transparent 60%
   );
   background-attachment: fixed;

@@ -137,6 +137,30 @@ export function WorkoutLogger({
   const [showAdd, setShowAdd] = useState(false);
   const [swapIdx, setSwapIdx] = useState<number | null>(null);
   const [detailEx, setDetailEx] = useState<Exercise | null>(null);
+  // Oefening-menu (⋯): verplaatsen, wisselen, verwijderen — ook mid-workout.
+  const [menuIdx, setMenuIdx] = useState<number | null>(null);
+  const [confirmRemoveIdx, setConfirmRemoveIdx] = useState<number | null>(null);
+
+  function closeMenu() {
+    setMenuIdx(null);
+    setConfirmRemoveIdx(null);
+  }
+
+  function moveGroup(gi: number, dir: -1 | 1) {
+    setGroups((prev) => {
+      const ni = gi + dir;
+      if (ni < 0 || ni >= prev.length) return prev;
+      const next = [...prev];
+      [next[gi], next[ni]] = [next[ni], next[gi]];
+      return next;
+    });
+    closeMenu();
+  }
+
+  function removeGroup(gi: number) {
+    setGroups((prev) => prev.filter((_, i) => i !== gi));
+    closeMenu();
+  }
 
   // Haal de volledige oefening op (foto's + uitleg) en toon de popup.
   async function openDetail(exerciseId: string) {
@@ -590,14 +614,14 @@ export function WorkoutLogger({
                 </span>
               )}
             </div>
-            <button
-              type="button"
-              onClick={() => setSwapIdx(gi)}
-              title={t("wk.swap")}
-              className="shrink-0 rounded-lg border border-line px-2 py-1.5 text-xs text-muted transition hover:border-primary hover:text-primary"
-            >
-              ↔
-            </button>
+            {g.sets.length > 0 && g.sets.every((s) => s.completed) && (
+              <span
+                title={t("wk.exerciseDone")}
+                className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-500/15 text-xs font-bold text-emerald-400 ring-1 ring-emerald-500/30"
+              >
+                ✓
+              </span>
+            )}
             <button
               type="button"
               onClick={() => startRest(g.restSeconds ?? restDuration)}
@@ -606,6 +630,65 @@ export function WorkoutLogger({
             >
               ⏱ {fmtTime(g.restSeconds ?? restDuration)}
             </button>
+            <div className="relative shrink-0">
+              <button
+                type="button"
+                onClick={() => {
+                  setConfirmRemoveIdx(null);
+                  setMenuIdx(menuIdx === gi ? null : gi);
+                }}
+                title={t("wk.exerciseMenu")}
+                className="rounded-lg border border-line px-2.5 py-1.5 text-xs font-bold text-muted transition hover:border-primary hover:text-primary"
+              >
+                ⋯
+              </button>
+              {menuIdx === gi && (
+                <>
+                  <div className="fixed inset-0 z-20" onClick={closeMenu} />
+                  <div className="absolute right-0 top-full z-30 mt-1 w-52 card p-1 text-sm shadow-[var(--shadow-lg)]">
+                    <button
+                      type="button"
+                      disabled={gi === 0}
+                      onClick={() => moveGroup(gi, -1)}
+                      className="flex w-full items-center gap-2 rounded-lg px-3 py-2.5 text-left transition hover:bg-surface2 disabled:opacity-40"
+                    >
+                      ↑ {t("wk.moveUp")}
+                    </button>
+                    <button
+                      type="button"
+                      disabled={gi === groups.length - 1}
+                      onClick={() => moveGroup(gi, 1)}
+                      className="flex w-full items-center gap-2 rounded-lg px-3 py-2.5 text-left transition hover:bg-surface2 disabled:opacity-40"
+                    >
+                      ↓ {t("wk.moveDown")}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSwapIdx(gi);
+                        closeMenu();
+                      }}
+                      className="flex w-full items-center gap-2 rounded-lg px-3 py-2.5 text-left transition hover:bg-surface2"
+                    >
+                      ↔ {t("wk.swap")}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        confirmRemoveIdx === gi ? removeGroup(gi) : setConfirmRemoveIdx(gi)
+                      }
+                      className={`flex w-full items-center gap-2 rounded-lg px-3 py-2.5 text-left font-medium transition ${
+                        confirmRemoveIdx === gi
+                          ? "bg-danger/15 text-danger"
+                          : "text-danger hover:bg-danger/10"
+                      }`}
+                    >
+                      ✕ {confirmRemoveIdx === gi ? t("wk.confirmRemove") : t("wk.removeExercise")}
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
           </header>
 
           {g.suggestion && g.suggestion.kind === "up" && (
