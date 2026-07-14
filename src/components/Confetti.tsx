@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-const COLORS = ["#6366f1", "#f59e0b", "#10b981", "#fb7185", "#38bdf8", "#a78bfa"];
+const COLORS = ["#60a5fa", "#f59e0b", "#10b981", "#fb7185", "#38bdf8", "#a78bfa"];
 
 /** Korte confetti-burst + trilling. Render met `fire` om af te vuren. */
 export function Confetti({ fire }: { fire: boolean }) {
