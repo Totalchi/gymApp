@@ -66,7 +66,7 @@ export default async function HistoryPage() {
               return (
                 <div
                   key={s.id}
-                  className="flex items-center justify-between gap-3 rounded-2xl border border-line bg-surface p-4"
+                  className="flex items-center justify-between gap-3 card-flat p-4"
                 >
                   <Link href={`/workout/${s.id}`} className="min-w-0 flex-1">
                     <p className="font-semibold">

@@ -89,7 +89,7 @@ export default async function NotificationsPage() {
             {t("notif.empty")}
           </p>
         ) : (
-          <div className="divide-y divide-line overflow-hidden rounded-2xl border border-line bg-surface">
+          <div className="divide-y divide-line overflow-hidden card-flat">
             {items.map((n) => {
               const msg = renderNotification(lang, n.type, n.data);
               const href = notificationLink(n.type, n.data);
@@ -104,7 +104,7 @@ export default async function NotificationsPage() {
                       <div className="mt-2 flex gap-2">
                         <form action={acceptFollow}>
                           <input type="hidden" name="follower_id" value={n.actor_id} />
-                          <button className="rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-primary-fg">
+                          <button className="btn-primary rounded-lg px-3 py-1.5 text-xs">
                             {t("social.accept")}
                           </button>
                         </form>

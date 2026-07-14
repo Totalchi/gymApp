@@ -17,7 +17,7 @@ export function DragHandle({
     <button
       type="button"
       aria-label="Versleep om te herordenen"
-      className="-ml-1 cursor-grab touch-none rounded-md px-1 py-1 text-faint transition hover:bg-surface2 hover:text-muted active:cursor-grabbing"
+      className="-ml-1 cursor-grab touch-none rounded-md p-2 text-faint transition hover:bg-surface2 hover:text-muted active:cursor-grabbing"
       {...attributes}
       {...listeners}
     >

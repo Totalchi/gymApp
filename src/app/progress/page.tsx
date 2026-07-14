@@ -123,7 +123,7 @@ export default async function ProgressPage({
             {charts.map((c) => (
               <section
                 key={c.name}
-                className="rounded-2xl border border-line bg-surface p-5"
+                className="card-flat p-5"
               >
                 <div className="mb-2 flex items-baseline justify-between">
                   <h2 className="font-semibold">{c.name}</h2>

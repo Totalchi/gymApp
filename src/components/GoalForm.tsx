@@ -15,7 +15,7 @@ export function GoalForm({
   return (
     <form
       action={addGoal}
-      className="mb-6 space-y-3 rounded-2xl border border-line bg-surface p-5"
+      className="mb-6 space-y-3 card-flat p-5"
     >
       <h2 className="font-semibold">{t("goals.new")}</h2>
 
@@ -50,7 +50,7 @@ export function GoalForm({
             <span className="mb-1 block text-sm text-muted">{t("goals.exercise")}</span>
             <select
               name="exercise_id"
-              className="w-full rounded-xl border border-line bg-canvas px-3 py-2.5 focus:border-primary focus:outline-none"
+              className="input px-3"
             >
               {exercises.map((e) => (
                 <option key={e.id} value={e.id}>
@@ -72,14 +72,14 @@ export function GoalForm({
           step="0.5"
           min="0"
           required
-          className="w-full rounded-xl border border-line bg-canvas px-3 py-2.5 tabular-nums focus:border-primary focus:outline-none"
+          className="input px-3 tabular-nums"
         />
       </label>
 
       <button
         type="submit"
         disabled={kind === "lift" && exercises.length === 0}
-        className="rounded-xl bg-primary px-5 py-2.5 font-semibold text-primary-fg transition hover:brightness-110 disabled:opacity-50"
+        className="btn-primary"
       >
         {t("goals.add")}
       </button>

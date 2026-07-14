@@ -146,7 +146,7 @@ export default async function WorkoutDetailPage({
         {/* Oefeningen (alleen-lezen) */}
         <div className="space-y-4">
           {groups.map((g) => (
-            <section key={g.id} className="rounded-2xl border border-line bg-surface p-4">
+            <section key={g.id} className="card-flat p-4">
               <div className="mb-2 flex items-center gap-3">
                 <div className="relative h-9 w-9 shrink-0 overflow-hidden rounded-lg bg-white ring-1 ring-line">
                   {g.image ? (

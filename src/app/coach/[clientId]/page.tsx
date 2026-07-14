@@ -89,14 +89,14 @@ export default async function CoachClientPage({
           </h1>
           <Link
             href={`/messages/${clientId}`}
-            className="shrink-0 rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-fg transition hover:brightness-110"
+            className="shrink-0 btn-primary px-4 py-2 text-sm"
           >
             💬 {t("coach.message")}
           </Link>
         </div>
 
         {/* Schema toewijzen */}
-        <section className="mb-6 rounded-2xl border border-line bg-surface p-5">
+        <section className="mb-6 card-flat p-5">
           <h2 className="mb-3 font-semibold">{t("coach.assign")}</h2>
           {!myRoutines || myRoutines.length === 0 ? (
             <p className="text-sm text-faint">{t("coach.noOwnRoutines")}</p>
@@ -105,7 +105,7 @@ export default async function CoachClientPage({
               <input type="hidden" name="client_id" value={clientId} />
               <select
                 name="routine_id"
-                className="flex-1 rounded-xl border border-line bg-canvas px-3 py-2.5 focus:border-primary focus:outline-none"
+                className="flex-1 input px-3"
               >
                 {myRoutines.map((r) => (
                   <option key={r.id} value={r.id}>
@@ -113,7 +113,7 @@ export default async function CoachClientPage({
                   </option>
                 ))}
               </select>
-              <button className="rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-fg transition hover:brightness-110">
+              <button className="btn-primary px-4 text-sm">
                 {t("coach.assignBtn")}
               </button>
             </form>

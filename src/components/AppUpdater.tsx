@@ -52,7 +52,7 @@ export function AppUpdater() {
     >
       <button
         onClick={() => window.location.reload()}
-        className="rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-fg shadow-lg ring-1 ring-black/10 transition hover:brightness-110"
+        className="btn-primary rounded-full text-sm"
       >
         🔄 {t("update.available")}
       </button>

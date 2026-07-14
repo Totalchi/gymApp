@@ -56,7 +56,7 @@ export default async function NutritionPage() {
         <p className="mb-6 text-muted">{t("nutri.subtitle")}</p>
 
         {/* Dagoverzicht met doelen */}
-        <section className="mb-6 rounded-2xl border border-line bg-surface p-5">
+        <section className="mb-6 card-flat p-5">
           <h2 className="mb-3 font-semibold">{t("nutri.today")}</h2>
           <div className="grid grid-cols-2 gap-4">
             <div>
@@ -79,7 +79,7 @@ export default async function NutritionPage() {
         </section>
 
         {/* Vandaag invullen */}
-        <form action={saveNutrition} className="mb-6 rounded-2xl border border-line bg-surface p-5">
+        <form action={saveNutrition} className="mb-6 card-flat p-5">
           <h2 className="mb-3 font-semibold">{t("nutri.logToday")}</h2>
           <input type="hidden" name="log_date" value={today} />
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
@@ -104,13 +104,13 @@ export default async function NutritionPage() {
               </label>
             ))}
           </div>
-          <button className="mt-4 rounded-xl bg-primary px-5 py-2.5 font-semibold text-primary-fg transition hover:brightness-110">
+          <button className="mt-4 btn-primary">
             {t("common.save")}
           </button>
         </form>
 
         {/* Doelen instellen */}
-        <details className="mb-6 rounded-2xl border border-line bg-surface p-5">
+        <details className="mb-6 card-flat p-5">
           <summary className="cursor-pointer font-semibold">{t("nutri.goals")}</summary>
           <form action={setNutritionGoals} className="mt-3 flex flex-wrap items-end gap-3">
             <label className="flex flex-col">
@@ -135,7 +135,7 @@ export default async function NutritionPage() {
                 className="h-11 w-28 rounded-lg border border-line bg-canvas px-2 text-center tabular-nums focus:border-primary focus:outline-none"
               />
             </label>
-            <button className="h-11 rounded-xl bg-primary px-5 font-semibold text-primary-fg transition hover:brightness-110">
+            <button className="h-11 btn-primary">
               {t("common.save")}
             </button>
           </form>

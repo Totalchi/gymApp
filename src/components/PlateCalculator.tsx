@@ -30,7 +30,7 @@ export function PlateCalculator({ onClose }: { onClose: () => void }) {
       onClick={onClose}
     >
       <div
-        className="w-full max-w-sm rounded-2xl border border-line bg-surface p-5"
+        className="w-full max-w-sm card-flat p-5"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="mb-4 flex items-center justify-between">

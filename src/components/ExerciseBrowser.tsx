@@ -77,7 +77,7 @@ export function ExerciseBrowser({ refreshKey = 0 }: { refreshKey?: number }) {
             <button
               key={ex.id}
               onClick={() => setSelected(ex)}
-              className="group overflow-hidden rounded-2xl border border-line bg-surface text-left shadow-[var(--shadow)] transition hover:-translate-y-0.5 hover:border-primary/40"
+              className="group overflow-hidden card text-left transition hover:-translate-y-0.5 hover:border-primary/40"
             >
               <div className="relative aspect-square w-full bg-white">
                 {ex.image_urls?.[0] ? (
@@ -94,7 +94,7 @@ export function ExerciseBrowser({ refreshKey = 0 }: { refreshKey?: number }) {
                   </div>
                 )}
                 {ex.owner_id && (
-                  <span className="absolute left-2 top-2 rounded-full bg-primary px-2 py-0.5 text-[10px] font-semibold text-white">
+                  <span className="absolute left-2 top-2 rounded-full bg-primary px-2 py-0.5 text-[10px] font-semibold text-primary-fg">
                     {t("ex.own")}
                   </span>
                 )}
@@ -131,7 +131,7 @@ function ExerciseModal({
       onClick={onClose}
     >
       <div
-        className="max-h-[85vh] w-full max-w-lg overflow-y-auto rounded-2xl border border-line bg-surface"
+        className="max-h-[85vh] w-full max-w-lg overflow-y-auto card-flat"
         onClick={(e) => e.stopPropagation()}
       >
         {exercise.image_urls.length > 0 ? (
@@ -220,7 +220,7 @@ function Chip({
       onClick={onClick}
       className={`rounded-full px-2.5 py-1 text-xs capitalize ring-1 transition ${
         active
-          ? "bg-primary text-white ring-primary"
+          ? "bg-primary text-primary-fg ring-primary"
           : "bg-surface text-muted ring-line hover:ring-muted"
       }`}
     >

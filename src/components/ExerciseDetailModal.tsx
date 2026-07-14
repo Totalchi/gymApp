@@ -20,7 +20,7 @@ export function ExerciseDetailModal({
       onClick={onClose}
     >
       <div
-        className="max-h-[88vh] w-full max-w-lg overflow-y-auto rounded-2xl border border-line bg-surface"
+        className="max-h-[88vh] w-full max-w-lg overflow-y-auto card-flat"
         onClick={(e) => e.stopPropagation()}
       >
         {exercise.image_urls.length > 0 ? (
@@ -85,7 +85,7 @@ export function ExerciseDetailModal({
 
           <Link
             href={`/exercises/${exercise.id}`}
-            className="mt-5 inline-flex w-full items-center justify-center rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-fg transition hover:brightness-110"
+            className="mt-5 inline-flex w-full items-center justify-center btn-primary px-4 text-sm"
           >
             {t("ex.viewHistory")}
           </Link>

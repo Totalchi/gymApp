@@ -59,7 +59,7 @@ export default async function BodyPage() {
         <p className="mb-6 text-muted">{t("body.subtitle")}</p>
 
         {weightChart.length >= 2 && (
-          <section className="mb-6 rounded-2xl border border-line bg-surface p-5">
+          <section className="mb-6 card-flat p-5">
             <h2 className="mb-2 font-semibold">{t("body.weightChart")} (kg)</h2>
             <LineChart points={weightChart} unit="" color="#34d399" />
           </section>
@@ -68,7 +68,7 @@ export default async function BodyPage() {
         {/* Nieuwe meting */}
         <form
           action={addBodyMetric}
-          className="mb-6 rounded-2xl border border-line bg-surface p-5"
+          className="mb-6 card-flat p-5"
         >
           <h2 className="mb-3 font-semibold">{t("body.newMeasurement")}</h2>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
@@ -82,7 +82,7 @@ export default async function BodyPage() {
           </div>
           <button
             type="submit"
-            className="mt-4 rounded-xl bg-primary px-5 py-2.5 font-semibold text-primary-fg transition hover:brightness-110"
+            className="mt-4 btn-primary"
           >
             {t("common.save")}
           </button>
@@ -142,7 +142,7 @@ export default async function BodyPage() {
         <h2 className="mb-2 mt-8 font-semibold">{t("photos.title")}</h2>
         <form
           action={uploadProgressPhoto}
-          className="mb-4 rounded-2xl border border-line bg-surface p-5"
+          className="mb-4 card-flat p-5"
         >
           <div className="flex flex-wrap items-end gap-3">
             <label className="block">
@@ -169,7 +169,7 @@ export default async function BodyPage() {
             <input type="checkbox" name="shared_with_coach" className="h-4 w-4 accent-primary" />
             {t("photos.shareCoach")}
           </label>
-          <button className="mt-3 block rounded-xl bg-primary px-5 py-2.5 font-semibold text-primary-fg transition hover:brightness-110">
+          <button className="mt-3 block btn-primary">
             {t("photos.upload")}
           </button>
         </form>
@@ -181,7 +181,7 @@ export default async function BodyPage() {
         ) : (
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
             {photos.map((p) => (
-              <div key={p.id} className="overflow-hidden rounded-2xl border border-line bg-surface">
+              <div key={p.id} className="overflow-hidden card-flat">
                 <div className="relative aspect-square bg-canvas">
                   <Image src={p.url} alt="" fill sizes="33vw" className="object-cover" />
                 </div>

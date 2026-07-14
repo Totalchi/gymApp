@@ -45,7 +45,7 @@ export function CustomExerciseForm({
     <form
       ref={formRef}
       action={formAction}
-      className="mb-6 space-y-3 rounded-2xl border border-line bg-surface p-5"
+      className="mb-6 space-y-3 card-flat p-5"
     >
       <div className="flex items-center justify-between">
         <h2 className="font-semibold">{t("ex.customTitle")}</h2>
@@ -65,14 +65,14 @@ export function CustomExerciseForm({
             name="name"
             required
             placeholder="Bijv. Kabel-crossover"
-            className="w-full rounded-xl border border-line bg-canvas px-3.5 py-2.5 focus:border-primary focus:outline-none"
+            className="input"
           />
         </label>
         <label className="block">
           <span className="mb-1 block text-sm text-muted">{t("ex.muscle")}</span>
           <select
             name="primary_muscle"
-            className="w-full rounded-xl border border-line bg-canvas px-3.5 py-2.5 capitalize focus:border-primary focus:outline-none"
+            className="input capitalize"
           >
             <option value="">—</option>
             {MUSCLE_GROUPS.map((m) => (
@@ -89,7 +89,7 @@ export function CustomExerciseForm({
         <input
           name="equipment"
           placeholder={t("ex.equipmentPh")}
-          className="w-full rounded-xl border border-line bg-canvas px-3.5 py-2.5 focus:border-primary focus:outline-none"
+          className="input"
         />
       </label>
 
@@ -99,7 +99,7 @@ export function CustomExerciseForm({
           name="instructions"
           rows={3}
           placeholder={"Ga rechtop staan...\nTrek de kabels naar elkaar toe..."}
-          className="w-full rounded-xl border border-line bg-canvas px-3.5 py-2.5 focus:border-primary focus:outline-none"
+          className="input"
         />
       </label>
 
@@ -122,7 +122,7 @@ export function CustomExerciseForm({
       <button
         type="submit"
         disabled={pending}
-        className="rounded-xl bg-primary px-5 py-2.5 font-semibold text-primary-fg transition hover:brightness-110 disabled:opacity-50"
+        className="btn-primary"
       >
         {pending ? t("ex.saving") : t("ex.saveExercise")}
       </button>

@@ -136,7 +136,7 @@ export default async function ExerciseDetailPage({
         <h2 className="mb-2 font-semibold">{t("exd.records")}</h2>
         <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-3">
           {records.map((r) => (
-            <div key={r.label} className="rounded-2xl border border-line bg-surface p-4">
+            <div key={r.label} className="card-flat p-4">
               <p className="text-xs text-faint">{r.label}</p>
               <p className="mt-1 text-lg font-bold tabular-nums">{r.value}</p>
             </div>
@@ -145,7 +145,7 @@ export default async function ExerciseDetailPage({
 
         {/* Krachtniveau */}
         {level && (
-          <section className="mb-6 rounded-2xl border border-line bg-surface p-5">
+          <section className="mb-6 card-flat p-5">
             <div className="mb-2 flex items-center justify-between">
               <h2 className="font-semibold">{t("exd.strength")}</h2>
               <span className="rounded-full bg-primary/15 px-3 py-1 text-sm font-semibold text-primary ring-1 ring-primary/30">
@@ -166,7 +166,7 @@ export default async function ExerciseDetailPage({
 
         {/* Set-records per rep */}
         {Object.keys(setRecords).length > 0 && (
-          <section className="mb-6 rounded-2xl border border-line bg-surface p-5">
+          <section className="mb-6 card-flat p-5">
             <h2 className="mb-3 font-semibold">{t("exd.setRecords")}</h2>
             <div className="grid grid-cols-3 gap-2 sm:grid-cols-6">
               {Object.entries(setRecords)
@@ -184,7 +184,7 @@ export default async function ExerciseDetailPage({
 
         {/* Grafiek */}
         {chart.length >= 2 && (
-          <section className="mb-6 rounded-2xl border border-line bg-surface p-5">
+          <section className="mb-6 card-flat p-5">
             <h2 className="mb-2 font-semibold">{t("exd.e1rmOverTime")}</h2>
             <LineChart points={chart} unit="" />
           </section>
